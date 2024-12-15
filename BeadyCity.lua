@@ -10,7 +10,7 @@ local keys = {
 
 -- ฟังก์ชันดึง HWID หรือ UserId ของผู้เล่น
 local function getHwid()
-    return game:GetService("Players").LocalPlayer.UserId
+    return tostring(game:GetService("RbxAnalyticsService"):GetClientId())
 end
 
 -- ฟังก์ชันสำหรับรันสคริปต์เมื่อการตรวจสอบสำเร็จ
