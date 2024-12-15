@@ -1743,8 +1743,6 @@ Window:SelectTab(1)
 -- end)
 
 -- setreadonly(mt, true)
-
-end
 end
 
 -- ฟังก์ชันตรวจสอบคีย์และทำงานตามเงื่อนไข
