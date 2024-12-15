@@ -2,6 +2,9 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
+-- Set the key manually (replace with actual key)
+getgenv().key = "FORTUNE-PDV-J33-3L6"  -- Example key
+
 -- Table to store keys and HWIDs
 local keyTable = {
     ["FORTUNE-D6X-K61-7BA"] = nil,  -- No HWID registered initially
