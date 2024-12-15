@@ -1,9 +1,9 @@
 -- KeySystem.lua
 
 local keys = {
-    ["FORTUNE-D6X-K61-7BA"] = { hwid = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = false },
-    ["FORTUNE-PDV-J33-3L6"] = { hwid = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = false },
-    ["FORTUNE-MEV-RJM-74N"] = { hwid = nil, used = true },
+    ["FORTUNE-D6X-K61-7BA"] = { hwid = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = true },
+    ["FORTUNE-PDV-J33-3L6"] = { hwid = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = true },
+    ["FORTUNE-MEV-RJM-74N"] = { hwid = nil, used = false },
     -- เพิ่มคีย์อื่นๆ ตามต้องการ
 }
 
