@@ -2,7 +2,7 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
--- Local table to store keys and associated HWIDs
+-- Table to store keys and HWIDs
 local keyTable = {
     ["FORTUNE-D6X-K61-7BA"] = "HWID1",
     ["FORTUNE-PDV-J33-3L6"] = "HWID2",
@@ -29,46 +29,25 @@ local function validateKey(key)
     return true, "Key is valid"
 end
 
--- Function to kick the player if the key is invalid or used on another device
-local function kickIfKeyInvalid(key)
-    local isValid, message = validateKey(key)
+-- Function to kick the player if the key is invalid
+local function kickIfKeyInvalid()
+    local userKey = getgenv().key -- Get the key from global environment
+    if not userKey then
+        Players.LocalPlayer:Kick("Key is missing. Please provide a valid key.")
+        return
+    end
+
+    local isValid, message = validateKey(userKey)
     if not isValid then
         Players.LocalPlayer:Kick("Key validation failed: " .. message)
     end
 end
 
--- User-provided key
-local userKey = "ใส่คีย์ของคุณที่นี่" -- Replace with the user's input
-
 -- Validate the key
-kickIfKeyInvalid(userKey)
+kickIfKeyInvalid()
 
--- Continue executing the rest of the script if the key is valid
-repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
-
-getgenv().Settings = {
-    SelectedBlackList = {},
-    SelectedFarmList = {},
-    SelectedTarget = nil,
-}
-
-local Device;
-
-local Players = game:GetService("Players")
-local function checkDevice()
-    local player = Players.LocalPlayer
-    if player then
-        local UserInputService = game:GetService("UserInputService")
-
-        if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-            Device = UDim2.fromOffset(480, 360)
-        else
-            Device = UDim2.fromOffset(580, 460)
-        end
-    end
-end
-
-checkDevice()
+-- Continue executing the script if key is valid
+print("Key validated successfully!")
 
 repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 
