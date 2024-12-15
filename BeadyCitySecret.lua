@@ -15,81 +15,8 @@ end
 -- ฟังก์ชันสำหรับรันสคริปต์เมื่อการตรวจสอบสำเร็จ
 local function runScript()
     print("Correct Key Loading...")
-end
 
--- ฟังก์ชันสำหรับฟังก์ชันแอดมินที่สามารถใช้งานได้
-local function adminScript()
-    print("Admin access granted! Running admin script...")
-end
-
--- ฟังก์ชันตรวจสอบคีย์และทำงานตามเงื่อนไข
-local function checkKey(inputKey)
-    local player = game.Players.LocalPlayer
-    local playerClientId = getClientId()
-
-    if not keys[inputKey] then
-        -- คีย์ไม่ถูกต้อง
-        player:Kick("Invalid key!")
-        return
-    end
-
-    local keyData = keys[inputKey]
-
-    if keyData.used then
-        -- คีย์ถูกใช้งานแล้ว
-        player:Kick("Key already used!")
-        return
-    end
-
-    if keyData.clientId == nil then
-        -- ถ้า Client ID ของคีย์ยังไม่ได้ถูกใช้
-        keyData.clientId = playerClientId
-        print("Client ID registered successfully!")
-        return
-    end
-
-    if keyData.admin then
-        -- ตรวจสอบว่าผู้เล่นมี Client ID ที่ตรงกับ 2 ตัวที่กำหนดในคีย์แอดมิน
-        local isValidAdmin = false
-        for _, adminClientId in ipairs(keyData.clientIds) do
-            if adminClientId == playerClientId then
-                isValidAdmin = true
-                break
-            end
-        end
-
-        if isValidAdmin then
-            -- หากตรงกับ 2 Client ID สำหรับแอดมิน
-            print("Admin Key validated successfully! Client ID matched.")
-            keyData.used = true
-            adminScript()  -- รันสคริปต์แอดมิน
-        else
-            -- ถ้า Client ID ไม่ตรงกับแอดมิน
-            player:Kick("Client ID mismatch for Admin key!")
-        end
-    else
-        -- หากคีย์ไม่ใช่แอดมิน
-        if keyData.clientId == playerClientId then
-            print("Key validated successfully! Client ID matched.")
-            keyData.used = true
-            runScript()  -- รันสคริปต์ปกติ
-        else
-            -- ถ้า Client ID ไม่ตรงกัน
-            player:Kick("Client ID mismatch!")
-        end
-    end
-end
-
--- รับคีย์จากภายนอกและตรวจสอบ
-local inputKey = _G.inputKey
-if inputKey then
-    checkKey(inputKey)
-else
-    print("No input key provided.")
-end
-
-
-repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+    repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 
 getgenv().Settings = {
   SelectedBlackList = {},
@@ -949,3 +876,76 @@ Window:SelectTab(1)
 -- end)
 
 -- setreadonly(mt, true)
+
+end
+
+-- ฟังก์ชันสำหรับฟังก์ชันแอดมินที่สามารถใช้งานได้
+local function adminScript()
+    print("Admin access granted! Running admin script...")
+end
+
+-- ฟังก์ชันตรวจสอบคีย์และทำงานตามเงื่อนไข
+local function checkKey(inputKey)
+    local player = game.Players.LocalPlayer
+    local playerClientId = getClientId()
+
+    if not keys[inputKey] then
+        -- คีย์ไม่ถูกต้อง
+        player:Kick("Invalid key!")
+        return
+    end
+
+    local keyData = keys[inputKey]
+
+    if keyData.used then
+        -- คีย์ถูกใช้งานแล้ว
+        player:Kick("Key already used!")
+        return
+    end
+
+    if keyData.clientId == nil then
+        -- ถ้า Client ID ของคีย์ยังไม่ได้ถูกใช้
+        keyData.clientId = playerClientId
+        print("Client ID registered successfully!")
+        return
+    end
+
+    if keyData.admin then
+        -- ตรวจสอบว่าผู้เล่นมี Client ID ที่ตรงกับ 2 ตัวที่กำหนดในคีย์แอดมิน
+        local isValidAdmin = false
+        for _, adminClientId in ipairs(keyData.clientIds) do
+            if adminClientId == playerClientId then
+                isValidAdmin = true
+                break
+            end
+        end
+
+        if isValidAdmin then
+            -- หากตรงกับ 2 Client ID สำหรับแอดมิน
+            print("Admin Key validated successfully! Client ID matched.")
+            keyData.used = true
+            adminScript()  -- รันสคริปต์แอดมิน
+        else
+            -- ถ้า Client ID ไม่ตรงกับแอดมิน
+            player:Kick("Client ID mismatch for Admin key!")
+        end
+    else
+        -- หากคีย์ไม่ใช่แอดมิน
+        if keyData.clientId == playerClientId then
+            print("Key validated successfully! Client ID matched.")
+            keyData.used = true
+            runScript()  -- รันสคริปต์ปกติ
+        else
+            -- ถ้า Client ID ไม่ตรงกัน
+            player:Kick("Client ID mismatch!")
+        end
+    end
+end
+
+-- รับคีย์จากภายนอกและตรวจสอบ
+local inputKey = _G.inputKey
+if inputKey then
+    checkKey(inputKey)
+else
+    print("No input key provided.")
+end
