@@ -4,7 +4,8 @@ local keys = {
     ["FORTUNE-D6X-K61-7BA"] = { clientId = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = false, admin = false },
     ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = false, admin = false },
     ["FORTUNE-MEV-RJM-74N"] = { clientId = nil, used = false, admin = false },
-    ["FORTUNE-ADMIN-ADMIN-ADMIN"] = { clientIds = {"311F338E-A4B6-4AE8-AE25-C56B209C7E1A", "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1"}, used = false, admin = false },
+    ["FORTUNE-ADMIN-ADMIN-ADMIN"] = { clientIds = {"311F338E-A4B6-4AE8-AE25-C56B209C7E1A", "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1"}, used = false, admin = true },  -- เพิ่ม 2 Client IDs สำหรับแอดมิน
+    -- เพิ่มคีย์อื่นๆ ตามต้องการ
 }
 
 -- ฟังก์ชันดึง Client ID
@@ -14,7 +15,9 @@ end
 
 -- ฟังก์ชันสำหรับรันสคริปต์เมื่อการตรวจสอบสำเร็จ
 local function runScript()
-    print("Correct Key Loading...")
+    print("SUCCESFULLY CHECK KEY/HWID")
+    wait(5)
+    print("LOADING...")
 
     repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 
@@ -876,13 +879,34 @@ Window:SelectTab(1)
 -- end)
 
 -- setreadonly(mt, true)
-
 end
 
 -- ฟังก์ชันสำหรับฟังก์ชันแอดมินที่สามารถใช้งานได้
 local function adminScript()
     print("Admin access granted! Running admin script...")
+    -- ฟังก์ชันพิเศษที่แอดมินสามารถใช้งาน
+    -- ตัวอย่างฟังก์ชันที่ใช้เฉพาะแอดมิน
+    game.ReplicatedStorage:WaitForChild("AdminFunction"):FireServer()
 end
+
+-- ฟังก์ชันตรวจสอบคีย์และทำงานตามเงื่อนไข
+local function checkKey(inputKey)
+    local player = game.Players.LocalPlayer
+    local playerClientId = getClientId()
+
+    if not keys[inputKey] then
+        -- คีย์ไม่ถูกต้อง
+        player:Kick("Invalid key!")
+        return
+    end
+
+    local keyData = keys[inputKey]
+
+    if keyData.used then
+        -- คีย์ถูกใช้งานแล้ว
+        player:Kick("Key already used!")
+        return
+    end
 
     if keyData.clientId == nil then
         -- ถ้า Client ID ของคีย์ยังไม่ได้ถูกใช้
