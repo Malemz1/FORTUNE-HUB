@@ -41,29 +41,39 @@ end
 
 -- Function to kick the player if the key is invalid
 local function kickIfKeyInvalid()
-    local userKey = getgenv().key -- Get the key from the global environment
+    local userKey = getgenv().key  -- Fetch the key from the global environment
+
+    -- Check if a key is provided
     if not userKey then
         Players.LocalPlayer:Kick("Key is missing. Please provide a valid key.")
         return
     end
 
+    -- Validate the key
     local isValid, message = validateKey(userKey)
     if not isValid then
         Players.LocalPlayer:Kick("Key validation failed: " .. message)
         return
     end
 
+    -- Add HWID to the key
     local success, hwidMessage = addHWIDToKey(userKey)
     if not success then
         Players.LocalPlayer:Kick("HWID registration failed: " .. hwidMessage)
         return
     end
 
+    -- Print success message to the console
     print("Key validated and HWID added successfully!")
 end
 
--- Validate the key
-kickIfKeyInvalid()
+-- Dynamic script execution through loadstring
+loadstring([[
+    -- Player input their key here
+    getgenv().key = "FORTUNE-D6X-K61-7BA"  -- Player enters their key dynamically
 
--- If the key is valid and HWID added, continue executing the script
+    -- Now we validate the key and proceed
+    kickIfKeyInvalid()
+]])()
+
 print("Test")
