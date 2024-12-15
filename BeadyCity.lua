@@ -21,12 +21,13 @@ local function runScript()
 end
 
 local function checkKey(inputKey)
+    local player = game.Players.LocalPlayer
     local playerHwid = getHwid()
 
     if keys[inputKey] then
         if keys[inputKey].used then
             -- ถ้าคีย์นี้ถูกใช้งานแล้ว
-            print("Key already used!")
+            player:Kick("Key already used!")  -- เตะผู้เล่นและแสดงข้อความ
         else
             if keys[inputKey].hwid == nil then
                 -- ถ้า HWID ของคีย์ยังเป็น nil (ยังไม่ได้ถูกใช้)
@@ -40,12 +41,12 @@ local function checkKey(inputKey)
                 runScript()
             else
                 -- ถ้า HWID ไม่ตรงกัน
-                print("HWID mismatch!")
+                player:Kick("HWID mismatch!")  -- เตะผู้เล่นและแสดงข้อความ
             end
         end
     else
         -- ถ้าคีย์ไม่ถูกต้อง
-        print("Invalid key!")
+        player:Kick("Invalid key!")  -- เตะผู้เล่นและแสดงข้อความ
     end
 end
 
