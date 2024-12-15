@@ -1,35 +1,31 @@
 -- KeySystem.lua
 
--- ตารางคีย์และข้อมูลที่เกี่ยวข้อง
 local keys = {
-    ["FORTUNE-D6X-K61-7BA"] = { hwid = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = false },
-    ["FORTUNE-PDV-J33-3L6"] = { hwid = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = false },
-    ["FORTUNE-MEV-RJM-74N"] = { hwid = nil, used = false },
-    -- เพิ่มคีย์อื่นๆ ตามต้องการ
+    ["FORTUNE-D6X-K61-7BA"] = { clientId = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = false, admin = false },
+    ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = false, admin = false },
+    ["FORTUNE-MEV-RJM-74N"] = { clientId = nil, used = false, admin = false },
+    ["FORTUNE-ADMIN-ADMIN-ADMIN"] = { clientIds = {"311F338E-A4B6-4AE8-AE25-C56B209C7E1A", "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1"}, used = false, admin = false },
 }
 
--- ฟังก์ชันดึง HWID หรือ UserId ของผู้เล่น
-local function getHwid()
+-- ฟังก์ชันดึง Client ID
+local function getClientId()
     return tostring(game:GetService("RbxAnalyticsService"):GetClientId())
 end
 
 -- ฟังก์ชันสำหรับรันสคริปต์เมื่อการตรวจสอบสำเร็จ
 local function runScript()
-    print("Executing custom script after successful key validation!")
-    -- เพิ่มฟังก์ชันหรือสคริปต์ที่คุณต้องการให้ทำงานที่นี่
-    -- ตัวอย่างการเรียกฟังก์ชันใน ReplicatedStorage
-    local myFunction = game.ReplicatedStorage:FindFirstChild("MyCustomFunction")
-    if myFunction then
-        myFunction:FireServer()
-    else
-        print("MyCustomFunction not found!")
-    end
+    print("Correct Key Loading...")
+end
+
+-- ฟังก์ชันสำหรับฟังก์ชันแอดมินที่สามารถใช้งานได้
+local function adminScript()
+    print("Admin access granted! Running admin script...")
 end
 
 -- ฟังก์ชันตรวจสอบคีย์และทำงานตามเงื่อนไข
 local function checkKey(inputKey)
     local player = game.Players.LocalPlayer
-    local playerHwid = getHwid()
+    local playerClientId = getClientId()
 
     if not keys[inputKey] then
         -- คีย์ไม่ถูกต้อง
@@ -45,21 +41,42 @@ local function checkKey(inputKey)
         return
     end
 
-    if keyData.hwid == nil then
-        -- ถ้า HWID ของคีย์ยังไม่ได้ถูกใช้
-        keyData.hwid = playerHwid
-        print("HWID registered successfully!")
+    if keyData.clientId == nil then
+        -- ถ้า Client ID ของคีย์ยังไม่ได้ถูกใช้
+        keyData.clientId = playerClientId
+        print("Client ID registered successfully!")
         return
     end
 
-    if keyData.hwid == playerHwid then
-        -- หาก HWID ตรงกัน
-        print("Key validated successfully! HWID matched.")
-        keyData.used = true
-        runScript()
+    if keyData.admin then
+        -- ตรวจสอบว่าผู้เล่นมี Client ID ที่ตรงกับ 2 ตัวที่กำหนดในคีย์แอดมิน
+        local isValidAdmin = false
+        for _, adminClientId in ipairs(keyData.clientIds) do
+            if adminClientId == playerClientId then
+                isValidAdmin = true
+                break
+            end
+        end
+
+        if isValidAdmin then
+            -- หากตรงกับ 2 Client ID สำหรับแอดมิน
+            print("Admin Key validated successfully! Client ID matched.")
+            keyData.used = true
+            adminScript()  -- รันสคริปต์แอดมิน
+        else
+            -- ถ้า Client ID ไม่ตรงกับแอดมิน
+            player:Kick("Client ID mismatch for Admin key!")
+        end
     else
-        -- ถ้า HWID ไม่ตรงกัน
-        player:Kick("HWID mismatch!")
+        -- หากคีย์ไม่ใช่แอดมิน
+        if keyData.clientId == playerClientId then
+            print("Key validated successfully! Client ID matched.")
+            keyData.used = true
+            runScript()  -- รันสคริปต์ปกติ
+        else
+            -- ถ้า Client ID ไม่ตรงกัน
+            player:Kick("Client ID mismatch!")
+        end
     end
 end
 
@@ -70,6 +87,7 @@ if inputKey then
 else
     print("No input key provided.")
 end
+
 
 repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 
