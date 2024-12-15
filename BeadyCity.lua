@@ -4,8 +4,8 @@ local Players = game:GetService("Players")
 
 -- Table to store keys and HWIDs
 local keyTable = {
-    ["FORTUNE-D6X-K61-7BA"] = "nill",
-    ["FORTUNE-PDV-J33-3L6"] = "nill",
+    ["FORTUNE-D6X-K61-7BA"] = "",
+    ["FORTUNE-PDV-J33-3L6"] = "",
 }
 
 -- Function to get the unique Client ID
