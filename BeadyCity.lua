@@ -1,53 +1,40 @@
--- Import services
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-
--- Table to store keys and HWIDs
-local keyTable = {
-    ["FORTUNE-D6X-K61-7BA"] = "",
-    ["FORTUNE-PDV-J33-3L6"] = "",
+local keys = {
+    -- Key: HWID pairs (you should store them somewhere securely)
+    ["dadsdas"] = {
+        hwid = "hwid_of_user1", -- ตัวอย่าง HWID
+        used = false
+    },
+    -- Add more keys if necessary
 }
 
--- Function to get the unique Client ID
-local function getClientID()
-    return game:GetService("RbxAnalyticsService"):GetClientId() -- Fetch Client ID
+local function getHwid()
+    -- ฟังก์ชั่นนี้สามารถใช้งานได้ตามความต้องการของคุณในการดึง HWID ของผู้ใช้
+    return game:GetService("Players").LocalPlayer.UserId
 end
+local inputKey = 'dadsdas' -- ตัวอย่าง key ที่ผู้ใช้จะใส่เข้ามา
+local playerHwid = getHwid() -- ดึง HWID ของผู้เล่น
 
--- Function to validate the key locally
-local function validateKey(key)
-    local clientID = getClientID()
-    local registeredHWID = keyTable[key]
-
-    if not registeredHWID then
-        return false, "Invalid key"
-    end
-
-    if registeredHWID ~= clientID then
-        return false, "Key already used on another device"
-    end
-
-    return true, "Key is valid"
-end
-
--- Function to kick the player if the key is invalid
-local function kickIfKeyInvalid()
-    local userKey = getgenv().key -- Get the key from global environment
-    if not userKey then
-        Players.LocalPlayer:Kick("Key is missing. Please provide a valid key.")
-        return
-    end
-
-    local isValid, message = validateKey(userKey)
-    if not isValid then
-        Players.LocalPlayer:Kick("Key validation failed: " .. message)
+-- ฟังก์ชั่นการตรวจสอบ key และ HWID
+local function checkKey(inputKey, playerHwid)
+    if keys[inputKey] then
+        if keys[inputKey].used then
+            -- ถ้าคีย์นี้ถูกใช้งานแล้ว ให้เตะผู้เล่น
+            game:GetService("Players").LocalPlayer:Kick("Key already used!")
+        else
+            if keys[inputKey].hwid == playerHwid then
+                -- ถ้า HWID ตรงกัน ก็ให้ใช้คีย์นั้น
+                print("Key validated successfully!")
+            else
+                -- ถ้า HWID ไม่ตรงกัน ให้เตะผู้เล่น
+                game:GetService("Players").LocalPlayer:Kick("HWID mismatch!")
+            end
+        end
+    else
+        print("Invalid key!")
     end
 end
 
--- Validate the key
-kickIfKeyInvalid()
-
--- Continue executing the script if key is valid
-print("Key validated successfully!")
+checkKey(inputKey, playerHwid)
 
 repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 
