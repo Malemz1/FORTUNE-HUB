@@ -51,7 +51,7 @@ local Window = Fluent:CreateWindow({
     TabWidth = 160,
     Size =  Device,
     Acrylic = false,
-    Theme = "Black",
+    Theme = "Amethyse",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
@@ -918,7 +918,7 @@ local Window = Fluent:CreateWindow({
     TabWidth = 160,
     Size =  Device,
     Acrylic = false,
-    Theme = "White",
+    Theme = "Amethyse",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
