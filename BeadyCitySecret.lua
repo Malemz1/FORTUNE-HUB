@@ -3,7 +3,7 @@
 local keys = {
     ["FORTUNE-D6X-K61-7BA"] = { clientId = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = false, admin = false },
     ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = false, admin = false },
-    ["FORTUNE-MEV-RJM-74N"] = { clientId = nil, used = false, admin = false },
+    ["FORTUNE-MEV-RJM-74N"] = { clientId = nil, used = false, admin = false, gameAccess = {BeadyCity = false, BlueLock = false} },
     ["FORTUNE-ADMIN-ADMIN-ADMIN"] = { clientIds = {"311F338E-A4B6-4AE8-AE25-C56B209C7E1A", "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1"}, used = false, admin = true },  -- เพิ่ม 2 Client IDs สำหรับแอดมิน
     -- เพิ่มคีย์อื่นๆ
 }
