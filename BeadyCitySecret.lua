@@ -105,5 +105,5 @@ local inputKey = _G.inputKey
 if inputKey then
     checkKey(inputKey)
 else
-    print("No input key provided.")
+    warn("No input key provided.")
 end
