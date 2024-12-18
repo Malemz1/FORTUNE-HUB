@@ -34,7 +34,7 @@ local Window = Fluent:CreateWindow({
     Size =  Device,
     Acrylic = false,
     Theme = "Amethyst",
-    MinimizeKey = Enum.KeyCode.LeftControl
+    MinimizeKey = Enum.KeyCode.RightControl
 })
 
 local Tabs = {
