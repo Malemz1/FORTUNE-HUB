@@ -1,7 +1,7 @@
 local keys = {
-    ["FORTUNE-D6X-K61-7BA"] = { clientId = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = true, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = true, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-MEV-RJM-74N"] = { clientId = "36BECFFC-B312-4A6C-B3FA-22ADBE4A33C8", used = true, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-D6X-K61-7BA"] = { clientId = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-MEV-RJM-74N"] = { clientId = "36BECFFC-B312-4A6C-B3FA-22ADBE4A33C8", used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
     ["FORTUNE-30K-I1F-C2U"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
     ["FORTUNE-VJT-H1G-14F"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
     ["FORTUNE-PZK-NWV-RCX"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
