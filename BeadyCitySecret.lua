@@ -72,7 +72,7 @@ local function checkKey(inputKey)
         if keyData.clientId == playerClientId then
             print("Key validated successfully! Client ID matched.")
             keyData.used = true
-            if keyData.gameAccess.BeadyCity then
+            if keyData.gameAccess.BeadyCity  then --[[and game.PlaceId ==]]
                 local success, err = pcall(function()
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/BeadyCity.lua"))()
                 end)
