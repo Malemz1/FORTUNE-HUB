@@ -541,23 +541,6 @@ do
         end
     end)
   end)
-
-  SilentAim:OnChanged(function()
-    task.spawn(function()
-        while SilentAim.Value do
-            wait()
-            Fluent:Notify({
-                Title = "คำเตือน",
-                Content = "ฟังก์ชั่นนี้ยังไม่เสร็จสมบูรณ์มีความเสี่ยงทางเราจึงปิดไว้ก่อน >:(",
-                Duration = 8
-            })
-            wait(3)
-            SilentAim:SetValue(false)
-            wait(1)
-        end
-    end)
-  end)
-
   ---------------------------------------------------------------------
   local function CreateESP(Target, PlayerName)
     local billboardGui = Instance.new("BillboardGui")
