@@ -809,7 +809,7 @@ args[2] = "Hit"
 return oldNamecall(self, unpack(args))
 end
 return oldNamecall(self, ...)
-nd)
+end)
 
 setreadonly(mt, true)
 end
