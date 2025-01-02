@@ -190,12 +190,6 @@ do
   local AutoSell = Tabs.pageFarm:AddToggle("AutoSell", {Title = "Auto Sell (WIP)", Default = false })
 
   --[[TELEPORT]]--------------------------------------------------------
-  local GotoGarage = Tabs.pageTeleport:AddButton({
-    Title = "Goto Garage",
-    Callback = function()
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(722.32074, 6.73808432, -527.474854, -0.998656631, 2.08491198e-08, -0.0518162288, 2.45992275e-08, 1, -7.17355064e-08, 0.0518162288, -7.29137852e-08, -0.998656631)
-    end
-  })
   local GotoClub = Tabs.pageTeleport:AddButton({
     Title = "Goto Club",
     Callback = function()
@@ -842,26 +836,6 @@ do
 
             setreadonly(mt, true)
     end)
-<<<<<<< HEAD
-=======
--- local mt = getrawmetatable(game)
-
--- local oldNamecall = mt.__namecall
-
--- mt.__namecall = newcclosure(function(self, ...)
--- local args = {...}
--- local method = getnamecallmethod()
-        
--- if method == "FireServer" and self.Name == "." then
--- args[1] = game.Workspace.tooj1239.Humanoid
--- args[2] = "Hit"
--- return oldNamecall(self, unpack(args))
--- end
--- return oldNamecall(self, ...)
--- end)
-
--- setreadonly(mt, true)
->>>>>>> 1d7947e81f820232fceca9d9c3726c9724f2e6f0
 end
 
 Fluent:Notify({
@@ -888,7 +862,6 @@ Window:SelectTab(1)
 -- print("Not Work")
 -- return oldNamecall(self, ...)
 -- end)
-<<<<<<< HEAD
 
 -- setreadonly(mt, true)
 
@@ -898,7 +871,3 @@ Window:SelectTab(1)
 --     return currentWeight
 -- end
 
-=======
-
--- setreadonly(mt, true)
->>>>>>> 1d7947e81f820232fceca9d9c3726c9724f2e6f0
