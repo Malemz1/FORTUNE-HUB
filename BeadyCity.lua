@@ -173,6 +173,12 @@ do
   local AutoFarm = Tabs.pageFarm:AddToggle("AutoFarm", {Title = "AutoFarm", Default = false })
 
   --[[TELEPORT]]--------------------------------------------------------
+  local GotoGarage = Tabs.pageTeleport:AddButton({
+    Title = "Goto Garage",
+    Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(722.32074, 6.73808432, -527.474854, -0.998656631, 2.08491198e-08, -0.0518162288, 2.45992275e-08, 1, -7.17355064e-08, 0.0518162288, -7.29137852e-08, -0.998656631)
+    end
+  })
   local GotoClub = Tabs.pageTeleport:AddButton({
     Title = "Goto Club",
     Callback = function()
@@ -795,23 +801,23 @@ do
     task.spawn(function()
         
     end)
-local mt = getrawmetatable(game)
+-- local mt = getrawmetatable(game)
 
-local oldNamecall = mt.__namecall
+-- local oldNamecall = mt.__namecall
 
-mt.__namecall = newcclosure(function(self, ...)
-local args = {...}
-local method = getnamecallmethod()
+-- mt.__namecall = newcclosure(function(self, ...)
+-- local args = {...}
+-- local method = getnamecallmethod()
         
-if method == "FireServer" and self.Name == "." then
-args[1] = game.Workspace.tooj1239.Humanoid
-args[2] = "Hit"
-return oldNamecall(self, unpack(args))
-end
-return oldNamecall(self, ...)
-end)
+-- if method == "FireServer" and self.Name == "." then
+-- args[1] = game.Workspace.tooj1239.Humanoid
+-- args[2] = "Hit"
+-- return oldNamecall(self, unpack(args))
+-- end
+-- return oldNamecall(self, ...)
+-- end)
 
-setreadonly(mt, true)
+-- setreadonly(mt, true)
 end
 
 Fluent:Notify({
@@ -823,20 +829,20 @@ Fluent:Notify({
 Window:SelectTab(1)
 
 --------------------------------------------------------
-local mt = getrawmetatable(game)
-setreadonly(mt, false)
+-- local mt = getrawmetatable(game)
+-- setreadonly(mt, false)
 
-local oldNamecall = mt.__namecall
+-- local oldNamecall = mt.__namecall
 
-mt.__namecall = newcclosure(function(self, ...)
-local args = {...}
-local method = getnamecallmethod()
+-- mt.__namecall = newcclosure(function(self, ...)
+-- local args = {...}
+-- local method = getnamecallmethod()
     
-if method == "FireServer" and self.Name == "RemoteEvent" then
-return oldNamecall(self, unpack(args))
-end
-print("Not Work")
-return oldNamecall(self, ...)
-end)
+-- if method == "FireServer" and self.Name == "RemoteEvent" then
+-- return oldNamecall(self, unpack(args))
+-- end
+-- print("Not Work")
+-- return oldNamecall(self, ...)
+-- end)
 
-setreadonly(mt, true)
+-- setreadonly(mt, true)
