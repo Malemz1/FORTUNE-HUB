@@ -1,3 +1,4 @@
+local inputKey = _G.inputKey
 local keys = {
     ["FORTUNE-D6X-K61-7BA"] = { clientId = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
     ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
@@ -72,27 +73,30 @@ local function checkKey(inputKey)
         if keyData.clientId == playerClientId then
             print("Key validated successfully! Client ID matched.")
             keyData.used = true
-            if keyData.gameAccess.BeadyCity  then --[[and game.PlaceId ==]]
-                local success, err = pcall(function()
+            local success, err = pcall(function()
+                if keyData.gameAccess.BeadyCity  then --[[and game.PlaceId ==]]
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/BeadyCity.lua"))()
-                end)
-                if not success then
-                    error("Error Message: " .. err)
-                else
-                    runScript()
+                elseif keyData.gameAccess.BlueLockRival then
+                    error("เข้าถึงได้ไงยังไม่เสร็จ")
+                    task.wait(10)
+                    player:Kick("ตัวเจาะกัง")
                 end
-            elseif keyData.gameAccess.BlueLockRival then
-                error("เข้าถึงได้ไงยังไม่เสร็จ")
-                task.wait(10)
-                player:Kick("ตัวเจาะกัง")
+            end)
+            if not success then
+                error("Error Message: " .. err)
+            else
+                runScript()
             end
+        elseif keyData.clientId == nil then
+            local str = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
+            setclipboard(str)
+            player:Kick("\n".."KEY: "..tostring(inputKey).."\nHWID: "..str)
         else
             player:Kick("Client ID mismatch!")
         end
     end
 end
 
-local inputKey = _G.inputKey
 if inputKey then
     checkKey(inputKey)
 else
