@@ -171,6 +171,23 @@ do
     getgenv().Settings.SelectedFarmList = Value
   end)
   local AutoFarm = Tabs.pageFarm:AddToggle("AutoFarm", {Title = "AutoFarm", Default = false })
+  local TeleportToSell = Tabs.pageFarm:AddButton({
+    Title = "Teleport To Sell",
+    Callback = function()
+        local function GetWeight()
+            local fullText = game:GetService("Players").LocalPlayer.PlayerGui["InventoryNew1.4"].Frame.Footer.Weight.Text
+            local currentWeight = tonumber(string.match(fullText, "(%d+)/"))
+            return currentWeight
+        end
+        
+        if GetWeight() >= 0 then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(775.055298, 3.93340445, -401.156982, -0.00690881675, 5.43246514e-08, -0.999976158, 1.01940971e-08, 1, 5.42555156e-08, 0.999976158, -9.81901316e-09, -0.00690881675)
+            wait(.1)
+            game:GetService("Players").LocalPlayer.PlayerGui["Economy_Gui"].Frame.Visible = true
+        end
+    end
+  })
+  local AutoSell = Tabs.pageFarm:AddToggle("AutoSell", {Title = "Auto Sell (WIP)", Default = false })
 
   --[[TELEPORT]]--------------------------------------------------------
   local GotoClub = Tabs.pageTeleport:AddButton({
@@ -541,6 +558,14 @@ do
         end
     end)
   end)
+
+  SilentAim:OnChanged(function()
+    task.spawn(function()
+        pcall(function()
+            
+        end)
+    end)
+  end)
   ---------------------------------------------------------------------
   local function CreateESP(Target, PlayerName)
     local billboardGui = Instance.new("BillboardGui")
@@ -793,25 +818,24 @@ do
         task.spawn(UpdateESP)
     end)
     task.spawn(function()
-        
+        local mt = getrawmetatable(game)
+        setreadonly(mt, false)
+        local oldNamecall = mt.__namecall
+
+        mt.__namecall = newcclosure(function(self, ...)
+        local args = {...}
+        local method = getnamecallmethod()
+
+        if method == "FireServer" and self.Name == "." and SilentAim.Value then
+            args[1] = game.Workspace[tostring(getgenv().Settings.SelectedTarget)].Humanoid
+            args[2] = "Hit"
+            return oldNamecall(self, unpack(args))
+        end
+            return oldNamecall(self, ...)
+        end)
+
+            setreadonly(mt, true)
     end)
-local mt = getrawmetatable(game)
-
-local oldNamecall = mt.__namecall
-
-mt.__namecall = newcclosure(function(self, ...)
-local args = {...}
-local method = getnamecallmethod()
-        
-if method == "FireServer" and self.Name == "." then
-args[1] = game.Workspace.tooj1239.Humanoid
-args[2] = "Hit"
-return oldNamecall(self, unpack(args))
-end
-return oldNamecall(self, ...)
-end)
-
-setreadonly(mt, true)
 end
 
 Fluent:Notify({
@@ -823,20 +847,27 @@ Fluent:Notify({
 Window:SelectTab(1)
 
 --------------------------------------------------------
-local mt = getrawmetatable(game)
-setreadonly(mt, false)
+-- local mt = getrawmetatable(game)
+-- setreadonly(mt, false)
 
-local oldNamecall = mt.__namecall
+-- local oldNamecall = mt.__namecall
 
-mt.__namecall = newcclosure(function(self, ...)
-local args = {...}
-local method = getnamecallmethod()
+-- mt.__namecall = newcclosure(function(self, ...)
+-- local args = {...}
+-- local method = getnamecallmethod()
     
-if method == "FireServer" and self.Name == "RemoteEvent" then
-return oldNamecall(self, unpack(args))
-end
-print("Not Work")
-return oldNamecall(self, ...)
-end)
+-- if method == "FireServer" and self.Name == "RemoteEvent" then
+-- return oldNamecall(self, unpack(args))
+-- end
+-- print("Not Work")
+-- return oldNamecall(self, ...)
+-- end)
 
-setreadonly(mt, true)
+-- setreadonly(mt, true)
+
+-- local function GetWeight()
+--     local fullText = game:GetService("Players").LocalPlayer.PlayerGui["InventoryNew1.4"].Frame.Footer.Weight.Text
+--     local currentWeight = tonumber(string.match(fullText, "(%d+)/"))
+--     return currentWeight
+-- end
+

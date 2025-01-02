@@ -1,19 +1,19 @@
-local inputKey = _G.inputKey
+_G.inputKey = "FORTUNE-30K-I1F-C2U"
 local keys = {
-    ["FORTUNE-D6X-K61-7BA"] = { clientId = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-MEV-RJM-74N"] = { clientId = "36BECFFC-B312-4A6C-B3FA-22ADBE4A33C8", used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-30K-I1F-C2U"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-VJT-H1G-14F"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-PZK-NWV-RCX"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-HWS-ITG-OU2"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-VS8-QKM-5EV"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-D90-USN-2T2"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-RV8-OY3-7IE"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-EPJ-RCX-9X4"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-RMB-9KU-5TE"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-168-NDX-OP2"] = { clientId = nil, used = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
-    ["FORTUNE-ADMIN-ADMIN-ADMIN"] = { clientIds = { "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1" }, used = false, admin = true, gameAccess = { BeadyCity = true, BlueLockRival = true } }
+    ["FORTUNE-D6X-K61-7BA"] = { clientId = "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-MEV-RJM-74N"] = { clientId = "36BECFFC-B312-4A6C-B3FA-22ADBE4A33C8", Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-30K-I1F-C2U"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-VJT-H1G-14F"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-PZK-NWV-RCX"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-HWS-ITG-OU2"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-VS8-QKM-5EV"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-D90-USN-2T2"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-RV8-OY3-7IE"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-EPJ-RCX-9X4"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-RMB-9KU-5TE"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-168-NDX-OP2"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-ADMIN-ADMIN-ADMIN"] = { clientIds = { "311F338E-A4B6-4AE8-AE25-C56B209C7E1A", "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1" }, Banned = false, admin = true, gameAccess = { BeadyCity = true, BlueLockRival = true } }
 }
 
 local function getClientId()
@@ -42,16 +42,16 @@ local function checkKey(inputKey)
 
     local keyData = keys[inputKey]
 
-    if keyData.used then
-        player:Kick("Key already used!")
+    if keyData.Banned then
+        player:Kick("\nYour Got Banned!\n".."If U Need UnBan Contect Admin.")
         return
     end
 
-    if keyData.clientId == nil then
-        keyData.clientId = playerClientId
-        print("Client ID registered successfully!")
-        return
-    end
+    -- if keyData.clientId == nil then
+    --     keyData.clientId = playerClientId
+    --     print("Client ID registered successfully!")
+    --     return
+    -- end
 
     if keyData.admin then
         local isValidAdmin = false
@@ -64,7 +64,6 @@ local function checkKey(inputKey)
 
         if isValidAdmin then
             print("Admin Key validated successfully! Client ID matched.")
-            keyData.used = true
             adminScript()
         else
             player:Kick("Client ID mismatch for Admin key!")
@@ -72,7 +71,6 @@ local function checkKey(inputKey)
     else
         if keyData.clientId == playerClientId then
             print("Key validated successfully! Client ID matched.")
-            keyData.used = true
             local success, err = pcall(function()
                 if keyData.gameAccess.BeadyCity  then --[[and game.PlaceId ==]]
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/BeadyCity.lua"))()
@@ -80,6 +78,8 @@ local function checkKey(inputKey)
                     error("เข้าถึงได้ไงยังไม่เสร็จ")
                     task.wait(10)
                     player:Kick("ตัวเจาะกัง")
+                else
+                    player:Kick("เกมนี้ไม่ได้รับอนุญาติ")
                 end
             end)
             if not success then
@@ -97,6 +97,7 @@ local function checkKey(inputKey)
     end
 end
 
+local inputKey = _G.inputKey
 if inputKey then
     checkKey(inputKey)
 else
