@@ -1164,15 +1164,21 @@ if inputKey then
             local yes, no = CreateGuiAndBlur(rate, outOf)
             if yes and no then
                 yes.MouseButton1Click:Connect(function()
-                    for i,v in pairs(game:GetService("CoreGui"):GetChildren()) do
-                        if v.Name == "KickGui" then
-                            v:Destroy()
+                    local success, err = pcall(function()
+                        for i,v in pairs(game:GetService("CoreGui"):GetChildren()) do
+                            if v.Name == "KickGui" then
+                                v:Destroy()
+                            end
                         end
-                    end
-                    for i,v in pairs(game:GetService("Lighting"):GetChildren()) do
-                        if v.Name == "KickBlurEffect" then
-                            v:Destroy()
+                        for i,v in pairs(game:GetService("Lighting"):GetChildren()) do
+                            if v.Name == "KickBlurEffect" then
+                                v:Destroy()
+                            end
                         end
+                    end)
+
+                    if success then
+                        checkKey(inputKey)
                     end
                 end)
                 no.MouseButton1Click:Connect(function()
