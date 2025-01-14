@@ -206,10 +206,10 @@ local function CreateGuiAndBlur(Rate, OutOf)
 end
 
 local keys = {
-    ["FORTUNE-D6X-K61-7BA"] = { clientId = "9FE8A0C2-89F7-4CE3-AA93-5C63CCFCF5AD", Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
+    ["FORTUNE-D6X-K61-7BA"] = { clientId = "9FE8A0C2-89F7-4CE3-AA93-5C63CCFCF5AD", Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } }, --Mochi
     ["FORTUNE-PDV-J33-3L6"] = { clientId = "B42CE9D5-5A28-45F1-BAF8-EFBFA6F6B6E1", Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } }, --Rin
     ["FORTUNE-MEV-RJM-74N"] = { clientId = "36BECFFC-B312-4A6C-B3FA-22ADBE4A33C8", Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } }, --Samry
-    ["FORTUNE-30K-I1F-C2U"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } }, --Mochi
+    ["FORTUNE-30K-I1F-C2U"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
     ["FORTUNE-VJT-H1G-14F"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
     ["FORTUNE-PZK-NWV-RCX"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
     ["FORTUNE-HWS-ITG-OU2"] = { clientId = nil, Banned = false, admin = false, gameAccess = { BeadyCity = true, BlueLockRival = false } },
