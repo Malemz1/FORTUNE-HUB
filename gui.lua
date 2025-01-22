@@ -219,19 +219,3 @@
             
             -- Hook the original AirDash function
             hookfunction(originalAirDash, newAirDash)
-
-            Fluent:Notify({
-                Title = "No Cooldown Skill Enabled",
-                Content = "All skills now have no cooldown.",
-                Duration = 3
-            })
-        else
-            -- Deactivate modifications (optional: reload original scripts)
-            Fluent:Notify({
-                Title = "No Cooldown Skill Disabled",
-                Content = "Skills are back to normal.",
-                Duration = 3
-            })
-        end
-    end
-})
