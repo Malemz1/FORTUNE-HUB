@@ -533,6 +533,53 @@ Tabs.Kaitan:AddToggle("NoCooldownAirDash", {
     end
 })
 
+    local MiscTitle = Tabs.Kaitan:AddSection("Misc")
+
+    local InfiniteStaminaEnabled = false
+
+    Tabs.Kaitan:AddButton({
+        Title = "Infinite Stamina",
+        Description = "Click to enable Infinite Stamina (cannot be disabled)",
+        Callback = function()
+            if not InfiniteStaminaEnabled then
+                InfiniteStaminaEnabled = true
+                Fluent:Notify({
+                    Title = "Infinite Stamina",
+                    Content = "Enabled",
+                    Duration = 3
+                })
+            else
+                Fluent:Notify({
+                    Title = "Infinite Stamina",
+                    Content = "Already Enabled",
+                    Duration = 3
+                })
+            end
+        end
+    })
+
+
+    task.spawn(function()
+        while task.wait(0.1) do
+            if InfiniteStaminaEnabled then
+                pcall(function()
+                    local plr = game.Players.LocalPlayer
+                    local stats = plr:FindFirstChild("PlayerStats")
+                    if stats then
+                        local stamina = stats:FindFirstChild("Stamina")
+                        if stamina then
+                            stamina:Destroy()
+                            local fakeStamina = Instance.new("NumberValue")
+                            fakeStamina.Name = "Stamina"
+                            fakeStamina.Value = math.huge
+                            fakeStamina.Parent = stats
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+
 
 Fluent:Notify({
     Title = "Private",
