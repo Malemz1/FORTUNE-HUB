@@ -908,7 +908,7 @@ local keybind = Tabs.OP:AddKeybind("InstantKeybind", {
     end
 })
 
-local SkillTitle = Tabs.OP:AddSection("No CD Skill")
+local SkillTitle = Tabs.OP:AddSection("No CD Skill (Wave Only)")
 -- Variables
 local noCooldownEnabled = false
 
