@@ -59,7 +59,8 @@ local Tabs = {
     Kaitan = Window:AddTab({ Title = "Kaitan", Icon = "crown" }),
     OP = Window:AddTab({ Title = "OP", Icon = "apple" }),
     Spin = Window:AddTab({ Title = "Spin", Icon = "box" }),
-    Rage = Window:AddTab({ Title = "Rage", Icon = "baby" })
+    Rage = Window:AddTab({ Title = "Rage", Icon = "baby" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
 Toggle.MouseButton1Click:Connect(function()
@@ -434,7 +435,7 @@ local HomeGoal = workspace.Goals.Away
 local AwayGoal = workspace.Goals.Home
 
 local GameValues = game:GetService("ReplicatedStorage"):WaitForChild("GameValues")
-local State = GameValues:WaitForChild("State") -- เข้าถึงตัวแปร State
+local State = GameValues.State -- เข้าถึงตัวแปร State
 
 local running = false -- ควบคุมสถานะการทำงานของระบบ Auto Goal
 
@@ -446,7 +447,7 @@ local function createUI()
 
     local background = Instance.new("Frame", screenGui)
     background.Size = UDim2.new(1, 0, 1, 0)
-    background.BackgroundTransparency = 0 -- ทำให้พื้นหลังโปร่งใส
+    background.BackgroundTransparency = 1 -- ทำให้พื้นหลังโปร่งใส
     background.BorderSizePixel = 0
     background.BackgroundColor3 = Color3.new(0, 0, 0)
     background.ZIndex = 100
@@ -520,7 +521,7 @@ end
 local function teleportBallToGoal(ball, goal)
     if ball and goal then
         for i = 1, 5 do
-            ball.CFrame = goal.CFrame + Vector3.new(0, 1, 0) -- เพิ่ม Y เพื่อเลี่ยงติดพื้น
+            ball.CFrame = goal.CFrame
             task.wait(0.1)
         end
     end
@@ -578,49 +579,40 @@ end
 
 -- ฟังก์ชันสำหรับเคลื่อนที่เข้าใกล้บอล
 local function autoGoal()
--- รอจนกว่าผู้เล่นจะอยู่ในทีม Home หรือ Away
-waitForValidTeam()
+    -- รอจนกว่าผู้เล่นจะอยู่ในทีม Home หรือ Away
+    waitForValidTeam()
 
-while running do
-    -- ตรวจสอบว่า State เป็น "Playing" หรือไม่
-    if State.Value ~= "Playing" then
-        print("State is not Playing, waiting...")
-        -- รอจนกว่า State จะกลับมาเป็น "Playing"
-        repeat
-            State:GetPropertyChangedSignal("Value"):Wait()
-        until State.Value == "Playing" or not running -- ออกจาก loop ถ้า running ถูกปิด
-    end
-
-    if not running then
-        break -- หากระบบถูกปิด ให้หยุดลูป
-    end
-
-    -- ค้นหาบอล
-    local ball = nil
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and obj.Name:lower():find("hitbox") and obj.Parent.Name:lower():find("football") then
-            ball = obj
-            break
+    while running do
+        -- ตรวจสอบว่า State เป็น "Playing" หรือไม่
+        if State.Value ~= "Playing" then
+            print("State is not Playing, waiting...")
+            -- รอจนกว่า State จะกลับมาเป็น "Playing"
+            repeat
+                State:GetPropertyChangedSignal("Value"):Wait()
+            until State.Value == "Playing" or not running -- ออกจาก loop ถ้า running ถูกปิด
         end
-    end
 
-    if ball then
-        local distance = (hrp.Position - ball.Position).Magnitude
+        if not running then
+            break -- หากระบบถูกปิด ให้หยุดลูป
+        end
 
-        -- ถ้าเข้าใกล้บอลในระยะ 20 หน่วย ให้วาร์ปไปที่บอล
-        if distance < 20 then
-            hrp.CFrame = ball.CFrame -- วาร์ปตัวละครไปยังตำแหน่งของบอล
+        -- ค้นหาบอล
+        local ball = nil
+        for _, obj in pairs(game.workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Parent and obj.Parent.Name:lower():find("football") then
+                ball = obj
+                break
+            end
+        end
+
+        if ball then
+            -- วาร์ปตัวละครไปยังตำแหน่งของบอลทันที
+            hrp.CFrame = ball.CFrame
             shootAndTeleport() -- ยิงบอลหรือสไลด์บอล
-        else
-            -- เคลื่อนที่เข้าใกล้บอล (เมื่อยังอยู่ไกล)
-            local direction = (ball.Position - hrp.Position).Unit
-            local step = direction * 25 -- ความเร็วในการเคลื่อนที่
-            hrp.CFrame = hrp.CFrame + step
         end
-    end
 
-    task.wait(0.4) -- รอในแต่ละรอบ
-end
+        task.wait(0.4) -- รอในแต่ละรอบ
+    end
 end
 
 -- Toggle สำหรับเปิด/ปิดระบบ Auto Goal
@@ -728,7 +720,6 @@ local rs = game:GetService("ReplicatedStorage")
 local lp = plrs.LocalPlayer
 local bs = rs.Packages.Knit.Services.BallService
 local ig = false
-local runService = game:GetService("RunService")
 local mouse = lp:GetMouse()
 
 local function getBall()
@@ -739,40 +730,31 @@ local function getBall()
     end
 end
 
-local function moveWithGravity(ball, startPos, endPos, height, duration)
-    local startTime = tick()
-    local connection
-    connection = runService.RenderStepped:Connect(function()
-        local elapsed = tick() - startTime
-        if elapsed > duration then
-            ball.Position = endPos
-            connection:Disconnect()
-            return
-        end
-        
-        local t = elapsed / duration
-        local currentX = startPos:Lerp(endPos, t) -- การเคลื่อนที่ในแนว XZ
-        local arcHeight = math.sin(t * math.pi) * height -- ความสูงของ Parabola
-        ball.Position = Vector3.new(currentX.X, startPos.Y + arcHeight, currentX.Z)
-    end)
-end
-
-local function teleportBallToMouse()
+local function warpBallToGoal()
     local b = getBall()
     if b then
-        local mouseTarget = mouse.Hit.Position -- ตำแหน่งที่เมาส์ชี้
-        local startPos = b.Position
-        local endPos = Vector3.new(mouseTarget.X, mouseTarget.Y, mouseTarget.Z) -- เปลี่ยนตำแหน่งลูกบอลไปที่เมาส์
-        moveWithGravity(b, startPos, endPos, 25, 1.5)
+        -- Find the goal based on the player's team
+        local goal
+        if lp.Team and lp.Team.Name == "Home" then
+            goal = workspace.Goals.Home -- Warp ball to the opponent's goal
+        elseif lp.Team and lp.Team.Name == "Away" then
+            goal = workspace.Goals.Away -- Warp ball to the opponent's goal
+        end
+
+        if goal then
+            b.CFrame = goal.CFrame + Vector3.new(0, 1, 0) -- Warp ball directly to the goal's position with slight offset
+        end
     end
 end
 
+-- Event listener for the shoot command
 bs.RE.Shoot.OnClientEvent:Connect(function()
     if ig then
-        teleportBallToMouse()
+        warpBallToGoal()
     end
 end)
 
+-- Toggle to enable/disable Instant Goal
 local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle", {
     Title = "Instant Goal",
     Default = false,
@@ -781,6 +763,7 @@ local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle", {
     end
 })
 
+-- Keybind to toggle Instant Goal
 local keybind = Tabs.Kaitan:AddKeybind("InstantKeybind", {
     Title = "Toggle Instant Goal Keybind",
     Mode = "Toggle",
@@ -802,6 +785,7 @@ local keybind = Tabs.Kaitan:AddKeybind("InstantKeybind", {
         })
     end
 })
+
 ----------------- OP Tab ------------------
 local plrs = game:GetService("Players")
 local runService = game:GetService("RunService")
@@ -908,7 +892,7 @@ local keybind = Tabs.OP:AddKeybind("InstantKeybind", {
     end
 })
 
-local SkillTitle = Tabs.OP:AddSection("No CD Skill (Wave Only)")
+local SkillTitle = Tabs.OP:AddSection("No CD Skill")
 -- Variables
 local noCooldownEnabled = false
 
@@ -1568,10 +1552,39 @@ Tabs.Rage:AddButton({
     end
 })
 
+-- Addons:
+-- SaveManager (Allows you to have a configuration system)
+-- InterfaceManager (Allows you to have a interface managment system)
+
+-- Hand the library over to our managers
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+-- Ignore keys that are used by ThemeManager.
+-- (we dont want configs to save themes, do we?)
+SaveManager:IgnoreThemeSettings()
+
+-- You can add indexes of elements the save manager should ignore
+SaveManager:SetIgnoreIndexes({})
+
+-- use case for doing it this way:
+-- a script hub could have themes in a global folder
+-- and game configs in a separate folder per game
+InterfaceManager:SetFolder("Fearise Hub interface")
+SaveManager:SetFolder("Fearise Hub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+
+Window:SelectTab(1)
+
 Fluent:Notify({
     Title = "Fearise Hub",
-    Content = "The script has been loaded. Enjoy :>",
+    Content = "The script has been loaded.",
     Duration = 8
 })
 
-Window:SelectTab(1)
+-- You can use the SaveManager:LoadAutoloadConfig() to load a config
+-- which has been marked to be one that auto loads!
+SaveManager:LoadAutoloadConfig()
