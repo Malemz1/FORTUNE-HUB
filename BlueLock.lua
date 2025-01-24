@@ -447,7 +447,7 @@ local function createUI()
 
     local background = Instance.new("Frame", screenGui)
     background.Size = UDim2.new(1, 0, 1, 0)
-    background.BackgroundTransparency = 1 -- ทำให้พื้นหลังโปร่งใส
+    background.BackgroundTransparency = 0 -- ทำให้พื้นหลังโปร่งใส
     background.BorderSizePixel = 0
     background.BackgroundColor3 = Color3.new(0, 0, 0)
     background.ZIndex = 100
