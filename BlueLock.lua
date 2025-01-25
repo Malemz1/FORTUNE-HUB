@@ -863,7 +863,7 @@ bs.RE.Shoot.OnClientEvent:Connect(function()
 end)
 
 local toggle = Tabs.OP:AddToggle("InstantGoalToggle", {
-    Title = "Kaiser Impack",
+    Title = "Kaiser Impack Pro Max",
     Default = false,
     Callback = function(state)
         ig = state
