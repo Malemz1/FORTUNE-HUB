@@ -71,15 +71,22 @@ Toggle.MouseButton1Click:Connect(function()
         local gui = Window.Instance or game:GetService("CoreGui"):FindFirstChild("ScreenGui")
         if gui then
             gui.Enabled = IsOpen
-        else
-            warn("Unable to find the GUI object associated with Fluent.")
         end
     end
 
 
     Toggle.Text = IsOpen and "Close GUI" or "Open GUI"
 end)
------------------------
+
+task.spawn(function()
+    while task.wait(1) do
+        if Fluent.Unloaded then
+            Toggle:Destroy()
+            break
+        end
+    end
+end)
+----------------- Legit Tab ------------------
 local Options = {}
 
 local SpeedTitle = Tabs.Legit:AddSection("Player Modifiers")
@@ -245,7 +252,6 @@ local function findFootball()
     return nil
 end
 
------------------ Legit Tab ------------------
 local HitboxTitle = Tabs.Legit:AddSection("Hitbox")
 
 local dribblingEnabled = false
@@ -310,7 +316,7 @@ local Input = Tabs.Legit:AddInput("Input", {
 local HitboxKeybind = Tabs.Legit:AddKeybind("HitboxKeybind", {
     Title = "Toggle Hitbox Keybind",
     Mode = "Toggle", 
-    Default = "H",
+    Default = "...",
     Callback = function()
 
         local currentState = Options.MyToggle.Value
@@ -420,13 +426,15 @@ end
 local Keybind = Tabs.Legit:AddKeybind("KickKeybind", {
     Title = "Instance Kick Keybind (PC Only)",
     Mode = "Toggle", -- เปลี่ยนโหมดเป็น Always เพื่อเรียกใช้ได้รัวๆ
-    Default = "F",
+    Default = "...",
     Callback = function()
         shootBall()
     end,
 })
 
 ----------------- Kaitan Tab ------------------
+local Striker = Tabs.Kaitan:AddSection("Striker")
+
 local plr = game.Players.LocalPlayer
 local chr = plr.Character or plr.CharacterAdded:Wait()
 local hrp = chr:WaitForChild("HumanoidRootPart")
@@ -511,10 +519,8 @@ end
 -- ฟังก์ชันรอจนกว่าผู้เล่นจะอยู่ในทีม Home หรือ Away
 local function waitForValidTeam()
     while not (plr.Team and (plr.Team.Name == "Home" or plr.Team.Name == "Away")) do
-        print("Waiting for player to join Home or Away team...")
         task.wait(1) -- รอ 1 วินาทีแล้วตรวจสอบใหม่
     end
-    print("Player joined team:", plr.Team.Name)
 end
 
 -- ฟังก์ชันเทเลพอร์ตบอลไปยังประตู
@@ -585,7 +591,6 @@ local function autoGoal()
     while running do
         -- ตรวจสอบว่า State เป็น "Playing" หรือไม่
         if State.Value ~= "Playing" then
-            print("State is not Playing, waiting...")
             -- รอจนกว่า State จะกลับมาเป็น "Playing"
             repeat
                 State:GetPropertyChangedSignal("Value"):Wait()
@@ -616,19 +621,28 @@ local function autoGoal()
 end
 
 -- Toggle สำหรับเปิด/ปิดระบบ Auto Goal
-local Toggle = Tabs.Kaitan:AddToggle("MyToggle", {Title = "Auto Goal Toggle", Default = false })
+local Toggle = Tabs.Kaitan:AddToggle("MyToggle", {Title = "Auto Farm", Default = false })
 
 Toggle:OnChanged(function()
     running = Toggle.Value -- อัปเดตสถานะการทำงาน
     if running then
-        print("Auto Goal Enabled")
-        createUI() -- สร้าง UI
         task.spawn(autoGoal) -- เริ่มทำงานใน Thread ใหม่
-    else
-        print("Auto Goal Disabled")
-        removeUI() -- ลบ UI
     end
 end)
+
+-- Toggle สำหรับเปิด/ปิดระบบ Auto Goal
+local Toggle = Tabs.Kaitan:AddToggle("MyToggle", {Title = "BlackScreen", Default = false })
+
+Toggle:OnChanged(function()
+    running = Toggle.Value -- อัปเดตสถานะการทำงาน
+    if running then
+        createUI()
+    else
+        removeUI()
+    end
+end)
+
+local Striker = Tabs.Kaitan:AddSection("Properties(Striker)")
 
 Options.MyToggle:SetValue(false) -- ตั้งค่าเริ่มต้น Toggle เป็นปิด
 
@@ -676,14 +690,7 @@ local function autoTeam()
                     Duration = 2
                 })
             end
-        else
-            -- ผู้เล่นไม่ได้อยู่ในทีม Visitor
-            Fluent:Notify({
-                Title = "Auto Team",
-                Content = "You are no longer in Visitor team.",
-                Duration = 3
-            })
-        end
+end
 
         task.wait(3) -- รอ 3 วินาทีก่อนตรวจสอบใหม่
     end
@@ -712,7 +719,6 @@ local AutoTeamToggle = Tabs.Kaitan:AddToggle("AutoTeamToggle", {
 })
 
 TeamPositionDropdown:OnChanged(function(Value)
-    print("Dropdown changed. Current selection: ", Value)
 end)
 
 local plrs = game:GetService("Players")
@@ -767,7 +773,7 @@ local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle", {
 local keybind = Tabs.Kaitan:AddKeybind("InstantKeybind", {
     Title = "Toggle Instant Goal Keybind",
     Mode = "Toggle",
-    Default = "T",
+    Default = "...",
     Callback = function()
         ig = not ig
         toggle:SetValue(ig)
@@ -786,6 +792,89 @@ local keybind = Tabs.Kaitan:AddKeybind("InstantKeybind", {
     end
 })
 
+local GoalTitle = Tabs.Kaitan:AddSection("Goal (In Testing)")
+
+local toggleState = false
+
+-- เพิ่ม Toggle สำหรับ Auto Goal
+local toggle = Tabs.Kaitan:AddToggle("AutoGoal", {Title = "Auto GK", Default = false})
+
+toggle:OnChanged(function()
+    toggleState = toggle.Value -- ดึงค่าปัจจุบันของ Toggle
+    Fluent:Notify({
+        Title = "Auto GK Toggled",
+        Content = "Auto GK has been " .. (toggleState and "enabled" or "disabled") .. ".", -- ตรวจสอบสถานะ Toggle
+        Duration = 3
+    })
+end)
+
+-- เพิ่ม Keybind สำหรับเปิด/ปิด Auto Goal
+local keybind = Tabs.Kaitan:AddKeybind("AutoGoalKeybind", {
+    Title = "Auto GK Keybind",
+    Mode = "Toggle", -- Toggle mode: กดเปิด/ปิด
+    Default = "...", -- ค่าปุ่มเริ่มต้น
+    Callback = function(Value)
+        toggleState = not toggleState -- พลิกค่า Toggle State
+        toggle:SetValue(toggleState) -- อัปเดตสถานะของ Toggle
+        if toggleState then
+        end
+    end,
+    ChangedCallback = function(New)
+    end
+})
+
+local p = game.Players.LocalPlayer
+local char = p.Character or p.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local distance = 50
+local ball = nil
+
+local function getBall()
+    for _, o in ipairs(workspace:GetDescendants()) do
+        if o:IsA("BasePart") and o.Name == "Football" then
+            return o
+        end
+    end
+end
+
+local function isBallInPlayer()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= p then -- ไม่เช็คตัวเอง
+            local playerChar = player.Character
+            if playerChar and ball and ball:IsDescendantOf(playerChar) then
+                return true -- บอลอยู่ใน Player คนอื่น
+            end
+        end
+    end
+    return false
+end
+
+local function pressQ()
+    local virtualInput = game:GetService("VirtualInputManager")
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.Q, false, nil) -- กดปุ่ม Q
+    task.wait(0.1)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.Q, false, nil) -- ปล่อยปุ่ม Q
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if toggleState then
+        ball = ball or getBall()
+        if ball and ball.Parent then
+            local ballPos = ball.Position
+            local mag = (hrp.Position - ballPos).Magnitude
+
+            -- ตรวจสอบว่าบอลอยู่ในตัวเรา หรือใน Player คนอื่น
+            if mag > 3 and mag <= distance and not ball:IsDescendantOf(char) and not isBallInPlayer() then
+                hrp.CFrame = CFrame.new(ballPos) -- วาร์ปไปหาบอล
+                pressQ() -- กดปุ่ม Q
+            elseif mag <= 3 then
+            elseif isBallInPlayer() then
+            end
+        else
+            ball = nil
+        end
+    end
+end)
 ----------------- OP Tab ------------------
 local plrs = game:GetService("Players")
 local runService = game:GetService("RunService")
@@ -819,6 +908,36 @@ local function getRandomTargetCFrame(team)
         return goalCFrames.Home[math.random(1, #goalCFrames.Home)]
     end
 end
+
+-- local function moveWithCurvedPath(ball, startPos, targetCF, height, duration, curveIntensity)
+--     local startTime = tick()
+--     local connection
+--     local endPos = targetCF.Position
+
+--     -- สุ่มว่าจะโค้งไปทางซ้าย (-1) หรือขวา (1)
+--     local curveDirection = math.random(0, 1) == 0 and -1 or 1
+
+--     connection = runService.RenderStepped:Connect(function()
+--         local elapsed = tick() - startTime
+--         if elapsed > duration then
+--             ball.CFrame = targetCF
+--             connection:Disconnect()
+--             return
+--         end
+
+--         local t = elapsed / duration
+--         local lerpPos = startPos:Lerp(endPos, t)
+
+--         local arcHeight = math.sin(t * math.pi) * height
+--         local horizontalCurve = math.sin(t * math.pi) * curveIntensity * curveDirection
+
+--         ball.CFrame = CFrame.new(
+--             lerpPos.X + horizontalCurve, -- โค้งซ้ายหรือขวา
+--             startPos.Y + arcHeight,     -- โค้งขึ้น-ลง
+--             lerpPos.Z
+--         )
+--     end)
+-- end
 
 local function moveWithCurvedPath(ball, startPos, targetCF, height, duration, curveIntensity)
     local startTime = tick()
@@ -863,7 +982,7 @@ bs.RE.Shoot.OnClientEvent:Connect(function()
 end)
 
 local toggle = Tabs.OP:AddToggle("InstantGoalToggle", {
-    Title = "Kaiser Impack Pro Max",
+    Title = "Kaiser Impack",
     Default = false,
     Callback = function(state)
         ig = state
@@ -873,7 +992,7 @@ local toggle = Tabs.OP:AddToggle("InstantGoalToggle", {
 local keybind = Tabs.OP:AddKeybind("InstantKeybind", {
     Title = "Toggle Kaiser Impack Keybind",
     Mode = "Toggle",
-    Default = "K",
+    Default = "...",
     Callback = function()
         ig = not ig
         toggle:SetValue(ig)
@@ -887,6 +1006,142 @@ local keybind = Tabs.OP:AddKeybind("InstantKeybind", {
         Fluent:Notify({
             Title = "Keybind Changed",
             Content = "Kaiser Impack Keybind is now set to: " .. tostring(newKey),
+            Duration = 3
+        })
+    end
+})
+
+----------------------------------------------------------------
+local plrs = game:GetService("Players")
+local runService = game:GetService("RunService")
+local lp = plrs.LocalPlayer
+local bs = game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService
+local ig = false
+
+local function getBall()
+    for _, o in ipairs(workspace:GetDescendants()) do
+        if o:IsA("BasePart") and o.Name == "Football" then
+            return o
+        end
+    end
+end
+
+local goalCFrames = {
+    Home = {
+        CFrame.new(323.849396, 11.1665344, -29.958168, -0.346998423, -2.85511348e-08, -0.937865734, 2.543152e-08, 1, -3.98520079e-08, 0.937865734, -3.76799356e-08, -0.346998423),
+        CFrame.new(326.027893, 11.1665325, -67.0218277, 0.910013974, -1.74189319e-09, -0.414577574, -1.44234642e-08, 1, -3.58616781e-08, 0.414577574, 3.86142709e-08, 0.910013974)
+    },
+    Away = {
+        CFrame.new(-247.79953, 11.1665344, -68.2236633, 0.441729337, -3.98036413e-08, -0.897148371, 8.61732801e-08, 1, -1.93767069e-09, 0.897148371, -7.64542918e-08, 0.441729337),
+        CFrame.new(-247.711075, 25.6309118, -30.344408, 0.936370671, 0.0215997752, -0.350347638, -3.86210353e-08, 0.99810493, 0.0615354702, 0.351012826, -0.0576199964, 0.934596181)
+    }
+}
+
+local function getRandomTargetCFrame(team)
+    if team == "Home" then
+        return goalCFrames.Away[math.random(1, #goalCFrames.Away)]
+    elseif team == "Away" then
+        return goalCFrames.Home[math.random(1, #goalCFrames.Home)]
+    end
+end
+
+local function moveWithCurvedPath(ball, startPos, targetCF, height, duration, curveIntensity)
+    local startTime = tick()
+    local connection
+    local endPos = targetCF.Position
+
+    -- สุ่มว่าจะโค้งไปทางซ้าย (-1) หรือขวา (1)
+    local curveDirection = math.random(0, 1) == 0 and -1 or 1
+
+    connection = runService.RenderStepped:Connect(function()
+        local elapsed = tick() - startTime
+        if elapsed > duration then
+            ball.CFrame = targetCF
+            connection:Disconnect()
+            return
+        end
+
+        local t = elapsed / duration
+        local lerpPos = startPos:Lerp(endPos, t)
+
+        local arcHeight = math.sin(t * math.pi) * height
+        local horizontalCurve = math.sin(t * math.pi) * curveIntensity * curveDirection
+
+        ball.CFrame = CFrame.new(
+            lerpPos.X + horizontalCurve, -- โค้งซ้ายหรือขวา
+            startPos.Y + arcHeight,     -- โค้งขึ้น-ลง
+            lerpPos.Z
+        )
+    end)
+end
+
+-- local function moveWithCurvedPath(ball, startPos, targetCF, height, duration, curveIntensity)
+--     local startTime = tick()
+--     local connection
+--     local endPos = targetCF.Position
+--     connection = runService.RenderStepped:Connect(function()
+--         local elapsed = tick() - startTime
+--         if elapsed > duration then
+--             ball.CFrame = targetCF
+--             connection:Disconnect()
+--             return
+--         end
+
+--         local t = elapsed / duration
+--         local currentXZ = startPos:Lerp(endPos, t)
+
+--         local arcHeight = math.sin(t * math.pi) * height
+--         local curve = math.sin(t * math.pi * curveIntensity) * 15 -- เพิ่มความโค้งซ้าย-ขวา
+
+--         ball.CFrame = CFrame.new(currentXZ.X + curve, startPos.Y + arcHeight, currentXZ.Z)
+--     end)
+-- end
+
+local function teleportBallToGoal()
+    local ball = getBall()
+    if ball then
+        local team = lp.Team and lp.Team.Name
+        if team then
+            local startPos = ball.Position
+            local targetCFrame = getRandomTargetCFrame(team)
+            if targetCFrame then
+                moveWithCurvedPath(ball, startPos, targetCFrame, 10, 1, 150) -- เพิ่ม curveIntensity = 5
+            end
+        end
+    end
+end
+
+bs.RE.Shoot.OnClientEvent:Connect(function()
+    if ig then
+        teleportBallToGoal()
+    end
+end)
+
+local toggle = Tabs.OP:AddToggle("InstantGoalToggle", {
+    Title = "Curve Shot Pro Max",
+    Default = false,
+    Callback = function(state)
+        ig = state
+    end
+})
+
+local keybind = Tabs.OP:AddKeybind("InstantKeybind", {
+    Title = "Toggle Curve Shot Keybind",
+    Mode = "Toggle",
+    Default = "...",
+    Callback = function()
+        ig = not ig
+        toggle:SetValue(ig)
+        Fluent:Notify({
+            Title = "Curve Shot Toggled",
+            Content = "Curve Shot has been " .. (ig and "enabled" or "disabled") .. ".",
+            Duration = 3
+        })
+    end,
+    ChangedCallback = function(newKey)
+        Fluent:Notify({
+            Title = "Keybind Changed",
+            Content = "Curve Shot Keybind is now set to: " .. tostring(newKey),
             Duration = 3
         })
     end
@@ -959,7 +1214,6 @@ Callback = function(state)
         
                 -- เรียกใช้ RemoteEvent "Slide" เพื่อ FireServer
                 game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Slide:FireServer()
-                print("Slide RemoteEvent has been fired!")
         
                 -- ใช้ TweenService แทนการพุ่งด้วย BodyVelocity
                 local rootPart = v13.HumanoidRootPart
@@ -979,10 +1233,8 @@ Callback = function(state)
                     local tween = TweenService:Create(rootPart, tweenInfo, tweenGoal)
         
                     tween:Play()
-                    print("Tween started. Moving to:", targetPosition)
         
                     tween.Completed:Connect(function()
-                        print("Tween completed. Reached:", targetPosition)
                         tween:Destroy() -- ลบ Tween หลังการใช้งาน
                     end)
                 end
