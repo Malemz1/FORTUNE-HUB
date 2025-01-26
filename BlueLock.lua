@@ -46,11 +46,11 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/d
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Fearise Hub" .. " | " .. "BlueLock : Rival" .. " | " .. "[Version 1.5]",
+    Title = "Fearise Hub" .. " | " .. "BlueLock : Rival" .. " | " .. "[Version 2]",
     TabWidth = 160,
     Size = Device,
     Acrylic = false,
-    Theme = "Amethyst",
+    Theme = "Dark",
     MinimizeKey = Enum.KeyCode.RightControl
 })
 
@@ -370,6 +370,23 @@ local vipToggle = Tabs.Legit:AddToggle("vipToggle", {
     end
 })
 
+local Toggle = Tabs.Legit:AddToggle("AntiAFK", {Title = "Anti-AFK", Default = false})
+
+local afkLoop
+Toggle:OnChanged(function(state)
+    if state then
+        afkLoop = game:GetService("RunService").RenderStepped:Connect(function()
+            local vu = game:GetService("VirtualUser")
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new(0, 0))
+        end)
+    else
+        if afkLoop then
+            afkLoop:Disconnect()
+            afkLoop = nil
+        end
+    end
+end)
 local InfiniteStaminaEnabled = false
 
 Tabs.Legit:AddButton({
@@ -414,6 +431,8 @@ task.spawn(function()
     end
 end)
 
+local GG = Tabs.Legit:AddSection("Enchanted")
+
 local ohNumber1 = 110
 local ohNil2 = nil
 local ohNil3 = nil
@@ -423,15 +442,40 @@ local function shootBall()
     game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Shoot:FireServer(ohNumber1, ohNil2, ohNil3, ohVector34)
 end
 
-local Keybind = Tabs.Legit:AddKeybind("KickKeybind", {
+local InstantKick = Tabs.Legit:AddKeybind("KickKeybind", {
     Title = "Instance Kick Keybind (PC Only)",
-    Mode = "Toggle", -- เปลี่ยนโหมดเป็น Always เพื่อเรียกใช้ได้รัวๆ
+    Mode = "Toggle",
     Default = "...",
     Callback = function()
         shootBall()
     end,
 })
 
+local Input1 = Tabs.Legit:AddInput("Input", {
+    Title = "Adjust Power (55-110)",
+    Default = "110",
+    Placeholder = "Enter power...",
+    Numeric = true,
+    Finished = true,
+    Callback = function(value)
+        local numValue = tonumber(value)
+        if numValue and numValue >= 55 and numValue <= 110 then
+            ohNumber1 = numValue
+            Fluent:Notify({
+                Title = "Power Adjustment",
+                Content = "Power updated to: " .. ohNumber1,
+                Duration = 3
+            })
+        else
+            ohNumber1 = 110
+            Fluent:Notify({
+                Title = "Invalid Input",
+                Content = "Out of range! Power reset to: " .. ohNumber1,
+                Duration = 3
+            })
+        end
+    end,
+})
 ----------------- Kaitan Tab ------------------
 local Striker = Tabs.Kaitan:AddSection("Striker")
 
