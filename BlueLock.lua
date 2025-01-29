@@ -686,7 +686,91 @@ Toggle:OnChanged(function()
     end
 end)
 
-local Striker = Tabs.Kaitan:AddSection("Properties(Striker)")
+local GoalTitle = Tabs.Kaitan:AddSection("Goal (In Testing)")
+
+local toggleState = false
+
+-- เพิ่ม Toggle สำหรับ Auto Goal
+local toggle = Tabs.Kaitan:AddToggle("AutoGoal", {Title = "Auto GK", Default = false})
+
+toggle:OnChanged(function()
+    toggleState = toggle.Value -- ดึงค่าปัจจุบันของ Toggle
+    Fluent:Notify({
+        Title = "Auto GK Toggled",
+        Content = "Auto GK has been " .. (toggleState and "enabled" or "disabled") .. ".", -- ตรวจสอบสถานะ Toggle
+        Duration = 3
+    })
+end)
+
+-- เพิ่ม Keybind สำหรับเปิด/ปิด Auto Goal
+local keybind = Tabs.Kaitan:AddKeybind("AutoGoalKeybind", {
+    Title = "Auto GK Keybind",
+    Mode = "Toggle", -- Toggle mode: กดเปิด/ปิด
+    Default = "...", -- ค่าปุ่มเริ่มต้น
+    Callback = function(Value)
+        toggleState = not toggleState -- พลิกค่า Toggle State
+        toggle:SetValue(toggleState) -- อัปเดตสถานะของ Toggle
+        if toggleState then
+        end
+    end,
+    ChangedCallback = function(New)
+    end
+})
+
+local p = game.Players.LocalPlayer
+local char = p.Character or p.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local distance = 50
+local ball = nil
+
+local function getBall()
+    for _, o in ipairs(workspace:GetDescendants()) do
+        if o:IsA("BasePart") and o.Name == "Football" then
+            return o
+        end
+    end
+end
+
+local function isBallInPlayer()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= p then -- ไม่เช็คตัวเอง
+            local playerChar = player.Character
+            if playerChar and ball and ball:IsDescendantOf(playerChar) then
+                return true -- บอลอยู่ใน Player คนอื่น
+            end
+        end
+    end
+    return false
+end
+
+local function pressQ()
+    local virtualInput = game:GetService("VirtualInputManager")
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.Q, false, nil) -- กดปุ่ม Q
+    task.wait(0.1)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.Q, false, nil) -- ปล่อยปุ่ม Q
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if toggleState then
+        ball = ball or getBall()
+        if ball and ball.Parent then
+            local ballPos = ball.Position
+            local mag = (hrp.Position - ballPos).Magnitude
+
+            -- ตรวจสอบว่าบอลอยู่ในตัวเรา หรือใน Player คนอื่น
+            if mag > 3 and mag <= distance and not ball:IsDescendantOf(char) and not isBallInPlayer() then
+                hrp.CFrame = CFrame.new(ballPos) -- วาร์ปไปหาบอล
+                pressQ() -- กดปุ่ม Q
+            elseif mag <= 3 then
+            elseif isBallInPlayer() then
+            end
+        else
+            ball = nil
+        end
+    end
+end)
+
+local Properties = Tabs.Kaitan:AddSection("Properties")
 
 Options.MyToggle:SetValue(false) -- ตั้งค่าเริ่มต้น Toggle เป็นปิด
 
@@ -806,38 +890,15 @@ end)
 
 -- Toggle to enable/disable Instant Goal
 local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle", {
-    Title = "Instant Goal",
+    Title = "Instant Goal (Auto Farm Only)",
     Default = false,
     Callback = function(s)
         ig = s
     end
 })
 
--- Keybind to toggle Instant Goal
-local keybind = Tabs.Kaitan:AddKeybind("InstantKeybind", {
-    Title = "Toggle Instant Goal Keybind",
-    Mode = "Toggle",
-    Default = "...",
-    Callback = function()
-        ig = not ig
-        toggle:SetValue(ig)
-        Fluent:Notify({
-            Title = "Instant Goal Toggled",
-            Content = "Instant Goal has been " .. (ig and "enabled" or "disabled") .. ".",
-            Duration = 3
-        })
-    end,
-    ChangedCallback = function(k)
-        Fluent:Notify({
-            Title = "Keybind Changed",
-            Content = "Instant Goal Keybind is now set to: " .. tostring(k),
-            Duration = 3
-        })
-    end
-})
-
 Tabs.Kaitan:AddButton({
-    Title = "Hop Server (Test)",
+    Title = "Hop Server (In Testing)",
     Description = "Switch to a mid-population server",
     Callback = function()
         local hs = game:GetService("HttpService")
@@ -919,90 +980,6 @@ Tabs.Kaitan:AddButton({
         end
     end
 })
-
-local GoalTitle = Tabs.Kaitan:AddSection("Goal (In Testing)")
-
-local toggleState = false
-
--- เพิ่ม Toggle สำหรับ Auto Goal
-local toggle = Tabs.Kaitan:AddToggle("AutoGoal", {Title = "Auto GK", Default = false})
-
-toggle:OnChanged(function()
-    toggleState = toggle.Value -- ดึงค่าปัจจุบันของ Toggle
-    Fluent:Notify({
-        Title = "Auto GK Toggled",
-        Content = "Auto GK has been " .. (toggleState and "enabled" or "disabled") .. ".", -- ตรวจสอบสถานะ Toggle
-        Duration = 3
-    })
-end)
-
--- เพิ่ม Keybind สำหรับเปิด/ปิด Auto Goal
-local keybind = Tabs.Kaitan:AddKeybind("AutoGoalKeybind", {
-    Title = "Auto GK Keybind",
-    Mode = "Toggle", -- Toggle mode: กดเปิด/ปิด
-    Default = "...", -- ค่าปุ่มเริ่มต้น
-    Callback = function(Value)
-        toggleState = not toggleState -- พลิกค่า Toggle State
-        toggle:SetValue(toggleState) -- อัปเดตสถานะของ Toggle
-        if toggleState then
-        end
-    end,
-    ChangedCallback = function(New)
-    end
-})
-
-local p = game.Players.LocalPlayer
-local char = p.Character or p.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
-local distance = 50
-local ball = nil
-
-local function getBall()
-    for _, o in ipairs(workspace:GetDescendants()) do
-        if o:IsA("BasePart") and o.Name == "Football" then
-            return o
-        end
-    end
-end
-
-local function isBallInPlayer()
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player ~= p then -- ไม่เช็คตัวเอง
-            local playerChar = player.Character
-            if playerChar and ball and ball:IsDescendantOf(playerChar) then
-                return true -- บอลอยู่ใน Player คนอื่น
-            end
-        end
-    end
-    return false
-end
-
-local function pressQ()
-    local virtualInput = game:GetService("VirtualInputManager")
-    virtualInput:SendKeyEvent(true, Enum.KeyCode.Q, false, nil) -- กดปุ่ม Q
-    task.wait(0.1)
-    virtualInput:SendKeyEvent(false, Enum.KeyCode.Q, false, nil) -- ปล่อยปุ่ม Q
-end
-
-game:GetService("RunService").RenderStepped:Connect(function()
-    if toggleState then
-        ball = ball or getBall()
-        if ball and ball.Parent then
-            local ballPos = ball.Position
-            local mag = (hrp.Position - ballPos).Magnitude
-
-            -- ตรวจสอบว่าบอลอยู่ในตัวเรา หรือใน Player คนอื่น
-            if mag > 3 and mag <= distance and not ball:IsDescendantOf(char) and not isBallInPlayer() then
-                hrp.CFrame = CFrame.new(ballPos) -- วาร์ปไปหาบอล
-                pressQ() -- กดปุ่ม Q
-            elseif mag <= 3 then
-            elseif isBallInPlayer() then
-            end
-        else
-            ball = nil
-        end
-    end
-end)
 ----------------- OP Tab ------------------
 local plrs = game:GetService("Players")
 local runService = game:GetService("RunService")
