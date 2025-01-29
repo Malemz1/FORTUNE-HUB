@@ -897,86 +897,124 @@ local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle", {
     end
 })
 
-Tabs.Kaitan:AddButton({
-    Title = "Hop Server (In Testing)",
-    Description = "Switch to a mid-population server",
-    Callback = function()
-        local hs = game:GetService("HttpService")
-        local ts = game:GetService("TeleportService")
-        local cursor = nil
-        local minPlayers = 4  -- จำนวนผู้เล่นต่ำสุดที่ต้องการ
-        local maxPlayers = 7  -- จำนวนผู้เล่นสูงสุดที่ต้องการ
-        local maxRetries = 5  -- จำกัดจำนวนครั้งที่พยายามดึงข้อมูล
-        local retries = 0
+local Hop = Tabs.Kaitan:AddSection("Hop Setting")
 
-        while true do
-            local s = {}
-            retries = retries + 1
-            if retries > maxRetries then
-                warn("Max retries reached. Waiting longer...")
-                Fluent:Notify({
-                    Title = "Too Many Requests",
-                    Content = "Waiting 15 seconds before retrying...",
-                    Duration = 5
-                })
-                task.wait(15)
-                retries = 0 -- รีเซ็ตจำนวนครั้งที่พยายาม
-            end
+local hs = game:GetService("HttpService")
+local ts = game:GetService("TeleportService")
+local plr = game.Players.LocalPlayer
+local placeID = game.PlaceId
+local allIDs = {}
+local foundCursor = ""
+local currentHour = os.date("!*t").hour
+local hopDelay = 5 -- Default delay before hopping
+local minPlayers = 4 -- Default minimum players
 
-            print("Fetching server list... Attempt:", retries)
+-- โหลด NotSameServers.json
+local fileExists = pcall(function()
+    allIDs = hs:JSONDecode(readfile("NotSameServers.json"))
+end)
 
-            local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-            if cursor then
-                url = url .. "&cursor=" .. cursor
-            end
+if not fileExists then
+    table.insert(allIDs, currentHour)
+    writefile("NotSameServers.json", hs:JSONEncode(allIDs))
+end
 
-            local success, res = pcall(function()
-                return hs:JSONDecode(game:HttpGet(url))
-            end)
+local function findServer()
+    local url = 'https://games.roblox.com/v1/games/' .. placeID .. '/servers/Public?sortOrder=Desc&limit=100'
+    if foundCursor ~= "" then url = url .. "&cursor=" .. foundCursor end
 
-            if success and res and res.data then
-                print("Server list fetched.")
-                for _, v in pairs(res.data) do
-                    if v.playing >= minPlayers and v.playing <= maxPlayers and v.playing < v.maxPlayers and v.id ~= game.JobId then
-                        table.insert(s, v.id)
-                        print("Found mid-pop server:", v.id, "Players:", v.playing, "/", v.maxPlayers)
-                    end
+    local success, site = pcall(function() return hs:JSONDecode(game:HttpGet(url)) end)
+    if not success then return false end
+
+    if site.nextPageCursor then foundCursor = site.nextPageCursor end
+
+    local bestServer = nil
+    local maxPlayers = 0
+
+    for _, v in pairs(site.data) do
+        local id = tostring(v.id)
+        if v.playing >= minPlayers and v.playing < v.maxPlayers then
+            local possible = true
+            for _, existing in pairs(allIDs) do
+                if id == tostring(existing) then
+                    possible = false
+                    break
                 end
-                
-                if res.nextPageCursor and #s == 0 then
-                    cursor = res.nextPageCursor -- ไปหน้าถัดไปถ้ายังหาไม่เจอ
-                    task.wait(math.random(7, 15)) -- รอแบบสุ่ม 7-15 วินาที ลดโอกาสโดน Rate Limit
-                else
-                    if #s > 0 then
-                        local sid = s[math.random(1, #s)]
-                        print("Hopping to mid-pop server:", sid)
-                        Fluent:Notify({
-                            Title = "Server Hopping",
-                            Content = "Switching to a mid-pop server with " .. minPlayers .. "-" .. maxPlayers .. " players.",
-                            Duration = 3
-                        })
-                        ts:TeleportToPlaceInstance(game.PlaceId, sid)
-                        return
-                    else
-                        warn("No suitable mid-pop servers found. Retrying in 10 seconds...")
-                        Fluent:Notify({
-                            Title = "No Server Found",
-                            Content = "Retrying in 10 seconds...",
-                            Duration = 3
-                        })
-                        task.wait(10) -- รอ 10 วินาทีแล้วลองใหม่
-                        cursor = nil -- รีเซ็ต cursor เพื่อค้นหาใหม่ทั้งหมด
-                    end
-                end
-            else
-                warn("Failed to fetch server list:", res)
-                Fluent:Notify({
-                    Title = "Server Fetch Failed",
-                    Content = "Retrying in 10 seconds...",
-                    Duration = 3
-                })
-                task.wait(10) -- ถ้าเกิด HTTP 429 ให้รอ 10 วินาทีก่อนลองใหม่
             end
+
+            if possible and v.playing > maxPlayers then
+                maxPlayers = v.playing
+                bestServer = id
+            end
+        end
+    end
+
+    if bestServer then
+        table.insert(allIDs, bestServer)
+        pcall(function()
+            writefile("NotSameServers.json", hs:JSONEncode(allIDs))
+            ts:TeleportToPlaceInstance(placeID, bestServer, plr)
+        end)
+        return true
+    end
+
+    return false
+end
+
+local function hopServer()
+    Fluent:Notify({Title = "Server Hop", Content = "Waiting " .. hopDelay .. "s before hopping...", Duration = 3})
+    task.wait(hopDelay)
+
+    while true do
+        local found = findServer()
+        if not found then
+            Fluent:Notify({Title = "No Large Server Found", Content = "Retrying in " .. hopDelay .. "s...", Duration = 3})
+            task.wait(hopDelay)
+        else
+            break
+        end
+    end
+end
+
+-- ช่องสำหรับกำหนดเวลา Delay
+local delayInput = Tabs.Kaitan:AddInput("HopDelayInput", {
+    Title = "Hop Delay (Seconds)",
+    Default = "5",
+    Placeholder = "Enter seconds",
+    Numeric = true,
+    Callback = function(value)
+        local num = tonumber(value)
+        if num and num > 0 then
+            hopDelay = num
+        else
+            Fluent:Notify({Title = "Invalid Input", Content = "Enter a valid number!", Duration = 3})
+        end
+    end
+})
+
+-- ช่องสำหรับกำหนดจำนวนผู้เล่นขั้นต่ำ
+local minPlayersInput = Tabs.Kaitan:AddInput("MinPlayersInput", {
+    Title = "Minimum Players",
+    Default = "1",
+    Placeholder = "Enter min players",
+    Numeric = true,
+    Callback = function(value)
+        local num = tonumber(value)
+        if num and num > 0 then
+            minPlayers = num
+        else
+            Fluent:Notify({Title = "Invalid Input", Content = "Enter a valid number!", Duration = 3})
+        end
+    end
+})
+
+-- Toggle สำหรับเปิด/ปิด Hop
+local toggle = Tabs.Kaitan:AddToggle("HopServerToggle", {
+    Title = "Hop Server",
+    Default = false,
+    Callback = function(state)
+        if state then
+            hopServer()
         end
     end
 })
