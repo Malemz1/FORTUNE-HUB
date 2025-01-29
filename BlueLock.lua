@@ -837,7 +837,7 @@ local keybind = Tabs.Kaitan:AddKeybind("InstantKeybind", {
 })
 
 Tabs.Kaitan:AddButton({
-    Title = "Hop Server",
+    Title = "Hop Server (Test)",
     Description = "Switch to a mid-population server",
     Callback = function()
         local hs = game:GetService("HttpService")
