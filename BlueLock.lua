@@ -836,6 +836,90 @@ local keybind = Tabs.Kaitan:AddKeybind("InstantKeybind", {
     end
 })
 
+Tabs.Kaitan:AddButton({
+    Title = "Hop Server",
+    Description = "Switch to a mid-population server",
+    Callback = function()
+        local hs = game:GetService("HttpService")
+        local ts = game:GetService("TeleportService")
+        local cursor = nil
+        local minPlayers = 4  -- จำนวนผู้เล่นต่ำสุดที่ต้องการ
+        local maxPlayers = 7  -- จำนวนผู้เล่นสูงสุดที่ต้องการ
+        local maxRetries = 5  -- จำกัดจำนวนครั้งที่พยายามดึงข้อมูล
+        local retries = 0
+
+        while true do
+            local s = {}
+            retries = retries + 1
+            if retries > maxRetries then
+                warn("Max retries reached. Waiting longer...")
+                Fluent:Notify({
+                    Title = "Too Many Requests",
+                    Content = "Waiting 15 seconds before retrying...",
+                    Duration = 5
+                })
+                task.wait(15)
+                retries = 0 -- รีเซ็ตจำนวนครั้งที่พยายาม
+            end
+
+            print("Fetching server list... Attempt:", retries)
+
+            local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+            if cursor then
+                url = url .. "&cursor=" .. cursor
+            end
+
+            local success, res = pcall(function()
+                return hs:JSONDecode(game:HttpGet(url))
+            end)
+
+            if success and res and res.data then
+                print("Server list fetched.")
+                for _, v in pairs(res.data) do
+                    if v.playing >= minPlayers and v.playing <= maxPlayers and v.playing < v.maxPlayers and v.id ~= game.JobId then
+                        table.insert(s, v.id)
+                        print("Found mid-pop server:", v.id, "Players:", v.playing, "/", v.maxPlayers)
+                    end
+                end
+                
+                if res.nextPageCursor and #s == 0 then
+                    cursor = res.nextPageCursor -- ไปหน้าถัดไปถ้ายังหาไม่เจอ
+                    task.wait(math.random(7, 15)) -- รอแบบสุ่ม 7-15 วินาที ลดโอกาสโดน Rate Limit
+                else
+                    if #s > 0 then
+                        local sid = s[math.random(1, #s)]
+                        print("Hopping to mid-pop server:", sid)
+                        Fluent:Notify({
+                            Title = "Server Hopping",
+                            Content = "Switching to a mid-pop server with " .. minPlayers .. "-" .. maxPlayers .. " players.",
+                            Duration = 3
+                        })
+                        ts:TeleportToPlaceInstance(game.PlaceId, sid)
+                        return
+                    else
+                        warn("No suitable mid-pop servers found. Retrying in 10 seconds...")
+                        Fluent:Notify({
+                            Title = "No Server Found",
+                            Content = "Retrying in 10 seconds...",
+                            Duration = 3
+                        })
+                        task.wait(10) -- รอ 10 วินาทีแล้วลองใหม่
+                        cursor = nil -- รีเซ็ต cursor เพื่อค้นหาใหม่ทั้งหมด
+                    end
+                end
+            else
+                warn("Failed to fetch server list:", res)
+                Fluent:Notify({
+                    Title = "Server Fetch Failed",
+                    Content = "Retrying in 10 seconds...",
+                    Duration = 3
+                })
+                task.wait(10) -- ถ้าเกิด HTTP 429 ให้รอ 10 วินาทีก่อนลองใหม่
+            end
+        end
+    end
+})
+
 local GoalTitle = Tabs.Kaitan:AddSection("Goal (In Testing)")
 
 local toggleState = false
