@@ -1572,7 +1572,7 @@ local StyleTitle = Tabs.Spin:AddSection("Style Spin")
 local MultiDropdown = Tabs.Spin:AddDropdown("StyleLockDropdown", {
     Title = "Style Lock",
     Description = "Select styles to stop spinning.",
-    Values = {"Isagi", "Chigiri", "Bachira", "Gagamaru", "King", "Nagi", "Reo", "Shidou", "Sae", "Aiku", "Rin", "Hiori", "Yukimiya"}, -- Replace with actual style names
+    Values = {"Isagi", "Chigiri", "Bachira", "Otoya", "Hiori", "Gagamaru", "King", "Nagi", "Reo",  "Karasu", "Shidou", "Sae", "Aiku", "Rin", "Yukimiya"}, -- Replace with actual style names
     Multi = true,
     Default = {}
 })
@@ -1643,7 +1643,7 @@ local SelectedFlow = {}
 local MultiDropdown = Tabs.Spin:AddDropdown("FlowLockDropdown", {
     Title = "Flow Lock",
     Description = "Select Flow to stop spinning.",
-    Values = {"Lightning", "Puzzle", "Monster", "Gale Burst", "Genius", "King's Instinct", "Trap", "Demon Wings", "Chameleon", "Wild Card", "Snake", "Prodigy", "Awakened Genius", "Dribbler"}, -- Actual flow names
+    Values = { "Ice", "Lightning", "Puzzle", "Monster", "Gale Burst", "Genius", "King's Instinct", "Trap", "Crow", "Demon Wings", "Chameleon", "Wild Card", "Snake", "Prodigy", "Awakened Genius", "Dribbler"}, -- Actual flow names
     Multi = true,
     Default = {}
 })
