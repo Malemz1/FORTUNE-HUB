@@ -313,45 +313,57 @@ end
 
 local PropertiesTitle = Tabs.Main:AddSection("Properties")
 
--- local Toggle = Tabs.Main:AddToggle("AutoTransform", {Title = "Auto Transform", Default = false })
+local plr = game:GetService("Players").LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
+local rfunc = rs:FindFirstChild("Remote") and rs.Remote.Function
 
--- Toggle:OnChanged(function()
---     if Toggle.Value then
---         task.spawn(function()
---             while Toggle.Value do
---                 local rider = game:GetService("Players").LocalPlayer.RiderStats.ClientRider.Value
-                
---                 if rider == "Cobra" then
---                     game:GetService("ReplicatedStorage").Remote.Function.InventoryFunction:InvokeServer("Survive Cobra")
---                     game:GetService("ReplicatedStorage").Remote.Function.InventoryFunction:InvokeServer(2, "Backpack")
---                     task.wait(1)
---                     game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
---                     game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
---                     task.wait(6)
---                     if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("Form") then
---                         task.wait(1)
---                         game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
---                         game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
---                     end
---                 elseif rider == "Kugha" then
---                     game:GetService("ReplicatedStorage").Remote.Function.AncientWorldEventRemote:InvokeServer({
---                         ["ActiveForm"] = "Ultimated",
---                         ["ActiveRider"] = true
---                     })
---                     task.wait(15)
---                 elseif rider == "Double" then
---                     game:GetService("ReplicatedStorage").Remote.Function.FoundationEventRemote:InvokeServer({
---                         ["ActiveForm"] = "Fang Joker",
---                         ["ActiveRider"] = true
---                     })
---                     task.wait(15)
---                 end
-                
---                 task.wait(1) 
---             end
---         end)
---     end
--- end)
+local Toggle = Tabs.Main:AddToggle("AutoTransform", {Title = "Auto Transform", Default = false })
+
+local function transformCobra()
+    rfunc.InventoryFunction:InvokeServer("Survive Cobra")
+    task.wait(0.5)
+    rfunc.InventoryFunction:InvokeServer(2, "Backpack")
+    task.wait(1)
+    game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
+    game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
+    task.wait(6)
+    local form = plr.Character and plr.Character:FindFirstChild("Form")
+    if not form and Toggle.Value then
+        transformCobra()
+    end
+end
+
+local function transformKugha()
+    while Toggle.Value do
+        rfunc.AncientWorldEventRemote:InvokeServer({["ActiveForm"] = "Ultimated", ["ActiveRider"] = true})
+        task.wait(15)
+    end
+end
+
+local function transformDouble()
+    while Toggle.Value do
+        rfunc.FoundationEventRemote:InvokeServer({["ActiveForm"] = "Fang Joker", ["ActiveRider"] = true})
+        task.wait(15)
+    end
+end
+
+Toggle:OnChanged(function()
+    if Toggle.Value then
+        task.spawn(function()
+            while Toggle.Value do
+                local rider = plr.RiderStats:FindFirstChild("ClientRider") and plr.RiderStats.ClientRider.Value
+                if rider == "Cobra" then
+                    transformCobra()
+                elseif rider == "Kugha" then
+                    task.spawn(transformKugha)
+                elseif rider == "Double" then
+                    task.spawn(transformDouble)
+                end
+                task.wait(1)
+            end
+        end)
+    end
+end)
 
 local p = game:GetService("Players").LocalPlayer
 local c = p.Character or p.CharacterAdded:Wait()
