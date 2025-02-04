@@ -57,6 +57,7 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Legit = Window:AddTab({ Title = "Legit", Icon = "align-justify" }),
     Spin = Window:AddTab({ Title = "Spin", Icon = "box" }),
+    OP = Window:AddTab({ Title = "OP", Icon = "apple"}),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
@@ -471,6 +472,39 @@ MultiDropdown:OnChanged(function(Value)
     end
     notify("Style Changed", #lockedStyles > 0 and "เลือก: " .. table.concat(lockedStyles, ", ") or "กรุณาเลือก Style อย่างน้อย 1 รายการ!", 3)
 end)
+
+Tabs.OP:AddButton({
+    Title = "Start Reward Loop (Risky)",
+    Description = "หากเงินเยอะเกินเงินจะลดนะครับ",
+    Callback = function()
+        local running = true
+        local btn
+
+        btn = Window:Dialog({
+            Title = "Confirmation",
+            Content = "Click confirm to start or cancel to stop.",
+            Buttons = {
+                {
+                    Title = "Confirm",
+                    Callback = function()
+                        while running do
+                            task.wait()
+                            game:GetService("ReplicatedStorage").Packages._Index["sleitnick_knit@1.7.0"].knit.Services.RewardService.RF.RequestPlayWithDeveloperAward:InvokeServer()
+                        end
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        running = false
+                        print("Stopped the reward loop.")
+                    end
+                }
+            }
+        })
+    end
+})
+
 
 -- Addons:
 -- SaveManager (Allows you to have a configuration system)
