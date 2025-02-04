@@ -202,14 +202,14 @@ toggle:OnChanged(function(v)
     print("[DEBUG] Toggle AutoBossRush:", autoRush)
     if autoRush then
         if not DungeonFound then
-            print("[DEBUG] No Dungeon found! Entering BossRush in 12s...")
-            task.wait(12)
+            print("[DEBUG] No Dungeon found! Entering BossRush now...")
             enterBossRush()
         end
     else
         DungeonFound = false
     end
 end)
+
 
 local dropdown = Tabs.Main:AddDropdown("BossType", {
     Title = "Select Boss Rush Type",
@@ -256,7 +256,6 @@ end)
 p.ChildRemoved:Connect(function(child)
     if child.Name == "Dungeon" and autoRush then
         print("[DEBUG] Dungeon Removed! Re-entering BossRush...")
-        DungeonFound = false
         repeat
             enterBossRush()
             task.wait(1)
@@ -318,6 +317,15 @@ local lockEquip = false
 
 local Toggle = Tabs.Main:AddToggle("AutoTransform", {Title = "Auto Transform", Default = false })
 
+local function getStaminaPercent()
+    local s = plr.RiderStats:FindFirstChild("Stamina")
+    if s then
+        local maxStamina = s:GetAttribute("MaxValue") or s.Value
+        return (s.Value / maxStamina) * 100
+    end
+    return 100
+end
+
 local function transformCobra()
     if plr.Character and plr.Character:FindFirstChild("Form") then return end
     lockEquip = true
@@ -340,7 +348,10 @@ end
 
 local function transformKugha()
     while Toggle.Value do
-        if not (plr.Character and plr.Character:FindFirstChild("Form")) then
+        if getStaminaPercent() < 70 then
+            print("[DEBUG] Stamina low! Switching to Combat...")
+            rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+        elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
             rfunc.AncientWorldEventRemote:InvokeServer({["ActiveForm"] = "Ultimated", ["ActiveRider"] = true})
         end
         task.wait(15)
@@ -349,7 +360,10 @@ end
 
 local function transformDouble()
     while Toggle.Value do
-        if not (plr.Character and plr.Character:FindFirstChild("Form")) then
+        if getStaminaPercent() < 70 then
+            print("[DEBUG] Stamina low! Switching to Combat...")
+            rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+        elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
             rfunc.FoundationEventRemote:InvokeServer({["ActiveForm"] = "Fang Joker", ["ActiveRider"] = true})
         end
         task.wait(15)
@@ -361,7 +375,10 @@ Toggle:OnChanged(function()
         task.spawn(function()
             while Toggle.Value do
                 local rider = plr.RiderStats:FindFirstChild("ClientRider") and plr.RiderStats.ClientRider.Value
-                if rider == "Cobra" then
+                if getStaminaPercent() < 70 then
+                    print("[DEBUG] Stamina low! Switching to Combat...")
+                    rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+                elseif rider == "Cobra" then
                     transformCobra()
                 elseif rider == "Kugha" then
                     task.spawn(transformKugha)
@@ -374,20 +391,21 @@ Toggle:OnChanged(function()
     end
 end)
 
-local p = game:GetService("Players").LocalPlayer
-local c = p.Character or p.CharacterAdded:Wait()
-local rs = game:GetService("ReplicatedStorage").Remote.Function.InventoryFunction
 local t = false
+local ToggleEquip = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = false})
 
-local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = false})
-
-Toggle:OnChanged(function(v)
+ToggleEquip:OnChanged(function(v)
     t = v
     while t do
         if not lockEquip then
-            if not (c and c:FindFirstChild("Attack")) then
+            if getStaminaPercent() < 70 then
+                print("[DEBUG] Stamina low! Equipping Combat...")
                 pcall(function()
-                    rs:InvokeServer(1, "Backpack")
+                    rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
+                end)
+            elseif not (plr.Character and plr.Character:FindFirstChild("Attack")) then
+                pcall(function()
+                    rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
                 end)
             end
         end
@@ -431,8 +449,6 @@ MultiDropdown:OnChanged(function(Value)
         end
     end
 
-    -- ✅ Debug เช็คค่า
-    print("Selected Skills:", table.concat(selectedSkills, ", "))
 end)
 
 spawn(function()
@@ -446,9 +462,6 @@ spawn(function()
                     ["MouseData"] = CFrame.new(-822.493286, 25.6408768, -93.336174, 1, 0, 0, 0, 1, 0, 0, 0, 1)
                 }
                 remote:FireServer(ohTable1)
-
-                -- ✅ Debug เช็คว่าส่ง Remote จริงมั้ย
-                print("Fired Skill:", Key)
             end
         end
     end
