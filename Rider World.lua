@@ -262,7 +262,7 @@ p.ChildRemoved:Connect(function(child)
             print("[DEBUG] Re-entering BossRush...")
             enterBossRush()
         end
-    end
+    end 
 end)
 
 function autoFarm()
@@ -271,13 +271,12 @@ function autoFarm()
 
     while autoRush and DungeonFound do
         if not DungeonFound then
-            print("[DEBUG] Dungeon disappeared! Waiting 12s before re-entering...")
-            task.wait(12)
-            if autoRush and not DungeonFound then
-                print("[DEBUG] Entering BossRush again...")
+            print("[DEBUG] Dungeon disappeared! Re-entering BossRush...")
+            repeat
                 enterBossRush()
-            end
-            break
+                task.wait(1)
+            until DungeonFound or not autoRush
+            if not DungeonFound then break end
         end
 
         local boss = nil
