@@ -353,6 +353,23 @@ local PropertiesTitle = Tabs.Main:AddSection("Properties")
 --     end
 -- end)
 
+local p = game:GetService("Players").LocalPlayer
+local c = p.Character or p.CharacterAdded:Wait()
+local rs = game:GetService("ReplicatedStorage").Remote.Function.InventoryFunction
+local t = false
+
+local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = false})
+
+Toggle:OnChanged(function(v)
+    t = v
+    while t do
+        if not (c and c:FindFirstChild("Attack")) then
+            rs:InvokeServer(1, "Backpack")
+        end
+        task.wait(1)
+    end
+end)
+
 local plr = game.Players.LocalPlayer
 local char = plr.Character or plr.CharacterAdded:Wait()
 
