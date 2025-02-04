@@ -316,10 +316,13 @@ local PropertiesTitle = Tabs.Main:AddSection("Properties")
 local plr = game:GetService("Players").LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 local rfunc = rs:FindFirstChild("Remote") and rs.Remote.Function
+local lockEquip = false
 
 local Toggle = Tabs.Main:AddToggle("AutoTransform", {Title = "Auto Transform", Default = false })
 
 local function transformCobra()
+    if plr.Character and plr.Character:FindFirstChild("Form") then return end
+    lockEquip = true
     rfunc.InventoryFunction:InvokeServer("Survive Cobra")
     task.wait(0.5)
     rfunc.InventoryFunction:InvokeServer(2, "Backpack")
@@ -327,22 +330,30 @@ local function transformCobra()
     game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
     game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
     task.wait(6)
-    local form = plr.Character and plr.Character:FindFirstChild("Form")
-    if not form and Toggle.Value then
+    if plr.Character and plr.Character:FindFirstChild("Form") then
+        lockEquip = false
+        return
+    end
+    if Toggle.Value then
         transformCobra()
     end
+    lockEquip = false
 end
 
 local function transformKugha()
     while Toggle.Value do
-        rfunc.AncientWorldEventRemote:InvokeServer({["ActiveForm"] = "Ultimated", ["ActiveRider"] = true})
+        if not (plr.Character and plr.Character:FindFirstChild("Form")) then
+            rfunc.AncientWorldEventRemote:InvokeServer({["ActiveForm"] = "Ultimated", ["ActiveRider"] = true})
+        end
         task.wait(15)
     end
 end
 
 local function transformDouble()
     while Toggle.Value do
-        rfunc.FoundationEventRemote:InvokeServer({["ActiveForm"] = "Fang Joker", ["ActiveRider"] = true})
+        if not (plr.Character and plr.Character:FindFirstChild("Form")) then
+            rfunc.FoundationEventRemote:InvokeServer({["ActiveForm"] = "Fang Joker", ["ActiveRider"] = true})
+        end
         task.wait(15)
     end
 end
@@ -375,8 +386,12 @@ local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = 
 Toggle:OnChanged(function(v)
     t = v
     while t do
-        if not (c and c:FindFirstChild("Attack")) then
-            rs:InvokeServer(1, "Backpack")
+        if not lockEquip then
+            if not (c and c:FindFirstChild("Attack")) then
+                pcall(function()
+                    rs:InvokeServer(1, "Backpack")
+                end)
+            end
         end
         task.wait(1)
     end
