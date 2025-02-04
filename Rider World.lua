@@ -255,13 +255,12 @@ end)
 
 p.ChildRemoved:Connect(function(child)
     if child.Name == "Dungeon" and autoRush then
-        print("[DEBUG] Dungeon Removed! Waiting 12s before re-entering...")
+        print("[DEBUG] Dungeon Removed! Re-entering BossRush...")
         DungeonFound = false
-        task.wait(12)
-        if autoRush and not DungeonFound then
-            print("[DEBUG] Re-entering BossRush...")
+        repeat
             enterBossRush()
-        end
+            task.wait(1)
+        until DungeonFound or not autoRush
     end 
 end)
 
