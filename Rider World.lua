@@ -197,19 +197,18 @@ local p = game.Players.LocalPlayer
 local pg = p:FindFirstChild("PlayerGui")
 
 local toggle = Tabs.Main:AddToggle("AutoBossRush", {Title = "Enable Auto Boss Rush", Default = false})
+
 toggle:OnChanged(function(v)
     autoRush = v
-    print("[DEBUG] Toggle AutoBossRush:", autoRush)
-    if autoRush then
-        if not DungeonFound then
-            print("[DEBUG] No Dungeon found! Entering BossRush now...")
+    print("[DEBUG] AutoBossRush:", autoRush)
+    if autoRush and not DungeonFound then
+        print("[DEBUG] No Dungeon found! Entering BossRush...")
+        repeat
             enterBossRush()
-        end
-    else
-        DungeonFound = false
+            task.wait(5)
+        until DungeonFound or not autoRush
     end
 end)
-
 
 local dropdown = Tabs.Main:AddDropdown("BossType", {
     Title = "Select Boss Rush Type",
@@ -246,9 +245,10 @@ end
 
 p.ChildAdded:Connect(function(child)
     if child.Name == "Dungeon" then
-        print("[DEBUG] Dungeon Created! Waiting for BossRushGUI...")
+        print("[DEBUG] Dungeon Created! Selecting Boss Type & Starting AutoFarm...")
         DungeonFound = true
         SelectBossType()
+        task.wait(1)
         autoFarm()
     end
 end)
@@ -256,11 +256,12 @@ end)
 p.ChildRemoved:Connect(function(child)
     if child.Name == "Dungeon" and autoRush then
         print("[DEBUG] Dungeon Removed! Re-entering BossRush...")
+        DungeonFound = false
         repeat
             enterBossRush()
             task.wait(1)
         until DungeonFound or not autoRush
-    end 
+    end
 end)
 
 function autoFarm()
@@ -268,15 +269,6 @@ function autoFarm()
     print("[DEBUG] AutoFarm Running...")
 
     while autoRush and DungeonFound do
-        if not DungeonFound then
-            print("[DEBUG] Dungeon disappeared! Re-entering BossRush...")
-            repeat
-                enterBossRush()
-                task.wait(1)
-            until DungeonFound or not autoRush
-            if not DungeonFound then break end
-        end
-
         local boss = nil
         for _, m in ipairs(ws.Lives:GetChildren()) do
             if m:IsA("Model") and m:FindFirstChild("Boss") and m.Name ~= "T-Rex Dopant Lv.80" then
@@ -301,7 +293,7 @@ function autoFarm()
                 print("[DEBUG] Attacking Boss!")
             end
         else
-            print("[DEBUG] No valid Boss found...")
+            print("[DEBUG] No valid Boss found... Waiting...")
         end
 
         task.wait(0.5)
