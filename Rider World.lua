@@ -224,7 +224,7 @@ local slider = Tabs.Main:AddSlider("AttackDistance", {
     Title = "Attack Distance",
     Default = 6,
     Min = 3,
-    Max = 15,
+    Max = 50,
     Rounding = 1
 })
 slider:OnChanged(function(v)
