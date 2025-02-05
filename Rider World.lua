@@ -83,7 +83,11 @@ task.spawn(function()
         end
     end
 end)
------------------ Legit Tab ------------------
+--------------------------------------------------- Legit Tab ----------------------------------------------------
+--------------------------------------------------- Legit Tab ----------------------------------------------------
+--------------------------------------------------- Legit Tab ----------------------------------------------------
+--------------------------------------------------- Legit Tab ----------------------------------------------------
+--------------------------------------------------- Legit Tab ----------------------------------------------------
 local Options = {}
 
 local SpeedTitle = Tabs.Legit:AddSection("Player Modifiers")
@@ -186,10 +190,18 @@ t:OnChanged(function(v)
     end
 end)
 
+--------------------------------------------------- Main Tab ----------------------------------------------------
+--------------------------------------------------- Main Tab ----------------------------------------------------
+--------------------------------------------------- Main Tab ----------------------------------------------------
+--------------------------------------------------- Main Tab ----------------------------------------------------
+--------------------------------------------------- Main Tab ----------------------------------------------------
+
 local autoRush = false
+local extremeMode = false
 local bossType = "MirrorWorld"
 local attackDistance = 6
 local DungeonFound = false
+local attackType = "M1"
 
 local rs = game:GetService("ReplicatedStorage")
 local ws = game:GetService("Workspace")
@@ -197,17 +209,19 @@ local p = game.Players.LocalPlayer
 local pg = p:FindFirstChild("PlayerGui")
 
 local toggle = Tabs.Main:AddToggle("AutoBossRush", {Title = "Enable Auto Boss Rush", Default = false})
-
 toggle:OnChanged(function(v)
     autoRush = v
-    print("[DEBUG] AutoBossRush:", autoRush)
     if autoRush and not DungeonFound then
-        print("[DEBUG] No Dungeon found! Entering BossRush...")
         repeat
             enterBossRush()
             task.wait(5)
         until DungeonFound or not autoRush
     end
+end)
+
+local extremeToggle = Tabs.Main:AddToggle("ExtremeMode", {Title = "Enable Extreme Mode", Default = false})
+extremeToggle:OnChanged(function(v)
+    extremeMode = v
 end)
 
 local dropdown = Tabs.Main:AddDropdown("BossType", {
@@ -217,7 +231,6 @@ local dropdown = Tabs.Main:AddDropdown("BossType", {
 })
 dropdown:OnChanged(function(v)
     bossType = v
-    print("[DEBUG] Boss Type changed to:", bossType)
 end)
 
 local slider = Tabs.Main:AddSlider("AttackDistance", {
@@ -229,23 +242,32 @@ local slider = Tabs.Main:AddSlider("AttackDistance", {
 })
 slider:OnChanged(function(v)
     attackDistance = v
-    print("[DEBUG] Attack Distance changed to:", attackDistance)
+end)
+
+local attackDropdown = Tabs.Main:AddDropdown("AttackType", {
+    Title = "Select Attack Type",
+    Values = {"M1", "M2"},
+    Default = "M1"
+})
+attackDropdown:OnChanged(function(v)
+    attackType = v
 end)
 
 function enterBossRush()
-    print("[DEBUG] Entering BossRush...")
     rs.Remote.Event.RiderManager:FireServer("Resource")
 end
 
 function SelectBossType()
     repeat task.wait() until pg:FindFirstChild("BossRushGUI")
-    print("[DEBUG] BossRushGUI found! Selecting Boss Type:", bossType)
     pg.BossRushGUI.BossRushRemote:FireServer(bossType)
+    if extremeMode then
+        task.wait(1)
+        pg.BossRushGUI.BossRushRemote:FireServer("Extreme")
+    end
 end
 
 p.ChildAdded:Connect(function(child)
     if child.Name == "Dungeon" then
-        print("[DEBUG] Dungeon Created! Selecting Boss Type & Starting AutoFarm...")
         DungeonFound = true
         SelectBossType()
         task.wait(1)
@@ -255,7 +277,6 @@ end)
 
 p.ChildRemoved:Connect(function(child)
     if child.Name == "Dungeon" and autoRush then
-        print("[DEBUG] Dungeon Removed! Re-entering BossRush...")
         DungeonFound = false
         repeat
             enterBossRush()
@@ -266,14 +287,12 @@ end)
 
 function autoFarm()
     if not DungeonFound then return end
-    print("[DEBUG] AutoFarm Running...")
 
     while autoRush and DungeonFound do
         local boss = nil
         for _, m in ipairs(ws.Lives:GetChildren()) do
             if m:IsA("Model") and m:FindFirstChild("Boss") and m.Name ~= "T-Rex Dopant Lv.80" then
                 boss = m
-                print("[DEBUG] Boss found:", boss.Name)
                 break
             end
         end
@@ -281,19 +300,16 @@ function autoFarm()
         if boss then
             local hrp = boss:FindFirstChild("HumanoidRootPart")
             if hrp then
-                print("[DEBUG] Moving to Boss:", boss.Name)
                 p.Character:PivotTo(hrp.CFrame * CFrame.new(0, 0, attackDistance))
                 ws.Lives[p.Name].PlayerHandler.HandlerEvent:FireServer({
                     CombatAction = true,
                     MouseData = hrp.CFrame,
-                    Input = "Mouse1",
-                    LightAttack = true,
+                    Input = attackType == "M1" and "Mouse1" or "Mouse2",
+                    LightAttack = attackType == "M1",
+                    HeavyAttack = attackType == "M2",
                     Attack = true
                 })
-                print("[DEBUG] Attacking Boss!")
             end
-        else
-            print("[DEBUG] No valid Boss found... Waiting...")
         end
 
         task.wait(0.5)
@@ -307,103 +323,103 @@ local rs = game:GetService("ReplicatedStorage")
 local rfunc = rs:FindFirstChild("Remote") and rs.Remote.Function
 local lockEquip = false
 
-local Toggle = Tabs.Main:AddToggle("AutoTransform", {Title = "Auto Transform", Default = false })
+-- local Toggle = Tabs.Main:AddToggle("AutoTransform", {Title = "Auto Transform", Default = false })
 
-local function getStaminaPercent()
-    local s = plr.RiderStats:FindFirstChild("Stamina")
-    if s then
-        local maxStamina = s:GetAttribute("MaxValue") or s.Value
-        return (s.Value / maxStamina) * 100
-    end
-    return 100
-end
+-- local function getStaminaPercent()
+--     local s = plr.RiderStats:FindFirstChild("Stamina")
+--     if s then
+--         local maxStamina = s:GetAttribute("MaxValue") or s.Value
+--         return (s.Value / maxStamina) * 100
+--     end
+--     return 100
+-- end
 
-local function transformCobra()
-    if plr.Character and plr.Character:FindFirstChild("Form") then return end
-    lockEquip = true
-    rfunc.InventoryFunction:InvokeServer("Survive Cobra")
-    task.wait(0.5)
-    rfunc.InventoryFunction:InvokeServer(2, "Backpack")
-    task.wait(1)
-    game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
-    game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
-    task.wait(6)
-    if plr.Character and plr.Character:FindFirstChild("Form") then
-        lockEquip = false
-        return
-    end
-    if Toggle.Value then
-        transformCobra()
-    end
-    lockEquip = false
-end
+-- local function transformCobra()
+--     if plr.Character and plr.Character:FindFirstChild("Form") then return end
+--     lockEquip = true
+--     rfunc.InventoryFunction:InvokeServer("Survive Cobra")
+--     task.wait(0.5)
+--     rfunc.InventoryFunction:InvokeServer(2, "Backpack")
+--     task.wait(1)
+--     game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
+--     game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
+--     task.wait(6)
+--     if plr.Character and plr.Character:FindFirstChild("Form") then
+--         lockEquip = false
+--         return
+--     end
+--     if Toggle.Value then
+--         transformCobra()
+--     end
+--     lockEquip = false
+-- end
 
-local function transformKugha()
-    while Toggle.Value do
-        if getStaminaPercent() < 70 then
-            print("[DEBUG] Stamina low! Switching to Combat...")
-            rfunc.InventoryFunction:InvokeServer(1, "Backpack")
-        elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
-            rfunc.AncientWorldEventRemote:InvokeServer({["ActiveForm"] = "Ultimated", ["ActiveRider"] = true})
-        end
-        task.wait(15)
-    end
-end
+-- local function transformKugha()
+--     while Toggle.Value do
+--         if getStaminaPercent() < 70 then
+--             print("[DEBUG] Stamina low! Switching to Combat...")
+--             rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+--         elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
+--             rfunc.AncientWorldEventRemote:InvokeServer({["ActiveForm"] = "Ultimated", ["ActiveRider"] = true})
+--         end
+--         task.wait(15)
+--     end
+-- end
 
-local function transformDouble()
-    while Toggle.Value do
-        if getStaminaPercent() < 70 then
-            print("[DEBUG] Stamina low! Switching to Combat...")
-            rfunc.InventoryFunction:InvokeServer(1, "Backpack")
-        elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
-            rfunc.FoundationEventRemote:InvokeServer({["ActiveForm"] = "Fang Joker", ["ActiveRider"] = true})
-        end
-        task.wait(15)
-    end
-end
+-- local function transformDouble()
+--     while Toggle.Value do
+--         if getStaminaPercent() < 70 then
+--             print("[DEBUG] Stamina low! Switching to Combat...")
+--             rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+--         elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
+--             rfunc.FoundationEventRemote:InvokeServer({["ActiveForm"] = "Fang Joker", ["ActiveRider"] = true})
+--         end
+--         task.wait(15)
+--     end
+-- end
 
-Toggle:OnChanged(function()
-    if Toggle.Value then
-        task.spawn(function()
-            while Toggle.Value do
-                local rider = plr.RiderStats:FindFirstChild("ClientRider") and plr.RiderStats.ClientRider.Value
-                if getStaminaPercent() < 70 then
-                    print("[DEBUG] Stamina low! Switching to Combat...")
-                    rfunc.InventoryFunction:InvokeServer(1, "Backpack")
-                elseif rider == "Cobra" then
-                    transformCobra()
-                elseif rider == "Kugha" then
-                    task.spawn(transformKugha)
-                elseif rider == "Double" then
-                    task.spawn(transformDouble)
-                end
-                task.wait(1)
-            end
-        end)
-    end
-end)
+-- Toggle:OnChanged(function()
+--     if Toggle.Value then
+--         task.spawn(function()
+--             while Toggle.Value do
+--                 local rider = plr.RiderStats:FindFirstChild("ClientRider") and plr.RiderStats.ClientRider.Value
+--                 if getStaminaPercent() < 70 then
+--                     print("[DEBUG] Stamina low! Switching to Combat...")
+--                     rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+--                 elseif rider == "Cobra" then
+--                     transformCobra()
+--                 elseif rider == "Kugha" then
+--                     task.spawn(transformKugha)
+--                 elseif rider == "Double" then
+--                     task.spawn(transformDouble)
+--                 end
+--                 task.wait(1)
+--             end
+--         end)
+--     end
+-- end)
 
-local t = false
-local ToggleEquip = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = false})
+-- local t = false
+-- local ToggleEquip = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = false})
 
-ToggleEquip:OnChanged(function(v)
-    t = v
-    while t do
-        if not lockEquip then
-            if getStaminaPercent() < 70 then
-                print("[DEBUG] Stamina low! Equipping Combat...")
-                pcall(function()
-                    rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
-                end)
-            elseif not (plr.Character and plr.Character:FindFirstChild("Attack")) then
-                pcall(function()
-                    rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
-                end)
-            end
-        end
-        task.wait(1)
-    end
-end)
+-- ToggleEquip:OnChanged(function(v)
+--     t = v
+--     while t do
+--         if not lockEquip then
+--             if getStaminaPercent() < 70 then
+--                 print("[DEBUG] Stamina low! Equipping Combat...")
+--                 pcall(function()
+--                     rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
+--                 end)
+--             elseif not (plr.Character and plr.Character:FindFirstChild("Attack")) then
+--                 pcall(function()
+--                     rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
+--                 end)
+--             end
+--         end
+--         task.wait(1)
+--     end
+-- end)
 
 local plr = game.Players.LocalPlayer
 local char = plr.Character or plr.CharacterAdded:Wait()
@@ -475,6 +491,12 @@ task.spawn(function()
         end
     end
 end)
+
+--------------------------------------------------- Setting Tab ----------------------------------------------------
+--------------------------------------------------- Setting Tab ----------------------------------------------------
+--------------------------------------------------- Setting Tab ----------------------------------------------------
+--------------------------------------------------- Setting Tab ----------------------------------------------------
+--------------------------------------------------- Setting Tab ----------------------------------------------------
 
 -- Addons:
 -- SaveManager (Allows you to have a configuration system)
