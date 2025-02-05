@@ -326,81 +326,81 @@ local rs = game:GetService("ReplicatedStorage")
 local rfunc = rs:FindFirstChild("Remote") and rs.Remote.Function
 local lockEquip = false
 
--- local Toggle = Tabs.Main:AddToggle("AutoTransform", {Title = "Auto Transform", Default = false })
+local Toggle = Tabs.Main:AddToggle("AutoTransform", {Title = "Auto Transform", Default = false })
 
--- local function getStaminaPercent()
---     local s = plr.RiderStats:FindFirstChild("Stamina")
---     if s then
---         local maxStamina = s:GetAttribute("MaxValue") or s.Value
---         return (s.Value / maxStamina) * 100
---     end
---     return 100
--- end
+local function getStaminaPercent()
+    local s = plr.RiderStats:FindFirstChild("Stamina")
+    if s then
+        local maxStamina = s:GetAttribute("MaxValue") or s.Value
+        return (s.Value / maxStamina) * 100
+    end
+    return 100
+end
 
--- local function transformCobra()
---     if plr.Character and plr.Character:FindFirstChild("Form") then return end
---     lockEquip = true
---     rfunc.InventoryFunction:InvokeServer("Survive Cobra")
---     task.wait(0.5)
---     rfunc.InventoryFunction:InvokeServer(2, "Backpack")
---     task.wait(1)
---     game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
---     game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
---     task.wait(6)
---     if plr.Character and plr.Character:FindFirstChild("Form") then
---         lockEquip = false
---         return
---     end
---     if Toggle.Value then
---         transformCobra()
---     end
---     lockEquip = false
--- end
+local function transformCobra()
+    if plr.Character and plr.Character:FindFirstChild("Form") then return end
+    lockEquip = true
+    rfunc.InventoryFunction:InvokeServer("Survive Cobra")
+    task.wait(0.5)
+    rfunc.InventoryFunction:InvokeServer(2, "Backpack")
+    task.wait(1)
+    game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
+    game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
+    task.wait(6)
+    if plr.Character and plr.Character:FindFirstChild("Form") then
+        lockEquip = false
+        return
+    end
+    if Toggle.Value then
+        transformCobra()
+    end
+    lockEquip = false
+end
 
--- local function transformKugha()
---     while Toggle.Value do
---         if getStaminaPercent() < 70 then
---             print("[DEBUG] Stamina low! Switching to Combat...")
---             rfunc.InventoryFunction:InvokeServer(1, "Backpack")
---         elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
---             rfunc.AncientWorldEventRemote:InvokeServer({["ActiveForm"] = "Ultimated", ["ActiveRider"] = true})
---         end
---         task.wait(15)
---     end
--- end
+local function transformKugha()
+    while Toggle.Value do
+        if getStaminaPercent() < 70 then
+            print("[DEBUG] Stamina low! Switching to Combat...")
+            rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+        elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
+            rfunc.AncientWorldEventRemote:InvokeServer({["ActiveForm"] = "Ultimated", ["ActiveRider"] = true})
+        end
+        task.wait(15)
+    end
+end
 
--- local function transformDouble()
---     while Toggle.Value do
---         if getStaminaPercent() < 70 then
---             print("[DEBUG] Stamina low! Switching to Combat...")
---             rfunc.InventoryFunction:InvokeServer(1, "Backpack")
---         elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
---             rfunc.FoundationEventRemote:InvokeServer({["ActiveForm"] = "Fang Joker", ["ActiveRider"] = true})
---         end
---         task.wait(15)
---     end
--- end
+local function transformDouble()
+    while Toggle.Value do
+        if getStaminaPercent() < 70 then
+            print("[DEBUG] Stamina low! Switching to Combat...")
+            rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+        elseif not (plr.Character and plr.Character:FindFirstChild("Form")) then
+            rfunc.FoundationEventRemote:InvokeServer({["ActiveForm"] = "Fang Joker", ["ActiveRider"] = true})
+        end
+        task.wait(15)
+    end
+end
 
--- Toggle:OnChanged(function()
---     if Toggle.Value then
---         task.spawn(function()
---             while Toggle.Value do
---                 local rider = plr.RiderStats:FindFirstChild("ClientRider") and plr.RiderStats.ClientRider.Value
---                 if getStaminaPercent() < 70 then
---                     print("[DEBUG] Stamina low! Switching to Combat...")
---                     rfunc.InventoryFunction:InvokeServer(1, "Backpack")
---                 elseif rider == "Cobra" then
---                     transformCobra()
---                 elseif rider == "Kugha" then
---                     task.spawn(transformKugha)
---                 elseif rider == "Double" then
---                     task.spawn(transformDouble)
---                 end
---                 task.wait(1)
---             end
---         end)
---     end
--- end)
+Toggle:OnChanged(function()
+    if Toggle.Value then
+        task.spawn(function()
+            while Toggle.Value do
+                local rider = plr.RiderStats:FindFirstChild("ClientRider") and plr.RiderStats.ClientRider.Value
+                if getStaminaPercent() < 70 then
+                    print("[DEBUG] Stamina low! Switching to Combat...")
+                    rfunc.InventoryFunction:InvokeServer(1, "Backpack")
+                elseif rider == "Cobra" then
+                    transformCobra()
+                elseif rider == "Kugha" then
+                    task.spawn(transformKugha)
+                elseif rider == "Double" then
+                    task.spawn(transformDouble)
+                end
+                task.wait(1)
+            end
+        end)
+    end
+end)
 
 local t = false
 local ToggleEquip = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = false})
