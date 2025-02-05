@@ -46,7 +46,7 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/d
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Fearise Hub" .. " | " .. "Rider World" .. " | " .. "[Version X]",
+    Title = "LyLab" .. " | " .. "Rider World" .. " | " .. "[By Ryuuu]",
     TabWidth = 160,
     Size = Device,
     Acrylic = false,
@@ -195,6 +195,9 @@ end)
 --------------------------------------------------- Main Tab ----------------------------------------------------
 --------------------------------------------------- Main Tab ----------------------------------------------------
 --------------------------------------------------- Main Tab ----------------------------------------------------
+
+
+local RushTitle = Tabs.Main:AddSection("Properties")
 
 local autoRush = false
 local extremeMode = false
@@ -399,27 +402,27 @@ local lockEquip = false
 --     end
 -- end)
 
--- local t = false
--- local ToggleEquip = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = false})
+local t = false
+local ToggleEquip = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Equip", Default = false})
 
--- ToggleEquip:OnChanged(function(v)
---     t = v
---     while t do
---         if not lockEquip then
---             if getStaminaPercent() < 70 then
---                 print("[DEBUG] Stamina low! Equipping Combat...")
---                 pcall(function()
---                     rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
---                 end)
---             elseif not (plr.Character and plr.Character:FindFirstChild("Attack")) then
---                 pcall(function()
---                     rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
---                 end)
---             end
---         end
---         task.wait(1)
---     end
--- end)
+ToggleEquip:OnChanged(function(v)
+    t = v
+    while t do
+        if not lockEquip then
+            if getStaminaPercent() < 70 then
+                print("[DEBUG] Stamina low! Equipping Combat...")
+                pcall(function()
+                    rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
+                end)
+            elseif not (plr.Character and plr.Character:FindFirstChild("Attack")) then
+                pcall(function()
+                    rs.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
+                end)
+            end
+        end
+        task.wait(1)
+    end
+end)
 
 local plr = game.Players.LocalPlayer
 local char = plr.Character or plr.CharacterAdded:Wait()
