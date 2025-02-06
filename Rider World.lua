@@ -290,7 +290,6 @@ SelectMob:OnChanged(function(Value)
         end
     end
     getgenv().Settings.SelectMob = SelectedMobs
-    print("Updated Selected Mobs:", table.concat(getgenv().Settings.SelectMob, ", "))
 end)
     local AutoMob = Tabs.pageMain:AddToggle("AutoMob", {Title = "Auto Mob", Default = getgenv().Settings.AutoMob or false })
     local DungeonSection = Tabs.pageMain:AddSection("Dungeons")
