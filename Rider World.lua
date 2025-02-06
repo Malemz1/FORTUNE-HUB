@@ -90,7 +90,19 @@ local Tabs = {
         ["Dark Dragon"] = {"Survive Dark Dragon"},
     }
     
-    -- ฟังก์ชันตรวจสอบว่าผู้เล่นแปลงร่างอยู่หรือไม่
+    -- ฟังก์ชันเช็คฟอร์มปัจจุบันของผู้เล่น (Kugha และ Double)
+    local function GetCurrentForm()
+        local player = LocalPlayer
+        if player.PlayerGui:FindFirstChild("KughaBar") then
+            return player.PlayerGui.KughaBar.KughaForm.Value
+        elseif player.PlayerGui:FindFirstChild("DoubleBar") then
+            return player.PlayerGui.DoubleBar.DoubleForm.Value
+        else
+            return nil
+        end
+    end
+    
+    -- ฟังก์ชันตรวจสอบว่าผู้เล่นแปลงร่างอยู่หรือไม่ (Cobra, Blue Bat, Red Dragon, Dark Dragon)
     local function IsTransformed()
         local character = Workspace.Lives:FindFirstChild(LocalPlayer.Name)
         return character and character:FindFirstChild("Form")
@@ -119,7 +131,6 @@ local Tabs = {
     local function TransformWithItem()
         if IsTransformed() then return end
     
-        local currentRider = LocalPlayer.RiderStats.ClientRider.Value
         local formName = SelectedForm
         if not formName then
             return
@@ -134,14 +145,15 @@ local Tabs = {
         -- ถือ Item แปลงร่าง (ถือที่ Slot 2)
         ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(2, "Backpack")
         task.wait(1)
-
-        print("🖱️ กดใช้ Item เพื่อแปลงร่าง")
+    
+        -- ใช้ VirtualInputManager เพื่อกดใช้งาน (จำลองคลิกที่หน้าจอ)
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
         task.wait(0.1)
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
     
         task.wait(2)
-
+    
+        -- คืนไอเทมกลับไปที่ Backpack
         ReturnItemToBackpack()
     end
     
@@ -151,24 +163,26 @@ local Tabs = {
     
         -- เช็คว่าผู้เล่นมีฟอร์มที่เลือกไหม
         if not SelectedForm or SelectedForm == "" then
-
             return
         end
-
+    
+        -- เช็คฟอร์มของ Kugha และ Double
+        local currentForm = GetCurrentForm()
+        if currentForm == SelectedForm then
+            return
+        end
+    
+        -- เช็คฟอร์มของ Cobra, Blue Bat, Red Dragon, Dark Dragon
         if IsTransformed() then
-
             return
         end
-
     
         if currentRider == "Kugha" then
             local ohTable1 = {["ActiveForm"] = SelectedForm, ["ActiveRider"] = true}
-            print("📡 ส่ง Remote Kugha ->", SelectedForm)
             ReplicatedStorage.Remote.Function.AncientWorldEventRemote:InvokeServer(ohTable1)
     
         elseif currentRider == "Double" then
             local ohTable1 = {["ActiveForm"] = SelectedForm, ["ActiveRider"] = true}
-            print("📡 ส่ง Remote Double ->", SelectedForm)
             ReplicatedStorage.Remote.Function.FoundationEventRemote:InvokeServer(ohTable1)
     
         elseif FormTable[currentRider] then
@@ -190,7 +204,6 @@ local Tabs = {
             SelectForm:SetValue(availableForms[1] or "")
             SelectedForm = availableForms[1] or ""
         end
-
     end
     
     -- สร้าง Dropdown เลือกฟอร์ม
@@ -218,7 +231,7 @@ local Tabs = {
                 pcall(ChangeToSelectedForm)
             end
         end)
-    end)
+    end)    
 
     --[[ MAIN ]]--------------------------------------------------------
     local MainSection = Tabs.pageMain:AddSection("Main")
