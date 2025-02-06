@@ -33,7 +33,6 @@ local Tabs = {
     pageTeleport = Window:AddTab({ Title = "Teleport", Icon = "map" }),
 }
 
-do
     --[[ SETTINGS ]]--------------------------------------------------------
     local SelectKeySkill = Tabs.pageSetting:AddDropdown("SelectKeySkill", {
         Title = "Select Skill",
@@ -68,7 +67,159 @@ do
     SelectAttackMode:OnChanged(function(Value)
         getgenv().Settings.SelectAttackMode = Value
     end)
+
+    local MiscTT = Tabs.pageSetting:AddSection("Misc Setting")
+
+    local AutoForm = Tabs.pageSetting:AddToggle("AutoForm", {Title = "Auto Form", Default = false })
+    local SelectForm -- ตัวแปร Dropdown
+    local SelectedForm = "" -- ตัวแปรเก็บค่าฟอร์มที่เลือก
     
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Players = game:GetService("Players")
+    local Workspace = game:GetService("Workspace")
+    local LocalPlayer = Players.LocalPlayer
+    
+    -- Table ของ ClientRider และฟอร์มที่มีให้เลือก
+    local FormTable = {
+        ["Kugha"] = {"Dragon", "Pegasus", "Titan", "Rising Mighty", "Amazing Mighty", "Ultimated"},
+        ["Double"] = {"Cyclone Joker", "Heat Metal", "Luna Trigger", "Fang Joker", "Extreme"},
+        ["Cobra"] = {"Survive Cobra"},
+        ["Blue Bat"] = {"Survive Bat"},
+        ["Red Dragon"] = {"Survive Dragon"},
+        ["Dark Dragon"] = {"Survive Dark Dragon"},
+    }
+    
+    -- ฟังก์ชันตรวจสอบว่าผู้เล่นแปลงร่างอยู่หรือไม่
+    local function IsTransformed()
+        local character = Workspace.Lives:FindFirstChild(LocalPlayer.Name)
+        return character and character:FindFirstChild("Form")
+    end
+    
+    -- ฟังก์ชันตรวจสอบว่ามีไอเทมอยู่ใน Backpack และตรงกับฟอร์มหรือไม่
+    local function HasCorrectItemInBackpack()
+        local backpack = LocalPlayer.RiderStats.CustomBackpack
+        if backpack and backpack:FindFirstChild("2") then
+            local item = backpack["2"]
+            if item.Value == SelectedForm then
+                return true
+            else
+                return false
+            end
+        end
+        return false
+    end
+    
+    -- ฟังก์ชันคืนไอเทมหลังจากแปลงร่างเสร็จ
+    local function ReturnItemToBackpack()
+        ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
+    end
+    
+    -- ฟังก์ชันแปลงร่างสำหรับ Cobra, Blue Bat, Red Dragon, Dark Dragon
+    local function TransformWithItem()
+        if IsTransformed() then return end
+    
+        local currentRider = LocalPlayer.RiderStats.ClientRider.Value
+        local formName = SelectedForm
+        if not formName then
+            return
+        end
+    
+        -- ถ้าไม่มีไอเทมหรือไอเทมไม่ตรงกับฟอร์ม ให้ดึงจาก Inventory
+        if not HasCorrectItemInBackpack() then
+            ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(formName)
+            task.wait(1)
+        end
+    
+        -- ถือ Item แปลงร่าง (ถือที่ Slot 2)
+        ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(2, "Backpack")
+        task.wait(1)
+
+        print("🖱️ กดใช้ Item เพื่อแปลงร่าง")
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+        task.wait(0.1)
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+    
+        task.wait(2)
+
+        ReturnItemToBackpack()
+    end
+    
+    -- ฟังก์ชันเปลี่ยนฟอร์มอัตโนมัติ
+    local function ChangeToSelectedForm()
+        local currentRider = LocalPlayer.RiderStats.ClientRider.Value
+    
+        -- เช็คว่าผู้เล่นมีฟอร์มที่เลือกไหม
+        if not SelectedForm or SelectedForm == "" then
+
+            return
+        end
+
+        if IsTransformed() then
+
+            return
+        end
+
+    
+        if currentRider == "Kugha" then
+            local ohTable1 = {["ActiveForm"] = SelectedForm, ["ActiveRider"] = true}
+            print("📡 ส่ง Remote Kugha ->", SelectedForm)
+            ReplicatedStorage.Remote.Function.AncientWorldEventRemote:InvokeServer(ohTable1)
+    
+        elseif currentRider == "Double" then
+            local ohTable1 = {["ActiveForm"] = SelectedForm, ["ActiveRider"] = true}
+            print("📡 ส่ง Remote Double ->", SelectedForm)
+            ReplicatedStorage.Remote.Function.FoundationEventRemote:InvokeServer(ohTable1)
+    
+        elseif FormTable[currentRider] then
+            -- ใช้ระบบแปลงร่างด้วย Item
+            TransformWithItem()
+        else
+        end
+    
+        task.wait(1)
+    end
+    
+    -- ฟังก์ชันอัปเดต Dropdown ฟอร์มตาม ClientRider
+    local function UpdateFormDropdown()
+        local currentRider = LocalPlayer.RiderStats.ClientRider.Value
+        local availableForms = FormTable[currentRider] or {}
+    
+        if SelectForm then
+            SelectForm:SetValues(availableForms)
+            SelectForm:SetValue(availableForms[1] or "")
+            SelectedForm = availableForms[1] or ""
+        end
+
+    end
+    
+    -- สร้าง Dropdown เลือกฟอร์ม
+    SelectForm = Tabs.pageSetting:AddDropdown("SelectForm", {
+        Title = "Select Form",
+        Values = {},
+        Multi = false,
+        Default = "",
+        Callback = function(Value)
+            SelectedForm = Value
+        end
+    })
+    
+    -- เรียกใช้เมื่อ ClientRider เปลี่ยน
+    LocalPlayer.RiderStats.ClientRider:GetPropertyChangedSignal("Value"):Connect(UpdateFormDropdown)
+    
+    -- อัปเดต Dropdown ครั้งแรก
+    UpdateFormDropdown()
+    
+    -- เปิดใช้งาน AutoForm
+    AutoForm:OnChanged(function()
+        task.spawn(function()
+            while AutoForm.Value do
+                task.wait(2) -- ตรวจสอบทุก 5 วินาที
+                pcall(ChangeToSelectedForm)
+            end
+        end)
+    end)
+
     --[[ MAIN ]]--------------------------------------------------------
     local MainSection = Tabs.pageMain:AddSection("Main")
     local AutoFarmLevel = Tabs.pageMain:AddToggle("AutoFarmLevel", {Title = "Auto Farm Level", Default = getgenv().Settings.AutoFarmLevel or false })
@@ -88,7 +239,6 @@ do
         "Bull User Lv.15", "Bat User Lv.12", "Crab User Lv.10", "Foundation Soldier Lv.8",
         "Dragon User Lv.7", "Armed Lost Rider Lv.5", "Lost Rider Lv.1"
     }
-    
 -- ฟังก์ชันแยกเลเวลออกจากชื่อมอน
 local function ExtractLevel(mobName)
     local level = string.match(mobName, "Lv%.(%d+)")
@@ -144,6 +294,32 @@ end)
         getgenv().Settings.SelectDungeon = Value
     end)
     local AutoDungeon = Tabs.pageMain:AddToggle("AutoDungeon", {Title = "Auto Dungeon", Default = getgenv().Settings.AutoDungeon or false })
+
+    local MiscTitle = Tabs.pageMain:AddSection("Misc")
+
+    Tabs.pageMain:AddButton({
+        Title = "Reset Char",
+        Description = "Kuy กร,Kuy แฮม",
+        Callback = function()
+            Window:Dialog({
+                Title = "กด Cancel พ่องตาย ไอกร ไอแฮม",
+                Content = "ควยๆๆๆๆๆๆ",
+                Buttons = {
+                    {
+                        Title = "Confirm",
+                        Callback = function()
+                            game:GetService("Players").LocalPlayer.Character.Humanoid.Health = 0
+                        end
+                    },
+                    {
+                        Title = "Cancel",
+                        Callback = function()
+                        end
+                    }
+                }
+            })
+        end
+    })
 
     --[[ TELEPORT ]]--------------------------------------------------------
     local SelectNPCType = Tabs.pageTeleport:AddDropdown("SelectNPCType", {
@@ -573,69 +749,38 @@ end)
                     HumanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
                     Humanoid = newCharacter:WaitForChild("Humanoid")
                 end)
+    
                 if game:GetService("Players").LocalPlayer.StatsReplicated.Level.Value >= 80 then
                     if game:GetService("Players").LocalPlayer:FindFirstChild("Dungeon") then
-                        for DungeonMonIndex, DungeonMonValue in ipairs(workspace.Lives:GetChildren()) do
-                            if DungeonMonValue:IsA("Model") and DungeonMonValue:FindFirstChild("Humanoid") and DungeonMonValue:FindFirstChild("AI_Controller") then
-                                if DungeonMonValue then
-                                    if character:FindFirstChild("Transformed") then
-                                        if HumanoidRootPart:FindFirstChild("antifall") and HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
-                                            if character:FindFirstChild("Attack") then
-                                                if DungeonMonValue.Humanoid.Health > 0 then
-                                                    repeat task.wait()
-                                                        task.spawn(function()
-                                                            task.spawn(function()
-                                                                HumanoidRootPart.CFrame = DungeonMonValue.HumanoidRootPart.CFrame * CFrame.new(0, 7, 0) * CFrame.Angles(math.rad(-90), 0, 0)
-                                                            end)
-                                                            task.spawn(function()
-                                                                local args = {
-                                                                    [1] = {
-                                                                        ["CombatAction"] = true,
-                                                                        ["MouseData"] = DungeonMonValue.HumanoidRootPart.CFrame,
-                                                                        ["Input"] = "Mouse1",
-                                                                        ["LightAttack"] = true,
-                                                                        ["Attack"] = true
-                                                                    }
-                                                                }
-                                                                character.PlayerHandler.HandlerEvent:FireServer(unpack(args))
-                                                            end)
-                                                            task.spawn(function()
-                                                                local args = {
-                                                                    [1] = {
-                                                                        ["CombatAction"] = true,
-                                                                        ["MouseData"] = DungeonMonValue.HumanoidRootPart.CFrame,
-                                                                        ["Input"] = "Mouse2",
-                                                                        ["HeavyAttack"] = true,
-                                                                        ["Attack"] = true
-                                                                    }
-                                                                }
-                                                                character.PlayerHandler.HandlerEvent:FireServer(unpack(args))
-                                                            end)
-                                                        end)
-                                                    until not AutoDungeon.Value or DungeonMonValue.Humanoid.Health <= 0 or Humanoid.Health <= 0 or not character:FindFirstChild("Transformed") or not character:FindFirstChild("Attack") or not game:GetService("Players").LocalPlayer:FindFirstChild("Dungeon")
-                                                end
-                                            else
-                                                EquipSlot(1)
-                                                task.wait(.1)
-                                            end
-                                        else
-                                            antifall = Instance.new("BodyVelocity", HumanoidRootPart)
-                                            antifall.Velocity = Vector3.new(0, 0, 0)
-                                            antifall.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                                            antifall.P = 1250
-                                            antifall.Name = "antifall"
-                                            Humanoid.PlatformStand = true
-                                        end
-                                    else
-                                        game:GetService("Players").LocalPlayer.Character.PlayerHandler.HandlerFunction:InvokeServer("Henshin")     
-                                        task.wait(.1)    
-                                    end
+                        for _, DungeonMon in ipairs(workspace.Lives:GetChildren()) do
+                            if DungeonMon:IsA("Model") and DungeonMon:FindFirstChild("Humanoid") and DungeonMon:FindFirstChild("AI_Controller") then
+                                -- ❌ Skip Boss and "T-Rex Dopant Lv.80"
+                                if DungeonMon:FindFirstChild("Boss") or DungeonMon.Name == "T-Rex Dopant Lv.80" then
+                                    print("Skipping Boss:", DungeonMon.Name)
                                 else
-                                    task.wait()
+                                    -- ✅ Attack Only Non-Boss Monsters
+                                    if DungeonMon.Humanoid.Health > 0 then
+                                        repeat task.wait()
+                                            HumanoidRootPart.CFrame = DungeonMon.HumanoidRootPart.CFrame * CFrame.new(0, 7, 0)
+    
+                                            local attackArgs = {
+                                                [1] = {
+                                                    ["CombatAction"] = true,
+                                                    ["MouseData"] = DungeonMon.HumanoidRootPart.CFrame,
+                                                    ["Input"] = "Mouse1",
+                                                    ["LightAttack"] = true,
+                                                    ["Attack"] = true
+                                                }
+                                            }
+                                            character.PlayerHandler.HandlerEvent:FireServer(unpack(attackArgs))
+    
+                                        until not AutoDungeon.Value or DungeonMon.Humanoid.Health <= 0 or Humanoid.Health <= 0
+                                    end
                                 end
                             end
                         end
                     else
+                        -- 🚀 Enter Dungeon if Not Inside
                         local args = {
                             [1] = "Trial of "..getgenv().Settings.SelectDungeon
                         }  
@@ -652,22 +797,22 @@ end)
                     AutoDungeon:SetValue(false)
                 end
             end 
+    
+            -- 🛑 Stop Auto Dungeon and Remove Anti-Fall
             task.wait(.1)
             if not AutoDungeon.Value then
                 pcall(function()
-                    for i,v in pairs(game.Players.LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
+                    for _, v in pairs(game.Players.LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
                         if v.Name == "antifall" or v:IsA("BodyVelocity") then
                             task.wait(.1)
                             v:Destroy()
                             Humanoid.PlatformStand = false
-                            antifall = nil
                         end
                     end
                 end)
             end
         end)
-    end)
-end
+    end)    
 
 Window:SelectTab(1)
 
