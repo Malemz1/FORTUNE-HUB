@@ -256,8 +256,8 @@ local HitboxTitle = Tabs.Legit:AddSection("Hitbox")
 
 local dribblingEnabled = false
 
-local Toggle = Tabs.Legit:AddToggle("MyToggle", { Title = "Hitbox", Default = false })
-Options.MyToggle = Toggle
+local Toggle = Tabs.Legit:AddToggle("HitboxTG", { Title = "Hitbox", Default = false })
+Options.HitboxTG = Toggle
 
 local function updateHitboxSize()
     local football = findFootball()
@@ -273,7 +273,7 @@ local function updateHitboxSize()
 end
 
 Toggle:OnChanged(function()
-    local toggleValue = Options.MyToggle.Value
+    local toggleValue = Options.HitboxTG.Value
     if toggleValue then
         updateHitboxSize()
     else
@@ -290,7 +290,7 @@ Toggle:OnChanged(function()
     end
 end)
 
-local Input = Tabs.Legit:AddInput("Input", {
+local Input = Tabs.Legit:AddInput("HitboxIP", {
     Title = "Hitbox Size",
     Default = tostring(currentSize),
     Placeholder = "Enter size (1-30)",
@@ -300,7 +300,7 @@ local Input = Tabs.Legit:AddInput("Input", {
         local newSize = tonumber(Value)
         if newSize and newSize >= 1 and newSize <= 30 then
             currentSize = newSize
-            if Options.MyToggle.Value then
+            if Options.HitboxTG.Value then
                 updateHitboxSize()
             end
         else
@@ -319,11 +319,11 @@ local HitboxKeybind = Tabs.Legit:AddKeybind("HitboxKeybind", {
     Default = "...",
     Callback = function()
 
-        local currentState = Options.MyToggle.Value
-        Options.MyToggle:SetValue(not currentState)
+        local currentState = Options.HitboxIP.Value
+        Options.HitboxTG:SetValue(not currentState)
         Fluent:Notify({
             Title = "Hitbox Toggled",
-            Content = "Hitbox has been " .. (Options.MyToggle.Value and "enabled" or "disabled") .. ".",
+            Content = "Hitbox has been " .. (Options.HitboxTG.Value and "enabled" or "disabled") .. ".",
             Duration = 3
         })
     end,
@@ -665,17 +665,17 @@ local function autoGoal()
 end
 
 -- Toggle สำหรับเปิด/ปิดระบบ Auto Goal
-local Toggle = Tabs.Kaitan:AddToggle("MyToggle", {Title = "Auto Farm", Default = false })
+local Toggle1 = Tabs.Kaitan:AddToggle("AutoFarmTG", {Title = "Auto Farm", Default = false })
 
 Toggle:OnChanged(function()
-    running = Toggle.Value -- อัปเดตสถานะการทำงาน
+    running = Toggle1.Value -- อัปเดตสถานะการทำงาน
     if running then
         task.spawn(autoGoal) -- เริ่มทำงานใน Thread ใหม่
     end
 end)
 
 -- Toggle สำหรับเปิด/ปิดระบบ Auto Goal
-local Toggle = Tabs.Kaitan:AddToggle("MyToggle", {Title = "BlackScreen", Default = false })
+local Toggle = Tabs.Kaitan:AddToggle("BlToggle", {Title = "BlackScreen", Default = false })
 
 Toggle:OnChanged(function()
     running = Toggle.Value -- อัปเดตสถานะการทำงาน
@@ -758,8 +758,6 @@ end)
 
 
 local Properties = Tabs.Kaitan:AddSection("Properties")
-
-Options.MyToggle:SetValue(false) -- ตั้งค่าเริ่มต้น Toggle เป็นปิด
 
 local TeamService = game:GetService("ReplicatedStorage").Packages.Knit.Services.TeamService
 
@@ -876,7 +874,7 @@ bs.RE.Shoot.OnClientEvent:Connect(function()
 end)
 
 -- Toggle to enable/disable Instant Goal
-local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle", {
+local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle1", {
     Title = "Instant Goal (Auto Farm Only)",
     Default = false,
     Callback = function(s)
@@ -1111,7 +1109,7 @@ bs.RE.Shoot.OnClientEvent:Connect(function()
     end
 end)
 
-local toggle = Tabs.OP:AddToggle("InstantGoalToggle", {
+local toggle = Tabs.OP:AddToggle("KaiserToggle", {
     Title = "Kaiser Impack",
     Default = false,
     Callback = function(state)
