@@ -94,88 +94,156 @@ local Tabs = {
     local function GetCurrentForm()
         local player = LocalPlayer
         if player.PlayerGui:FindFirstChild("KughaBar") then
+            print("[DEBUG] Found KughaBar UI")
             return player.PlayerGui.KughaBar.KughaForm.Value
         elseif player.PlayerGui:FindFirstChild("DoubleBar") then
+            print("[DEBUG] Found DoubleBar UI")
             return player.PlayerGui.DoubleBar.DoubleForm.Value
         else
+            print("[DEBUG] No valid form UI found")
             return nil
         end
-    end
+    end    
     
     -- ฟังก์ชันตรวจสอบว่าผู้เล่นแปลงร่างอยู่หรือไม่ (Cobra, Blue Bat, Red Dragon, Dark Dragon)
     local function IsTransformed()
         local character = Workspace.Lives:FindFirstChild(LocalPlayer.Name)
-        return character and character:FindFirstChild("Form")
+        if not character then
+            warn("[DEBUG] Character not found in Lives folder")
+            return false
+        end
+        if character:FindFirstChild("Form") then
+            print("[DEBUG] Character is transformed")
+            return true
+        else
+            print("[DEBUG] Character is NOT transformed")
+            return false
+        end
     end
     
-    -- ฟังก์ชันตรวจสอบว่ามีไอเทมอยู่ใน Backpack และตรงกับฟอร์มหรือไม่
-    local function HasCorrectItemInBackpack()
-        local backpack = LocalPlayer.RiderStats.CustomBackpack
-        if backpack and backpack:FindFirstChild("2") then
-            local item = backpack["2"]
-            if item.Value == SelectedForm then
-                return true
-            else
-                return false
+    
+    -- ฟังก์ชันตรวจสอบค่า Stamina
+    local function GetCurrentStamina()
+        local staminaGui = LocalPlayer.PlayerGui.Main.Info.Stamina
+        if not staminaGui then
+            warn("[DEBUG] Stamina GUI not found!")
+            return nil, nil
+        end
+        
+        local staminaText = staminaGui:FindFirstChild("StaminaText")
+        if not staminaText then
+            warn("[DEBUG] StaminaText not found!")
+            return nil, nil
+        end
+    
+        print("[DEBUG] StaminaText:", staminaText.Text)
+        
+        local currentStamina, maxStamina = staminaText.Text:match("(%d+)/(%d+)")
+        if currentStamina and maxStamina then
+            return tonumber(currentStamina), tonumber(maxStamina)
+        else
+            warn("[DEBUG] Failed to parse stamina values!")
+            return nil, nil
+        end
+    end
+    
+    
+    -- ฟังก์ชันเช็คว่าควรถือหมัดหรือไม่ (เฉพาะกับ Cobra, Blue Bat, Red Dragon, Dark Dragon)
+    local function ShouldRevertToFist()
+        local currentRider = LocalPlayer.RiderStats.ClientRider.Value
+        if FormTable[currentRider] then
+            local currentStamina, maxStamina = GetCurrentStamina()
+            if currentStamina and maxStamina then
+                return currentStamina < (maxStamina * 0.6)
             end
         end
         return false
     end
     
-    -- ฟังก์ชันคืนไอเทมหลังจากแปลงร่างเสร็จ
-    local function ReturnItemToBackpack()
+    -- ฟังก์ชันถือหมัด
+    local function HoldFist()
         ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(1, "Backpack")
     end
     
-    -- ฟังก์ชันแปลงร่างสำหรับ Cobra, Blue Bat, Red Dragon, Dark Dragon
+    -- ฟังก์ชันแปลงร่างด้วย Item
     local function TransformWithItem()
-        if IsTransformed() then return end
-    
-        local formName = SelectedForm
-        if not formName then
-            return
+        if IsTransformed() then 
+            print("[DEBUG] Already transformed, exiting function")
+            return 
         end
     
-        -- ถ้าไม่มีไอเทมหรือไอเทมไม่ตรงกับฟอร์ม ให้ดึงจาก Inventory
-        if not HasCorrectItemInBackpack() then
+        local formName = SelectedForm
+        if not formName then 
+            warn("[DEBUG] No SelectedForm set!")
+            return 
+        end
+
+        if HasCorrectItemInBackpack then
+            print("[DEBUG] Found Item:", formName)
+            ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(2, "Backpack")
+        end
+
+        if not HasCorrectItemInBackpack then
+            print("[DEBUG] Fetching transformation item:", formName)
             ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(formName)
             task.wait(1)
         end
     
-        -- ถือ Item แปลงร่าง (ถือที่ Slot 2)
+        print("[DEBUG] Equipping transformation item...")
         ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(2, "Backpack")
         task.wait(1)
     
-        -- ใช้ VirtualInputManager เพื่อกดใช้งาน (จำลองคลิกที่หน้าจอ)
+        print("[DEBUG] Using VirtualInputManager for transformation...")
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
         task.wait(0.1)
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
     
-        task.wait(2)
+        task.wait(7)
     
-        -- คืนไอเทมกลับไปที่ Backpack
-        ReturnItemToBackpack()
+        if HoldFist then
+            HoldFist()
+        else
+            warn("[DEBUG] Function HoldFist() is not defined!")
+        end
     end
     
     -- ฟังก์ชันเปลี่ยนฟอร์มอัตโนมัติ
     local function ChangeToSelectedForm()
+        print("[DEBUG] ChangeToSelectedForm() ถูกเรียก!")
+    
         local currentRider = LocalPlayer.RiderStats.ClientRider.Value
     
-        -- เช็คว่าผู้เล่นมีฟอร์มที่เลือกไหม
-        if not SelectedForm or SelectedForm == "" then
-            return
+        -- ถ้าเป็นฟอร์มพิเศษและ Stamina ต่ำกว่า 60% ถือหมัดก่อน
+        if ShouldRevertToFist() then
+            print("[DEBUG] Stamina ต่ำกว่า 60%, ถือหมัดแทน")
+            HoldFist()
+            repeat
+                task.wait(1)
+            until not ShouldRevertToFist()
         end
     
-        -- เช็คฟอร์มของ Kugha และ Double
+        -- ตรวจสอบว่าเลือกฟอร์มไว้หรือไม่
+        if not SelectedForm or SelectedForm == "" then 
+            warn("[DEBUG] ไม่มีฟอร์มที่ถูกเลือก, ออกจากฟังก์ชัน") 
+            return 
+        end
+    
+        -- ตรวจสอบว่าผู้เล่นมีฟอร์มปัจจุบันเป็นอะไร
         local currentForm = GetCurrentForm()
-        if currentForm == SelectedForm then
-            return
+        print("[DEBUG] ฟอร์มปัจจุบัน:", currentForm, "ฟอร์มที่ต้องการเปลี่ยน:", SelectedForm)
+    
+        if currentForm == SelectedForm then 
+            print("[DEBUG] ฟอร์มที่ต้องการตรงกับฟอร์มปัจจุบัน, ไม่ต้องเปลี่ยน") 
+            return 
         end
     
-        -- เช็คฟอร์มของ Cobra, Blue Bat, Red Dragon, Dark Dragon
-        if IsTransformed() then
-            return
+        -- ตรวจสอบว่ากำลังแปลงร่างอยู่หรือไม่
+        if IsTransformed() then 
+            print("[DEBUG] ผู้เล่นกำลังแปลงร่างอยู่แล้ว, ไม่ต้องเปลี่ยนฟอร์ม") 
+            return 
         end
+    
+        print("[DEBUG] กำลังเปลี่ยนเป็นฟอร์ม:", SelectedForm)
     
         if currentRider == "Kugha" then
             local ohTable1 = {["ActiveForm"] = SelectedForm, ["ActiveRider"] = true}
@@ -186,13 +254,28 @@ local Tabs = {
             ReplicatedStorage.Remote.Function.FoundationEventRemote:InvokeServer(ohTable1)
     
         elseif FormTable[currentRider] then
-            -- ใช้ระบบแปลงร่างด้วย Item
             TransformWithItem()
-        else
         end
     
+        print("[DEBUG] เปลี่ยนฟอร์มเสร็จแล้ว")
         task.wait(1)
     end
+    
+    -- เปิดใช้งาน AutoForm พร้อมเงื่อนไข Stamina
+    if AutoForm then
+        AutoForm:OnChanged(function()
+            print("[DEBUG] AutoForm changed, starting loop...")
+            task.spawn(function()
+                while AutoForm.Value do
+                    task.wait(2)
+                    print("[DEBUG] Running ChangeToSelectedForm...")
+                    pcall(ChangeToSelectedForm)
+                end
+            end)
+        end)
+    else
+        warn("[DEBUG] AutoForm is not defined!")
+    end       
     
     -- ฟังก์ชันอัปเดต Dropdown ฟอร์มตาม ClientRider
     local function UpdateFormDropdown()
@@ -225,13 +308,16 @@ local Tabs = {
     
     -- เปิดใช้งาน AutoForm
     AutoForm:OnChanged(function()
+        print("[DEBUG] AutoForm ถูกเปลี่ยนค่า, กำลังเริ่ม Loop...")
         task.spawn(function()
             while AutoForm.Value do
-                task.wait(2) -- ตรวจสอบทุก 5 วินาที
+                print("[DEBUG] กำลังเรียก ChangeToSelectedForm()")
+                task.wait(2) 
                 pcall(ChangeToSelectedForm)
             end
+            print("[DEBUG] AutoForm ถูกปิด, Loop หยุดแล้ว")
         end)
-    end)    
+    end)       
 
     --[[ MAIN ]]--------------------------------------------------------
     local MainSection = Tabs.pageMain:AddSection("Main")
@@ -771,7 +857,7 @@ end)
                                         if HumanoidRootPart:FindFirstChild("antifall") and HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
                                             if DungeonMonValue.Name == "T-Rex Dopant Lv.80" or DungeonMonValue.Name == "Xmas Goon Lv.80" then
                                                 task.wait(0.1)
-                                            if character:FindFirstChild("Attack") then
+                                            elseif character:FindFirstChild("Attack") then
                                                 local humanoid = DungeonMonValue:FindFirstChild("Humanoid")
                                                 if humanoid and humanoid.Health > 0 then
                                                     repeat task.wait()
@@ -781,7 +867,7 @@ end)
                                                                     HumanoidRootPart.CFrame = humanoid.Parent.HumanoidRootPart.CFrame * CFrame.new(0, 7, 0) * CFrame.Angles(math.rad(-90), 0, 0)
                                                                 end
                                                             end)
-                                                            
+    
                                                             if getgenv().Settings.SelectAttackMode == "M1" or getgenv().Settings.SelectAttackMode == "M1 + M2" then
                                                                 local attackArgs = {
                                                                     [1] = {
@@ -813,8 +899,9 @@ end)
                                                     until not AutoDungeon.Value or not DungeonMonValue or not humanoid or not humanoid.Parent or humanoid.Health <= 0 or Humanoid.Health <= 0 or not character:FindFirstChild("Transformed") or not character:FindFirstChild("Attack") or not game:GetService("Players").LocalPlayer:FindFirstChild("Dungeon")
                                                 end
                                             else
+                                                task.wait(2)
                                                 EquipSlot(1)
-                                                task.wait(.1)
+                                                task.wait(2)
                                             end
                                         else
                                             antifall = Instance.new("BodyVelocity", HumanoidRootPart)
@@ -865,7 +952,7 @@ end)
                 end)
             end
         end)
-    end)
+    end)    
 
 Window:SelectTab(1)
 
