@@ -814,61 +814,58 @@ end)
                     HumanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
                     Humanoid = newCharacter:WaitForChild("Humanoid")
                 end)
-    
-                if game:GetService("Players").LocalPlayer.StatsReplicated.Level.Value >= 80 then
-                    if game:GetService("Players").LocalPlayer:FindFirstChild("Dungeon") then
-                        for _, DungeonMonValue in ipairs(workspace.Lives:GetChildren()) do
-                            if DungeonMonValue:IsA("Model") and DungeonMonValue:FindFirstChild("Humanoid") and DungeonMonValue:FindFirstChild("Boss") then
-                                if DungeonMonValue then
-                                    if character:FindFirstChild("Transformed") then
+                if character:FindFirstChild("Transformed") then
+                    if game:GetService("Players").LocalPlayer.StatsReplicated.Level.Value >= 80 then
+                        if game:GetService("Players").LocalPlayer:FindFirstChild("Dungeon") then
+                            for DungeonMonIndex, DungeonMonValue in ipairs(workspace.Lives:GetChildren()) do
+                                if DungeonMonValue:IsA("Model") and DungeonMonValue:FindFirstChild("Humanoid") and (DungeonMonValue:FindFirstChild("Dungeon") or DungeonMonValue:FindFirstChild("Boss")) then
+                                    if DungeonMonValue then
                                         if HumanoidRootPart:FindFirstChild("antifall") and HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
-                                            if DungeonMonValue.Name == "T-Rex Dopant Lv.80" or DungeonMonValue.Name == "Xmas Goon Lv.80" then
-                                                task.wait(0.1)
-                                            elseif character:FindFirstChild("Attack") then
-                                                local humanoid = DungeonMonValue:FindFirstChild("Humanoid")
-                                                if humanoid and humanoid.Health > 0 then
-                                                    repeat task.wait()
-                                                        task.spawn(function()
+                                            if not (DungeonMonValue.Name == "T-Rex Dopant Lv.80" or DungeonMonValue.Name == "Xmas Goon Lv.80") then
+                                                if character:FindFirstChild("Attack") then
+                                                    local MonHumanoidRootPart = DungeonMonValue:FindFirstChild("HumanoidRootPart") or DungeonMonValue:WaitForChild("HumanoidRootPart", 9e99)
+                                                    local MonHumanoid = DungeonMonValue:FindFirstChild("Humanoid") or DungeonMonValue:WaitForChild("Humanoid", 9e99)
+                                                    if MonHumanoid and MonHumanoidRootPart and MonHumanoid.Health > 0 then
+                                                        repeat task.wait()
                                                             task.spawn(function()
-                                                                if DungeonMonValue and humanoid and humanoid.Parent then
-                                                                    HumanoidRootPart.CFrame = humanoid.Parent.HumanoidRootPart.CFrame * CFrame.new(0, 7, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                                                                task.spawn(function()
+                                                                    HumanoidRootPart.CFrame = DungeonMonValue.HumanoidRootPart.CFrame * CFrame.new(0, 7, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                                                                end)
+                                                                if getgenv().Settings.SelectAttackMode == "M1" or getgenv().Settings.SelectAttackMode == "M1 + M2" then
+                                                                    local attackArgs = {
+                                                                        [1] = {
+                                                                            ["CombatAction"] = true,
+                                                                            ["MouseData"] = DungeonMonValue.HumanoidRootPart.CFrame,
+                                                                            ["Input"] = "Mouse1",
+                                                                            ["LightAttack"] = true,
+                                                                            ["Attack"] = true
+                                                                        }
+                                                                    }
+                                                                    character.PlayerHandler.HandlerEvent:FireServer(unpack(attackArgs))
                                                                 end
-                                                            end)
-    
-                                                            if getgenv().Settings.SelectAttackMode == "M1" or getgenv().Settings.SelectAttackMode == "M1 + M2" then
-                                                                local attackArgs = {
-                                                                    [1] = {
-                                                                        ["CombatAction"] = true,
-                                                                        ["MouseData"] = humanoid.Parent.HumanoidRootPart.CFrame,
-                                                                        ["Input"] = "Mouse1",
-                                                                        ["LightAttack"] = true,
-                                                                        ["Attack"] = true
+            
+                                                                task.wait(.1)
+            
+                                                                if getgenv().Settings.SelectAttackMode == "M2" or getgenv().Settings.SelectAttackMode == "M1 + M2" then
+                                                                    local heavyAttackArgs = {
+                                                                        [1] = {
+                                                                            ["CombatAction"] = true,
+                                                                            ["MouseData"] = DungeonMonValue.HumanoidRootPart.CFrame,
+                                                                            ["Input"] = "Mouse2",
+                                                                            ["HeavyAttack"] = true,
+                                                                            ["Attack"] = true
+                                                                        }
                                                                     }
-                                                                }
-                                                                character.PlayerHandler.HandlerEvent:FireServer(unpack(attackArgs))
-                                                            end
-    
-                                                            task.wait(.1)
-    
-                                                            if getgenv().Settings.SelectAttackMode == "M2" or getgenv().Settings.SelectAttackMode == "M1 + M2" then
-                                                                local heavyAttackArgs = {
-                                                                    [1] = {
-                                                                        ["CombatAction"] = true,
-                                                                        ["MouseData"] = humanoid.Parent.HumanoidRootPart.CFrame,
-                                                                        ["Input"] = "Mouse2",
-                                                                        ["HeavyAttack"] = true,
-                                                                        ["Attack"] = true
-                                                                    }
-                                                                }
-                                                                character.PlayerHandler.HandlerEvent:FireServer(unpack(heavyAttackArgs))
-                                                            end
-                                                        end)
-                                                    until not AutoDungeon.Value or not DungeonMonValue or not humanoid or not humanoid.Parent or humanoid.Health <= 0 or Humanoid.Health <= 0 or not character:FindFirstChild("Transformed") or not character:FindFirstChild("Attack") or not game:GetService("Players").LocalPlayer:FindFirstChild("Dungeon")
+                                                                    character.PlayerHandler.HandlerEvent:FireServer(unpack(heavyAttackArgs))
+                                                                end
+                                                            end)   
+                                                        until not AutoDungeon.Value or DungeonMonValue.Humanoid.Health <= 0 or Humanoid.Health <= 0 or not character:FindFirstChild("Transformed") or not character:FindFirstChild("Attack") or not game:GetService("Players").LocalPlayer:FindFirstChild("Dungeon") or not MonHumanoid or not MonHumanoidRootPart
+                                                    end
+                                                else
+                                                    task.wait(2)
+                                                    EquipSlot(1)
+                                                    task.wait(.1)
                                                 end
-                                            else
-                                                task.wait(2)
-                                                EquipSlot(1)
-                                                task.wait(2)
                                             end
                                         else
                                             antifall = Instance.new("BodyVelocity", HumanoidRootPart)
@@ -879,29 +876,29 @@ end)
                                             Humanoid.PlatformStand = true
                                         end
                                     else
-                                        game:GetService("Players").LocalPlayer.Character.PlayerHandler.HandlerFunction:InvokeServer("Henshin")
-                                        task.wait(.1)
+                                        task.wait()
                                     end
-                                else
-                                    task.wait()
                                 end
                             end
+                        else
+                            local args = {
+                                [1] = "Trial of "..getgenv().Settings.SelectDungeon
+                            }  
+                            game:GetService("ReplicatedStorage").Remote.Function.TrialUniversalRemote:InvokeServer(unpack(args))
+                            task.wait(1)                    
                         end
                     else
-                        local args = {
-                            [1] = "Trial of "..getgenv().Settings.SelectDungeon
-                        }
-                        game:GetService("ReplicatedStorage").Remote.Function.TrialUniversalRemote:InvokeServer(unpack(args))
-                        task.wait(1)
-                    end
+                        Fluent:Notify({
+                            Title = "BlobbyHub",
+                            Content = "Your Rider Must Level 80",
+                            Duration = 5
+                        })
+                        task.wait(.1)
+                        AutoDungeon:SetValue(false)
+                    end      
                 else
-                    Fluent:Notify({
-                        Title = "BlobbyHub",
-                        Content = "Your Rider Must Level 80",
-                        Duration = 5
-                    })
-                    task.wait(.1)
-                    AutoDungeon:SetValue(false)
+                    game:GetService("Players").LocalPlayer.Character.PlayerHandler.HandlerFunction:InvokeServer("Henshin")     
+                    task.wait(.1)    
                 end
             end 
     
@@ -919,7 +916,7 @@ end)
                 end)
             end
         end)
-    end)    
+    end)
 
 Window:SelectTab(1)
 
