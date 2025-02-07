@@ -94,13 +94,10 @@ local Tabs = {
     local function GetCurrentForm()
         local player = LocalPlayer
         if player.PlayerGui:FindFirstChild("KughaBar") then
-            print("[DEBUG] Found KughaBar UI")
             return player.PlayerGui.KughaBar.KughaForm.Value
         elseif player.PlayerGui:FindFirstChild("DoubleBar") then
-            print("[DEBUG] Found DoubleBar UI")
             return player.PlayerGui.DoubleBar.DoubleForm.Value
         else
-            print("[DEBUG] No valid form UI found")
             return nil
         end
     end    
@@ -109,14 +106,11 @@ local Tabs = {
     local function IsTransformed()
         local character = Workspace.Lives:FindFirstChild(LocalPlayer.Name)
         if not character then
-            warn("[DEBUG] Character not found in Lives folder")
             return false
         end
         if character:FindFirstChild("Form") then
-            print("[DEBUG] Character is transformed")
             return true
         else
-            print("[DEBUG] Character is NOT transformed")
             return false
         end
     end
@@ -126,23 +120,18 @@ local Tabs = {
     local function GetCurrentStamina()
         local staminaGui = LocalPlayer.PlayerGui.Main.Info.Stamina
         if not staminaGui then
-            warn("[DEBUG] Stamina GUI not found!")
             return nil, nil
         end
         
         local staminaText = staminaGui:FindFirstChild("StaminaText")
         if not staminaText then
-            warn("[DEBUG] StaminaText not found!")
             return nil, nil
         end
-    
-        print("[DEBUG] StaminaText:", staminaText.Text)
         
         local currentStamina, maxStamina = staminaText.Text:match("(%d+)/(%d+)")
         if currentStamina and maxStamina then
             return tonumber(currentStamina), tonumber(maxStamina)
         else
-            warn("[DEBUG] Failed to parse stamina values!")
             return nil, nil
         end
     end
@@ -168,32 +157,26 @@ local Tabs = {
     -- ฟังก์ชันแปลงร่างด้วย Item
     local function TransformWithItem()
         if IsTransformed() then 
-            print("[DEBUG] Already transformed, exiting function")
             return 
         end
     
         local formName = SelectedForm
         if not formName then 
-            warn("[DEBUG] No SelectedForm set!")
             return 
         end
 
         if HasCorrectItemInBackpack then
-            print("[DEBUG] Found Item:", formName)
             ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(2, "Backpack")
         end
 
         if not HasCorrectItemInBackpack then
-            print("[DEBUG] Fetching transformation item:", formName)
             ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(formName)
             task.wait(1)
         end
-    
-        print("[DEBUG] Equipping transformation item...")
+
         ReplicatedStorage.Remote.Function.InventoryFunction:InvokeServer(2, "Backpack")
         task.wait(1)
-    
-        print("[DEBUG] Using VirtualInputManager for transformation...")
+
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
         task.wait(0.1)
         VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
@@ -203,19 +186,16 @@ local Tabs = {
         if HoldFist then
             HoldFist()
         else
-            warn("[DEBUG] Function HoldFist() is not defined!")
         end
     end
     
     -- ฟังก์ชันเปลี่ยนฟอร์มอัตโนมัติ
     local function ChangeToSelectedForm()
-        print("[DEBUG] ChangeToSelectedForm() ถูกเรียก!")
     
         local currentRider = LocalPlayer.RiderStats.ClientRider.Value
     
         -- ถ้าเป็นฟอร์มพิเศษและ Stamina ต่ำกว่า 60% ถือหมัดก่อน
         if ShouldRevertToFist() then
-            print("[DEBUG] Stamina ต่ำกว่า 60%, ถือหมัดแทน")
             HoldFist()
             repeat
                 task.wait(1)
@@ -224,26 +204,21 @@ local Tabs = {
     
         -- ตรวจสอบว่าเลือกฟอร์มไว้หรือไม่
         if not SelectedForm or SelectedForm == "" then 
-            warn("[DEBUG] ไม่มีฟอร์มที่ถูกเลือก, ออกจากฟังก์ชัน") 
             return 
         end
     
         -- ตรวจสอบว่าผู้เล่นมีฟอร์มปัจจุบันเป็นอะไร
         local currentForm = GetCurrentForm()
-        print("[DEBUG] ฟอร์มปัจจุบัน:", currentForm, "ฟอร์มที่ต้องการเปลี่ยน:", SelectedForm)
     
         if currentForm == SelectedForm then 
-            print("[DEBUG] ฟอร์มที่ต้องการตรงกับฟอร์มปัจจุบัน, ไม่ต้องเปลี่ยน") 
             return 
         end
     
         -- ตรวจสอบว่ากำลังแปลงร่างอยู่หรือไม่
         if IsTransformed() then 
-            print("[DEBUG] ผู้เล่นกำลังแปลงร่างอยู่แล้ว, ไม่ต้องเปลี่ยนฟอร์ม") 
             return 
         end
-    
-        print("[DEBUG] กำลังเปลี่ยนเป็นฟอร์ม:", SelectedForm)
+
     
         if currentRider == "Kugha" then
             local ohTable1 = {["ActiveForm"] = SelectedForm, ["ActiveRider"] = true}
@@ -256,25 +231,20 @@ local Tabs = {
         elseif FormTable[currentRider] then
             TransformWithItem()
         end
-    
-        print("[DEBUG] เปลี่ยนฟอร์มเสร็จแล้ว")
+
         task.wait(1)
     end
     
     -- เปิดใช้งาน AutoForm พร้อมเงื่อนไข Stamina
     if AutoForm then
         AutoForm:OnChanged(function()
-            print("[DEBUG] AutoForm changed, starting loop...")
             task.spawn(function()
                 while AutoForm.Value do
                     task.wait(2)
-                    print("[DEBUG] Running ChangeToSelectedForm...")
                     pcall(ChangeToSelectedForm)
                 end
             end)
         end)
-    else
-        warn("[DEBUG] AutoForm is not defined!")
     end       
     
     -- ฟังก์ชันอัปเดต Dropdown ฟอร์มตาม ClientRider
@@ -308,14 +278,11 @@ local Tabs = {
     
     -- เปิดใช้งาน AutoForm
     AutoForm:OnChanged(function()
-        print("[DEBUG] AutoForm ถูกเปลี่ยนค่า, กำลังเริ่ม Loop...")
         task.spawn(function()
             while AutoForm.Value do
-                print("[DEBUG] กำลังเรียก ChangeToSelectedForm()")
                 task.wait(2) 
                 pcall(ChangeToSelectedForm)
             end
-            print("[DEBUG] AutoForm ถูกปิด, Loop หยุดแล้ว")
         end)
     end)       
 
