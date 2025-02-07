@@ -771,7 +771,6 @@ end)
                                         if HumanoidRootPart:FindFirstChild("antifall") and HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
                                             if DungeonMonValue.Name == "T-Rex Dopant Lv.80" or DungeonMonValue.Name == "Xmas Goon Lv.80" then
                                                 task.wait(0.1)
-                                            end
                                             if character:FindFirstChild("Attack") then
                                                 local humanoid = DungeonMonValue:FindFirstChild("Humanoid")
                                                 if humanoid and humanoid.Health > 0 then
