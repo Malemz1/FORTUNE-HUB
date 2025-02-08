@@ -145,9 +145,11 @@ local Tabs = {
             print("[DEBUG] Dungeon Removed! Waiting 1s before re-entering...")
             DungeonFound = false
             task.wait(1)
-            if autoRush and not DungeonFound then
+            
+            while autoRush and not DungeonFound do
                 print("[DEBUG] Re-entering BossRush...")
                 enterBossRush()
+                task.wait(3) -- รอ 3 วินาทีเพื่อลดการสแปมเซิร์ฟเวอร์
             end
         end
     end)
@@ -256,7 +258,6 @@ local Tabs = {
             end
         end)
     end    
-    
 
     local MiscTT = Tabs.pageSetting:AddSection("Misc Setting")
 
