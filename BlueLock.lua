@@ -59,7 +59,6 @@ local Tabs = {
     Kaitan = Window:AddTab({ Title = "Kaitan", Icon = "crown" }),
     OP = Window:AddTab({ Title = "OP", Icon = "apple" }),
     Spin = Window:AddTab({ Title = "Spin", Icon = "box" }),
-    Rage = Window:AddTab({ Title = "Rage", Icon = "baby" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
@@ -316,10 +315,10 @@ local Input = Tabs.Legit:AddInput("HitboxIP", {
 local HitboxKeybind = Tabs.Legit:AddKeybind("HitboxKeybind", {
     Title = "Toggle Hitbox Keybind",
     Mode = "Toggle", 
-    Default = "...",
+    Default = "",
     Callback = function()
 
-        local currentState = Options.HitboxIP.Value
+        local currentState = Options.HitboxTG.Value
         Options.HitboxTG:SetValue(not currentState)
         Fluent:Notify({
             Title = "Hitbox Toggled",
@@ -445,7 +444,7 @@ end
 local InstantKick = Tabs.Legit:AddKeybind("KickKeybind", {
     Title = "Instance Kick Keybind (PC Only)",
     Mode = "Toggle",
-    Default = "...",
+    Default = "",
     Callback = function()
         shootBall()
     end,
@@ -479,15 +478,19 @@ local Input1 = Tabs.Legit:AddInput("Input", {
 ----------------- Kaitan Tab ------------------
 local Striker = Tabs.Kaitan:AddSection("Striker")
 
-local plr = game.Players.LocalPlayer
+-- 🛠️ โหลด Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+-- 📌 กำหนดตัวแปรหลัก
+local plr = Players.LocalPlayer
 local chr = plr.Character or plr.CharacterAdded:Wait()
 local hrp = chr:WaitForChild("HumanoidRootPart")
+local State = ReplicatedStorage:FindFirstChild("GameState") or Instance.new("StringValue") -- ตรวจสอบสถานะเกม
 
-local HomeGoal = workspace.Goals.Away
-local AwayGoal = workspace.Goals.Home
-
-local GameValues = game:GetService("ReplicatedStorage"):WaitForChild("GameValues")
-local State = GameValues.State -- เข้าถึงตัวแปร State
+local HomeGoal = Workspace:FindFirstChild("HomeGoal")
+local AwayGoal = Workspace:FindFirstChild("AwayGoal")
 
 local running = false -- ควบคุมสถานะการทำงานของระบบ Auto Goal
 
@@ -560,117 +563,130 @@ local function removeUI()
     end
 end
 
--- ฟังก์ชันรอจนกว่าผู้เล่นจะอยู่ในทีม Home หรือ Away
-local function waitForValidTeam()
-    while not (plr.Team and (plr.Team.Name == "Home" or plr.Team.Name == "Away")) do
-        task.wait(1) -- รอ 1 วินาทีแล้วตรวจสอบใหม่
-    end
+-- ✅ ตรวจสอบว่ามีประตูอยู่ในเกมหรือไม่
+if not HomeGoal or not AwayGoal then
 end
 
--- ฟังก์ชันเทเลพอร์ตบอลไปยังประตู
-local function teleportBallToGoal(ball, goal)
-    if ball and goal then
-        for i = 1, 5 do
-            ball.CFrame = goal.CFrame
-            task.wait(0.1)
+-- ✅ ฟังก์ชันโหลดและตรวจสอบ `BallService`
+local function getBallService()
+    local BallService
+    repeat
+        local Packages = ReplicatedStorage:FindFirstChild("Packages")
+        local Knit = Packages and Packages:FindFirstChild("Knit")
+        local Services = Knit and Knit:FindFirstChild("Services")
+        BallService = Services and Services:FindFirstChild("BallService")
+
+        if not BallService then
+            task.wait(1) -- รอ 1 วินาทีแล้วลองใหม่
         end
-    end
+    until BallService
+
+    return BallService
 end
 
--- ฟังก์ชันตรวจสอบสถานะว่าเรามีบอลหรือไม่
+local BallService = getBallService()
+
+-- 🎯 ฟังก์ชันตรวจสอบว่าผู้เล่นมีบอลหรือไม่
 local function hasBall()
     local values = chr:FindFirstChild("Values")
     if values then
         local hasBallValue = values:FindFirstChild("HasBall")
         if hasBallValue and hasBallValue.Value == true then
-            return true -- เรามีบอลอยู่ในตัว
+            return true
         end
     end
-    return false -- เราไม่มีบอล
+    return false
 end
 
--- ฟังก์ชันสำหรับยิงบอลและเทเลพอร์ต
+-- 🎯 ฟังก์ชันสำหรับยิงบอลและเทเลพอร์ต
+-- 🎯 ฟังก์ชันสำหรับยิงบอลและเทเลพอร์ต
 local function shootAndTeleport()
     local ball = nil
 
-    -- ค้นหาบอล
-    for _, obj in pairs(workspace:GetDescendants()) do
+    -- 🔍 ค้นหาบอล
+    for _, obj in pairs(Workspace:GetDescendants()) do
         if obj:IsA("BasePart") and obj.Name:lower():find("hitbox") and obj.Parent.Name:lower():find("football") then
             ball = obj
             break
         end
     end
 
-    if ball then
-        if hasBall() then
-            -- ยิงบอล
-            local ohNumber1 = 64.49900161242113
-            local ohNil2 = nil
-            local ohNil3 = nil
-            local ohVector34 = Vector3.new(0.07641301304101944, -0.35041216015815735, -0.9334732294082642)
-            game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Shoot:FireServer(ohNumber1, ohNil2, ohNil3, ohVector34)
+    -- ✅ ตรวจสอบว่า `ball` ไม่เป็น nil ก่อนใช้งาน
+    if not ball then
+        return
+    end
 
-            -- รอสักครู่ก่อนวาร์ปบอล
-            task.wait(0.3)
+    if hasBall() then
 
-            -- เทเลพอร์ตบอลไปยังประตูฝั่งตรงข้าม
-            local team = plr.Team
-            if team and team.Name == "Home" then
-                teleportBallToGoal(ball, AwayGoal)
-            elseif team and team.Name == "Away" then
-                teleportBallToGoal(ball, HomeGoal)
-            end
-        else
-            -- ถ้าเราไม่มีบอล ให้ส่งคำสั่ง Slide
-            game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Slide:FireServer()
+        -- ✅ ตรวจสอบ `RE.Shoot` ก่อนใช้งาน
+        local RE = BallService:FindFirstChild("RE")
+        local Shoot = RE and RE:FindFirstChild("Shoot")
+
+        if Shoot then
+            Shoot:FireServer(64.499, nil, nil, Vector3.new(0.076, -0.35, -0.93))
+        end
+
+        -- ⏳ รอ 0.3 วินาทีก่อนวาร์ปบอล
+        task.wait(0.3)
+
+        -- ✅ ตรวจสอบว่า `ball` และ `goal` มีอยู่จริงก่อนเปลี่ยนตำแหน่ง
+        local team = plr.Team
+        if team and team.Name == "Home" and AwayGoal then
+            ball.CFrame = AwayGoal.CFrame
+        elseif team and team.Name == "Away" and HomeGoal then
+            ball.CFrame = HomeGoal.CFrame
+        end
+    else
+        -- 🏃‍♂️ ถ้าเราไม่มีบอล ให้ส่งคำสั่ง Slide
+        local RE = BallService:FindFirstChild("RE")
+        local Slide = RE and RE:FindFirstChild("Slide")
+
+        if Slide then
+            Slide:FireServer()
         end
     end
 end
 
--- ฟังก์ชันสำหรับเคลื่อนที่เข้าใกล้บอล
 local function autoGoal()
-    -- รอจนกว่าผู้เล่นจะอยู่ในทีม Home หรือ Away
-    waitForValidTeam()
 
+    -- ✅ รอจนกว่าผู้เล่นจะอยู่ในทีม
+    while not (plr.Team and (plr.Team.Name == "Home" or plr.Team.Name == "Away")) do
+        task.wait(1)
+    end
+
+    -- 🔄 **วนลูปไปเรื่อยๆ**
     while running do
-        -- ตรวจสอบว่า State เป็น "Playing" หรือไม่
-        if State.Value ~= "Playing" then
-            -- รอจนกว่า State จะกลับมาเป็น "Playing"
-            repeat
-                State:GetPropertyChangedSignal("Value"):Wait()
-            until State.Value == "Playing" or not running -- ออกจาก loop ถ้า running ถูกปิด
-        end
 
-        if not running then
-            break -- หากระบบถูกปิด ให้หยุดลูป
-        end
-
-        -- ค้นหาบอล
         local ball = nil
-        for _, obj in pairs(game.workspace:GetDescendants()) do
+        for _, obj in pairs(Workspace:GetDescendants()) do
             if obj:IsA("BasePart") and obj.Parent and obj.Parent.Name:lower():find("football") then
                 ball = obj
                 break
             end
         end
 
-        if ball then
-            -- วาร์ปตัวละครไปยังตำแหน่งของบอลทันที
-            hrp.CFrame = ball.CFrame
-            shootAndTeleport() -- ยิงบอลหรือสไลด์บอล
+        -- ✅ ถ้าไม่พบบอล ให้รอแล้วลองใหม่
+        if not ball then
+            task.wait(1)
+            continue
         end
 
-        task.wait(0.4) -- รอในแต่ละรอบ
+        if hrp then
+            hrp.CFrame = ball.CFrame
+            shootAndTeleport()
+        end
+
+        task.wait(0.4) -- ⏳ รอ 0.4 วินาทีก่อนค้นหาบอลรอบต่อไป
     end
 end
 
--- Toggle สำหรับเปิด/ปิดระบบ Auto Goal
+-- 🔘 Toggle สำหรับเปิด/ปิด Auto Goal
 local Toggle1 = Tabs.Kaitan:AddToggle("AutoFarmTG", {Title = "Auto Farm", Default = false })
 
-Toggle:OnChanged(function()
-    running = Toggle1.Value -- อัปเดตสถานะการทำงาน
+Toggle1:OnChanged(function()
+    running = Toggle1.Value -- 🔄 อัปเดตสถานะการทำงาน
     if running then
-        task.spawn(autoGoal) -- เริ่มทำงานใน Thread ใหม่
+        task.spawn(autoGoal) -- 🚀 เริ่มทำงานใน Thread ใหม่
     end
 end)
 
@@ -690,7 +706,7 @@ local GoalTitle = Tabs.Kaitan:AddSection("Goal (In Testing)")
 
 local tState = false
 
-local t = Tabs.Kaitan:AddToggle("AutoGoal", {Title = "Auto GK", Default = false})
+local t = Tabs.Kaitan:AddToggle("AutoGK", {Title = "Auto GK", Default = false})
 
 t:OnChanged(function()
     tState = t.Value
@@ -701,10 +717,10 @@ t:OnChanged(function()
     })
 end)
 
-local kb = Tabs.Kaitan:AddKeybind("AutoGoalKeybind", {
+local kb = Tabs.Kaitan:AddKeybind("AutoGKKeybind", {
     Title = "Auto GK Keybind",
     Mode = "Toggle",
-    Default = "...",
+    Default = "",
     Callback = function()
         tState = not tState
         t:SetValue(tState)
@@ -1120,7 +1136,7 @@ local toggle = Tabs.OP:AddToggle("KaiserToggle", {
 local keybind = Tabs.OP:AddKeybind("InstantKeybind", {
     Title = "Toggle Kaiser Impack Keybind",
     Mode = "Toggle",
-    Default = "...",
+    Default = "",
     Callback = function()
         ig = not ig
         toggle:SetValue(ig)
@@ -1256,7 +1272,7 @@ local toggle = Tabs.OP:AddToggle("InstantGoalToggle", {
 local keybind = Tabs.OP:AddKeybind("InstantKeybind", {
     Title = "Toggle Curve Shot Keybind",
     Mode = "Toggle",
-    Default = "...",
+    Default = "",
     Callback = function()
         ig = not ig
         toggle:SetValue(ig)
@@ -1691,246 +1707,7 @@ local AutoFlowToggle = Tabs.Spin:AddToggle("AutoFlowToggle", {
     end
 })
 
-------------------------------------------------- Rage -----------------------------------------------------------------
-local function getBall()
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj.Name == "Football" then
-            return obj
-        end
-    end
-    return nil
-end
 
-local function autoGoal(targetGoal)
-    local ball = getBall()
-    if ball and ball:IsA("BasePart") then
-        ball.CFrame = targetGoal.CFrame + Vector3.new(0, 0, 1)
-    end
-end
-
-local function teleportAllToPosition(pos)
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            plr.Character.HumanoidRootPart.CFrame = CFrame.new(pos)
-        end
-    end
-end
-
-local function freezeAllPlayers()
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local root = plr.Character.HumanoidRootPart
-            root.Anchored = true
-        end
-    end
-end
-
-local function unfreezeAllPlayers()
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local root = plr.Character.HumanoidRootPart
-            root.Anchored = false
-        end
-    end
-end
-
-local function nukeServer()
-    local ball = getBall()
-    for i = 1, 50 do
-        if ball then
-            ball.CFrame = CFrame.new(Vector3.new(math.random(-500, 500), math.random(50, 100), math.random(-500, 500)))
-            wait(0.1)
-        end
-    end
-end
-
--- Get goals for auto-goal targeting
-local homeGoal = workspace.Goals.Home
-local awayGoal = workspace.Goals.Away
-
------------------ Rage Tab ------------------
-local RageTitle = Tabs.Rage:AddSection("Rage Features")
-
-local autoGoalEnabled = false
-
-local autoGoalToggle = Tabs.Rage:AddToggle("autoGoalToggle", {
-    Title = "Auto Goal (Spam)",
-    Description = "Toggle spamming auto-goals into the opponent's net.",
-    Default = false,
-    Callback = function(state)
-        autoGoalEnabled = state
-        if autoGoalEnabled then
-            Fluent:Notify({
-                Title = "Auto Goal (Spam)",
-                Content = "Spamming goals enabled! Opponents will cry >:D",
-                Duration = 3
-            })
-            task.spawn(function()
-                while autoGoalEnabled do
-                    if autoGoalEnabled == false then break end
-
-                    -- Find the football
-                    local football = findFootball()
-
-                    if football and football:IsA("BasePart") then
-                        -- Determine which goal to teleport the ball into
-                        local targetGoal = nil
-                        local player = game.Players.LocalPlayer
-
-                        if player.Team and player.Team.Name == "Home" then
-                            targetGoal = AwayGoal
-                        elseif player.Team and player.Team.Name == "Away" then
-                            targetGoal = HomeGoal
-                        end
-
-                        if targetGoal then
-                            football.CFrame = targetGoal.CFrame
-
-                            shootBall()
-                        end
-                    end
-
-                    task.wait(0.2)
-                end
-            end)
-        else
-            Fluent:Notify({
-                Title = "Auto Goal (Spam)",
-                Content = "Spamming goals disabled! You're being nice now.",
-                Duration = 3
-            })
-        end
-    end
-})
-
-local autoSlideToggle = Tabs.Rage:AddToggle("autoSlideToggle", {
-    Title = "Auto Slide (Steal Ball)",
-    Description = "Automatically slide to steal the ball from opponents.",
-    Default = false,
-    Callback = function(state)
-        autoSlideEnabled = state
-        if autoSlideEnabled then
-            Fluent:Notify({
-                Title = "Auto Slide",
-                Content = "Automatic sliding to steal the ball is now enabled!",
-                Duration = 3
-            })
-
-            task.spawn(function()
-                while autoSlideEnabled do
-                    local player = game.Players.LocalPlayer
-
-                    if not player.Character or not player.Character:FindFirstChild("Values") then
-                        task.wait(0.1)
-                    end
-
-                    local hasBall = player.Character.Values:FindFirstChild("HasBall")
-                    if hasBall and not hasBall.Value then
-
-                        local football = findFootball()
-
-                        if football and football:IsA("BasePart") then
-
-                            local distance = (player.Character.HumanoidRootPart.Position - football.Position).Magnitude
-                            if distance <= 20 then
-                                
-                                game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Slide:FireServer()
-                            end
-                        end
-                    end
-
-                    task.wait(0.1)
-                end
-            end)
-        else
-            Fluent:Notify({
-                Title = "Auto Slide",
-                Content = "Automatic sliding to steal the ball is now disabled!",
-                Duration = 3
-            })
-        end
-    end
-})
-
-local autoTeleportToggle = Tabs.Rage:AddToggle("autoTeleportToggle", {
-    Title = "Auto Teleport to Ball",
-    Description = "Automatically teleport to the ball when active.",
-    Default = false,
-    Callback = function(state)
-        autoTeleportEnabled = state
-        if autoTeleportEnabled then
-            Fluent:Notify({
-                Title = "Auto Teleport",
-                Content = "Teleporting to the ball is now enabled!",
-                Duration = 3
-            })
-
-            task.spawn(function()
-                while autoTeleportEnabled do
-                    local player = game.Players.LocalPlayer
-
-                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        local football = findFootball()
-
-                        if football and football:IsA("BasePart") then
-                            local humanoidRootPart = player.Character.HumanoidRootPart
-                            humanoidRootPart.CFrame = football.CFrame + Vector3.new(0, 5, 0) -- Add slight offset above the ball
-                        end
-                    end
-
-                    task.wait(0.1)
-                end
-            end)
-        else
-            Fluent:Notify({
-                Title = "Auto Teleport",
-                Content = "Teleporting to the ball is now disabled.",
-                Duration = 3
-            })
-        end
-    end
-})
-
-
-Tabs.Rage:AddButton({
-    Title = "Teleport All Players",
-    Description = "Teleport all players to a random position on the map.",
-    Callback = function()
-        local randomPos = Vector3.new(math.random(-200, 200), math.random(50, 100), math.random(-200, 200))
-        teleportAllToPosition(randomPos)
-        Fluent:Notify({
-            Title = "Teleport All Players",
-            Content = "Everyone teleported to: " .. tostring(randomPos),
-            Duration = 3
-        })
-    end
-})
-
-Tabs.Rage:AddButton({
-    Title = "Freeze All Players",
-    Description = "Freeze every player in the server.",
-    Callback = function()
-        freezeAllPlayers()
-        Fluent:Notify({
-            Title = "Freeze Players",
-            Content = "Everyone is now frozen. Haha!",
-            Duration = 3
-        })
-    end
-})
-
-Tabs.Rage:AddButton({
-    Title = "Unfreeze All Players",
-    Description = "Unfreeze all players in the server.",
-    Callback = function()
-        unfreezeAllPlayers()
-        Fluent:Notify({
-            Title = "Unfreeze Players",
-            Content = "Everyone is now unfrozen.",
-            Duration = 3
-        })
-    end
-})
 
 -- Addons:
 -- SaveManager (Allows you to have a configuration system)
