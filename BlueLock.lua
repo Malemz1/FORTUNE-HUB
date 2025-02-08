@@ -1573,7 +1573,7 @@ local StyleTitle = Tabs.Spin:AddSection("Style Spin")
 local MultiDropdown = Tabs.Spin:AddDropdown("StyleLockDropdown", {
     Title = "Style Lock",
     Description = "Select styles to stop spinning.",
-    Values = {"Isagi", "Chigiri", "Bachira", "Otoya", "Hiori", "Gagamaru", "King", "Nagi", "Reo",  "Karasu", "Shidou", "Sae", "Aiku", "Rin", "Yukimiya"}, -- Replace with actual style names
+    Values = {"Isagi", "Chigiri", "Bachira", "Otoya", "Hiori", "Gagamaru", "King", "Nagi", "Reo",  "Karasu", "Shidou", "Kunigami", "Sae", "Aiku", "Rin", "Yukimiya"}, -- Replace with actual style names
     Multi = true,
     Default = {}
 })
