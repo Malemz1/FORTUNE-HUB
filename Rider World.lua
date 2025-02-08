@@ -10,6 +10,7 @@ getgenv().Settings = {
     AutoReset = nil,
     SelectDungeon = nil,
     AutoDungeon = nil,
+    bossType = nil,
 }
 
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
@@ -67,6 +68,195 @@ local Tabs = {
     SelectAttackMode:OnChanged(function(Value)
         getgenv().Settings.SelectAttackMode = Value
     end)
+
+    local autoRush = false
+    local attackDistance = 6
+    local DungeonFound = false
+
+    local rs = game:GetService("ReplicatedStorage")
+    local ws = game:GetService("Workspace")
+    local p = game.Players.LocalPlayer
+    local pg = p:FindFirstChild("PlayerGui")
+
+    local AutoRush = Tabs.pageMain:AddToggle("AutoBossRush", {Title = "Enable Auto Boss Rush", Default = false})
+    AutoRush:OnChanged(function(v)    
+        autoRush = v
+        print("[DEBUG] Toggle AutoBossRush:", autoRush)
+        
+        if autoRush then
+            if not DungeonFound then
+                print("[DEBUG] No Dungeon found! Entering BossRush in 1s...")
+                task.wait(1)
+                enterBossRush()
+            end
+        else
+            DungeonFound = false
+        end
+    end)
+
+    local dropdown = Tabs.pageMain:AddDropdown("BossType", {
+        Title = "Select Boss Rush Type",
+        Values = {"MirrorWorld", "Xmas", "AncientWorld", "SmartWorld"},
+        Default = ""
+    })
+    dropdown:OnChanged(function(v)
+        bossType = v
+        print("[DEBUG] Boss Type changed to:", bossType)
+    end)
+
+    local slider = Tabs.pageMain:AddSlider("AttackDistance", {
+        Title = "Attack Distance",
+        Default = 6,
+        Min = 3,
+        Max = 50,
+        Rounding = 1
+    })
+    slider:OnChanged(function(v)
+        attackDistance = v
+        print("[DEBUG] Attack Distance changed to:", attackDistance)
+    end)
+
+    function enterBossRush()
+        print("[DEBUG] Entering BossRush...")
+        rs.Remote.Event.RiderManager:FireServer("Resource")
+    end
+
+    function SelectBossType()
+        repeat task.wait() until pg:FindFirstChild("BossRushGUI")
+        print("[DEBUG] BossRushGUI found! Selecting Boss Type:", bossType)
+        pg.BossRushGUI.BossRushRemote:FireServer(bossType)
+    end
+    
+    p.ChildAdded:Connect(function(child)
+        if child.Name == "Dungeon" then
+            print("[DEBUG] Dungeon Created! Waiting for BossRushGUI...")
+            DungeonFound = true
+            
+            SelectBossType() -- ✅ เลือกประเภทบอสก่อนเริ่มฟาร์ม
+            task.wait(1) -- รอ 1 วินาทีกันข้อผิดพลาด
+            
+            autoFarm() -- ✅ เริ่มฟาร์มบอสหลังเลือกประเภทบอสแล้ว
+        end
+    end)
+    
+    
+    p.ChildRemoved:Connect(function(child)
+        if child.Name == "Dungeon" and autoRush then
+            print("[DEBUG] Dungeon Removed! Waiting 1s before re-entering...")
+            DungeonFound = false
+            task.wait(1)
+            if autoRush and not DungeonFound then
+                print("[DEBUG] Re-entering BossRush...")
+                enterBossRush()
+            end
+        end
+    end)
+
+    local function EquipSlot(Slot)
+        game:GetService("ReplicatedStorage").Remote.Function.InventoryFunction:InvokeServer(Slot, "Backpack")
+    end
+    
+    local function EquipSlot(Slot)
+        game:GetService("ReplicatedStorage").Remote.Function.InventoryFunction:InvokeServer(Slot, "Backpack")
+    end
+    
+    function autoFarm()
+        task.spawn(function()
+            while autoRush and DungeonFound do
+                task.wait()
+                
+                local character = game.Players.LocalPlayer.Character
+                if character then
+                    local HumanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    local Humanoid = character:FindFirstChild("Humanoid")
+    
+                    if HumanoidRootPart and Humanoid then
+                        if character:FindFirstChild("Transformed") then
+                            for _, boss in ipairs(workspace.Lives:GetChildren()) do
+                                if boss:IsA("Model") and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("Boss") then
+                                    if boss and not (boss.Name == "T-Rex Dopant Lv.80" or boss.Name == "Xmas Goon Lv.80") then
+                                        if HumanoidRootPart:FindFirstChild("antifall") and HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
+                                            if character:FindFirstChild("Attack") then
+                                                local bossHRP = boss:FindFirstChild("HumanoidRootPart") or boss:WaitForChild("HumanoidRootPart", 9e99)
+                                                local bossHumanoid = boss:FindFirstChild("Humanoid") or boss:WaitForChild("Humanoid", 9e99)
+    
+                                                if bossHumanoid and bossHRP and bossHumanoid.Health > 0 then
+                                                    repeat task.wait()
+                                                        task.spawn(function()
+                                                            HumanoidRootPart.CFrame = bossHRP.CFrame * CFrame.new(0, 7, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                                                        end)
+    
+                                                        if getgenv().Settings.SelectAttackMode == "M1" or getgenv().Settings.SelectAttackMode == "M1 + M2" then
+                                                            character.PlayerHandler.HandlerEvent:FireServer({
+                                                                CombatAction = true,
+                                                                MouseData = bossHRP.CFrame,
+                                                                Input = "Mouse1",
+                                                                LightAttack = true,
+                                                                Attack = true
+                                                            })
+                                                        end
+    
+                                                        task.wait(0.1)
+    
+                                                        if getgenv().Settings.SelectAttackMode == "M2" or getgenv().Settings.SelectAttackMode == "M1 + M2" then
+                                                            character.PlayerHandler.HandlerEvent:FireServer({
+                                                                CombatAction = true,
+                                                                MouseData = bossHRP.CFrame,
+                                                                Input = "Mouse2",
+                                                                HeavyAttack = true,
+                                                                Attack = true
+                                                            })
+                                                        end
+                                                    until not autoRush or bossHumanoid.Health <= 0 or Humanoid.Health <= 0 or not character:FindFirstChild("Transformed") or not character:FindFirstChild("Attack") or not bossHumanoid or not bossHRP
+                                                end
+                                            else
+                                                task.wait(2)
+                                                EquipSlot(1)
+                                                task.wait(0.1)
+                                            end
+                                        else
+                                            local antifall = Instance.new("BodyVelocity", HumanoidRootPart)
+                                            antifall.Velocity = Vector3.new(0, 0, 0)
+                                            antifall.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                            antifall.P = 1250
+                                            antifall.Name = "antifall"
+                                            Humanoid.PlatformStand = true
+                                        end
+                                    end
+                                end
+                            end
+                        else
+                            game:GetService("Players").LocalPlayer.Character.PlayerHandler.HandlerFunction:InvokeServer("Henshin")     
+                            task.wait(0.1)    
+                        end
+                    end
+                end
+            end
+    
+            -- 🛑 Stop AutoFarm & Remove Anti-Fall
+            task.wait(0.1)
+            if not autoRush then
+                pcall(function()
+                    local character = game.Players.LocalPlayer.Character
+                    if character then
+                        local HumanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                        if HumanoidRootPart then
+                            for _, v in pairs(HumanoidRootPart:GetChildren()) do
+                                if v.Name == "antifall" or v:IsA("BodyVelocity") then
+                                    task.wait(0.1)
+                                    v:Destroy()
+                                    if character:FindFirstChild("Humanoid") then
+                                        character.Humanoid.PlatformStand = false
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    end    
+    
 
     local MiscTT = Tabs.pageSetting:AddSection("Misc Setting")
 
@@ -775,7 +965,7 @@ end)
                     HumanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
                     Humanoid = newCharacter:WaitForChild("Humanoid")
                 end)
-                if AutoMob.Value or AutoFarmLevel.Value or AutoDungeon.Value then
+                if AutoMob.Value or AutoFarmLevel.Value or AutoDungeon.Value or AutoRush.Value then
                     if AutoReset.Value then
                         pcall(function()
                             local text = game:GetService("Players").LocalPlayer.PlayerGui.Main.Info.Stamina.StaminaText.Text
