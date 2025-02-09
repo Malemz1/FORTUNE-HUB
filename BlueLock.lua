@@ -354,8 +354,14 @@ AutoDB:OnChanged(function(val)
         })
 end)
 
+local function isSameTeam(p)
+    return p.Team == lp.Team -- ✅ ถ้าอยู่ทีมเดียวกัน return true
+end
+
 local function triggerQ(p)
     if enabled and p and p:FindFirstChild("HumanoidRootPart") and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        if isSameTeam(game:GetService("Players"):FindFirstChild(p.Name)) then return end -- ❌ ไม่กด Q ถ้าอยู่ทีมเดียวกัน
+        
         local dist = (lp.Character.HumanoidRootPart.Position - p.HumanoidRootPart.Position).Magnitude
         if dist <= d then
             v:SendKeyEvent(true, Enum.KeyCode.Q, false, nil)
@@ -369,7 +375,7 @@ end
 
 local function checkPlayer(p)
     local pws = ws:FindFirstChild(p.Name)
-    if not pws then return end
+    if not pws or isSameTeam(p) then return end -- ❌ ไม่ track ถ้าอยู่ทีมเดียวกัน
     tracked[pws] = { inside = false }
 
     local s = pws:FindFirstChild("Values") and pws.Values:FindFirstChild("Sliding")
@@ -387,6 +393,9 @@ game:GetService("RunService").Heartbeat:Connect(function()
 
     for pws, data in pairs(tracked) do
         if pws and pws:FindFirstChild("HumanoidRootPart") then
+            local p = game:GetService("Players"):FindFirstChild(pws.Name)
+            if p and isSameTeam(p) then continue end -- ❌ ไม่กด Q ถ้าอยู่ทีมเดียวกัน
+
             local dist = (lp.Character.HumanoidRootPart.Position - pws.HumanoidRootPart.Position).Magnitude
             local s = pws:FindFirstChild("Values") and pws.Values:FindFirstChild("Sliding")
             local isSliding = s and s.Value
@@ -408,13 +417,14 @@ game:GetService("RunService").Heartbeat:Connect(function()
 end)
 
 ws.ChildAdded:Connect(function(c)
-    if game:GetService("Players"):FindFirstChild(c.Name) then
-        checkPlayer(c)
+    local p = game:GetService("Players"):FindFirstChild(c.Name)
+    if p and not isSameTeam(p) then
+        checkPlayer(p)
     end
 end)
 
 for _, p in pairs(game:GetService("Players"):GetPlayers()) do
-    if ws:FindFirstChild(p.Name) then
+    if ws:FindFirstChild(p.Name) and not isSameTeam(p) then
         checkPlayer(p)
     end
 end
