@@ -336,6 +336,89 @@ local HitboxKeybind = Tabs.Legit:AddKeybind("HitboxKeybind", {
 })
 local MiscTitle = Tabs.Legit:AddSection("Misc")
 
+local v = game:GetService("VirtualInputManager")
+local lp = game:GetService("Players").LocalPlayer
+local ws = game:GetService("Workspace")
+local d = 20
+local tracked = {}
+local enabled = false
+
+local AutoDB = Tabs.Legit:AddToggle("AutoDribble", {Title = "AutoDribble", Default = false })
+
+AutoDB:OnChanged(function(val)
+    enabled = val
+            Fluent:Notify({
+            Title = "AutoDribble",
+            Content = "AutoDribble " .. (enabled  and "enabled" or "disabled") .. ".",
+            Duration = 3
+        })
+end)
+
+local function triggerQ(p)
+    if enabled and p and p:FindFirstChild("HumanoidRootPart") and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        local dist = (lp.Character.HumanoidRootPart.Position - p.HumanoidRootPart.Position).Magnitude
+        if dist <= d then
+            v:SendKeyEvent(true, Enum.KeyCode.Q, false, nil)
+            task.wait()
+            v:SendKeyEvent(false, Enum.KeyCode.Q, false, nil)
+            return true
+        end
+    end
+    return false
+end
+
+local function checkPlayer(p)
+    local pws = ws:FindFirstChild(p.Name)
+    if not pws then return end
+    tracked[pws] = { inside = false }
+
+    local s = pws:FindFirstChild("Values") and pws.Values:FindFirstChild("Sliding")
+    if s then
+        s.Changed:Connect(function(val)
+            if enabled and val and triggerQ(pws) then
+                tracked[pws].inside = true
+            end
+        end)
+    end
+end
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    if not enabled then return end -- ❌ หยุดทำงานถ้า Toggle ปิด
+
+    for pws, data in pairs(tracked) do
+        if pws and pws:FindFirstChild("HumanoidRootPart") then
+            local dist = (lp.Character.HumanoidRootPart.Position - pws.HumanoidRootPart.Position).Magnitude
+            local s = pws:FindFirstChild("Values") and pws.Values:FindFirstChild("Sliding")
+            local isSliding = s and s.Value
+
+            for _, c in pairs(pws:GetChildren()) do
+                if c.Name:match("^Slide%d+$") or isSliding then
+                    if dist <= d and not data.inside then
+                        if triggerQ(pws) then
+                            tracked[pws].inside = true
+                        end
+                    elseif dist > d then
+                        tracked[pws].inside = false
+                    end
+                    break
+                end
+            end
+        end
+    end
+end)
+
+ws.ChildAdded:Connect(function(c)
+    if game:GetService("Players"):FindFirstChild(c.Name) then
+        checkPlayer(c)
+    end
+end)
+
+for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+    if ws:FindFirstChild(p.Name) then
+        checkPlayer(p)
+    end
+end
+
 local vipToggle = Tabs.Legit:AddToggle("vipToggle", {
     Title = "Toggle VIP",
     Description = "Enable or disable VIP status for your player.",
