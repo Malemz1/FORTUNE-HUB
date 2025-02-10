@@ -1243,10 +1243,6 @@ local plr = game.Players.LocalPlayer
 local placeID = game.PlaceId
 local autoHopEnabled = false
 local playerThreshold = 5
-local executed = _G.ScriptExecuted or false
-_G.ScriptExecuted = true
-
-if executed then return end
 
 local function getNewServer()
     local url = "https://games.roblox.com/v1/games/"..placeID.."/servers/Public?sortOrder=Asc&limit=100"
@@ -1289,7 +1285,8 @@ local toggleHop = Tabs.Kaitan:AddToggle("AutoHopToggle", {
 
 local inputThreshold = Tabs.Kaitan:AddInput("AutoHopThreshold", {
     Title = "Auto Hop When Players ≤",
-    Default = "5",
+    Description = "ย้ายเซิฟหากผู้เล่นน้อยกว่า"
+    Default = "4",
     Callback = function(value)
         local num = tonumber(value)
         if num then
@@ -1297,10 +1294,6 @@ local inputThreshold = Tabs.Kaitan:AddInput("AutoHopThreshold", {
         end
     end
 })
-
-task.spawn(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/BlueLock.lua"))()
-end)
 
 ----------------- OP Tab ------------------
 local plrs = game:GetService("Players")
