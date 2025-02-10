@@ -1184,6 +1184,74 @@ local AutoTeamToggle = Tabs.Kaitan:AddToggle("AutoTeamToggle", {
     end
 })
 
+local rs = game:GetService("ReplicatedStorage")
+local teams = rs:WaitForChild("Teams")
+local players = game:GetService("Players")
+local localPlayer = players.LocalPlayer
+
+local remote = rs:WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("TeamService"):WaitForChild("RE"):WaitForChild("Select")
+
+local AutoTeamEnabled1 = false
+local lastTeam = "Visitor"
+
+local function isVisitor()
+    local currentTeam = localPlayer.Team and localPlayer.Team.Name or "Visitor"
+    return currentTeam == "Visitor", currentTeam
+end
+
+local function getAvailableTeam()
+    for _, team in ipairs(teams:GetChildren()) do
+        if team:IsA("Folder") then
+            for _, pos in ipairs(team:GetChildren()) do
+                if pos:IsA("ObjectValue") and pos.Value == nil then
+                    return team.Name:gsub("Team", ""), pos.Name
+                end
+            end
+        end
+    end
+    return nil, nil
+end
+
+local function autoTeam()
+    while AutoTeamEnabled1 do
+        local isVisitorNow, currentTeam = isVisitor()
+
+        -- ถ้าผู้เล่นออกจาก Visitor ให้หยุด
+        if not isVisitorNow then
+            lastTeam = currentTeam
+            repeat
+                task.wait(1)
+                isVisitorNow, currentTeam = isVisitor()
+            until isVisitorNow or not AutoTeamEnabled1
+        end
+
+        -- ถ้าเป็น Visitor ให้เลือกทีมใหม่
+        if AutoTeamEnabled1 and isVisitorNow then
+            local team, position = getAvailableTeam()
+            if team and position then
+                print("🚀 Assigning to:", team, position)
+                remote:FireServer(team, position)
+            end
+        end
+    end
+end
+
+local AutoTeamToggle1 = Tabs.Kaitan:AddToggle("AutoTeamToggle1", {
+    Title = "Auto Team & Position (ทำงานเฉพาะเมื่อเป็น Visitor)",
+    Default = false,
+    Callback = function(Value)
+        AutoTeamEnabled1 = Value
+        Fluent:Notify({
+            Title = "Auto Team",
+            Content = AutoTeamEnabled1 and "✅ Enabled: Auto-selecting team and position." or "❌ Disabled: Auto team selection stopped.",
+            Duration = 3
+        })
+        if AutoTeamEnabled1 then
+            task.spawn(autoTeam)
+        end
+    end
+})
+
 TeamPositionDropdown:OnChanged(function(Value)
 end)
 
