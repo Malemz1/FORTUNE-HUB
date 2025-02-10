@@ -1238,36 +1238,34 @@ local ToggleInstance = Tabs.Kaitan:AddToggle("InstantGoalToggle1", {
 local HopTitle = Tabs.Kaitan:AddSection("Hop Server")
 
 local ts = game:GetService("TeleportService")
+local http = game:GetService("HttpService")
 local plr = game.Players.LocalPlayer
 local placeID = game.PlaceId
-local scriptURL = "https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/main/BlueLock.lua"
 local autoHopEnabled = false
 local playerThreshold = 5
 
-local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport or fluxus.queue_on_teleport or function(...) return ... end
-
-if not _G.ScriptLoaded then
-    _G.ScriptLoaded = true
-    task.spawn(function()
-        repeat task.wait() until game:IsLoaded()
-        wait(2)
-        loadstring(game:HttpGet(scriptURL, true))()
-    end)
+local function getNewServer()
+    local url = "https://games.roblox.com/v1/games/"..placeID.."/servers/Public?sortOrder=Asc&limit=100"
+    local response = http:JSONDecode(game:HttpGet(url))
+    for _, server in pairs(response.data) do
+        if server.playing and server.playing < playerThreshold then
+            return server.id
+        end
+    end
 end
 
-game.Players.LocalPlayer.OnTeleport:Connect(function(state)
-    if state == Enum.TeleportState.Started then
-        queue_on_teleport('repeat task.wait() until game:IsLoaded() wait(2) loadstring(game:HttpGet("'..scriptURL..'", true))()')
+local function randomServer()
+    local serverID = getNewServer()
+    if serverID then
+        ts:TeleportToPlaceInstance(placeID, serverID, plr)
+    else
+        ts:Teleport(placeID, plr)
     end
-end)
-
-local function randomServer()   
-    ts:Teleport(placeID, plr)
 end
 
 local function autoHop()
     while autoHopEnabled do
-        if tonumber(playerThreshold) and #game.Players:GetPlayers() <= tonumber(playerThreshold) then
+        if #game.Players:GetPlayers() <= playerThreshold then
             randomServer()
         end
         task.wait(2)
@@ -1287,7 +1285,8 @@ local toggleHop = Tabs.Kaitan:AddToggle("AutoHopToggle", {
 
 local inputThreshold = Tabs.Kaitan:AddInput("AutoHopThreshold", {
     Title = "Auto Hop When Players ≤",
-    Default = "5",
+    Description = "ย้ายเซิฟหากผู้เล่นน้อยกว่า"
+    Default = "4",
     Callback = function(value)
         local num = tonumber(value)
         if num then
