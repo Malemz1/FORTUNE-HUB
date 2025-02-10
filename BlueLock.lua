@@ -1237,15 +1237,11 @@ local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle1", {
 
 local HopTitle = Tabs.Kaitan:AddSection("Hop Server")
 
-local hs = game:GetService("HttpService")
 local ts = game:GetService("TeleportService")
 local plr = game.Players.LocalPlayer
 local placeID = game.PlaceId
-local allIDs = {}
-local foundCursor = ""
-local minPlayers = 4
-local autoHopEnabled = false
 local scriptURL = "https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/BlueLock.lua"
+local autoHopEnabled = false
 
 local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport or fluxus.queue_on_teleport or function(...) return ... end
 
@@ -1264,51 +1260,13 @@ game.Players.LocalPlayer.OnTeleport:Connect(function(state)
     end
 end)
 
-local fileExists = pcall(function()
-    allIDs = hs:JSONDecode(readfile("NotSameServers.json"))
-end)
-
-if not fileExists then
-    writefile("NotSameServers.json", hs:JSONEncode(allIDs))
+local function randomServer()
+    ts:Teleport(placeID, plr)
 end
 
-local function findServer()
-    local url = 'https://games.roblox.com/v1/games/' .. placeID .. '/servers/Public?sortOrder=Desc&limit=100'
-    if foundCursor ~= "" then url = url .. "&cursor=" .. foundCursor end
-
-    local success, site = pcall(function() return hs:JSONDecode(game:HttpGet(url)) end)
-    if not success then return false end
-
-    if site.nextPageCursor then foundCursor = site.nextPageCursor end
-
-    for _, v in pairs(site.data) do
-        if v.playing >= minPlayers and v.playing < v.maxPlayers then
-            local id = tostring(v.id)
-            local possible = true
-            for _, existing in pairs(allIDs) do
-                if id == tostring(existing) then
-                    possible = false
-                    break
-                end
-            end
-            if possible then
-                table.insert(allIDs, id)
-                pcall(function()
-                    writefile("NotSameServers.json", hs:JSONEncode(allIDs))
-                    ts:TeleportToPlaceInstance(placeID, id, plr)
-                end)
-                return true
-            end
-        end
-    end
-    return false
-end
-
-local function checkPlayers()
+local function autoHop()
     while autoHopEnabled do
-        if #game.Players:GetPlayers() < minPlayers then
-            findServer()
-        end
+        randomServer()
         task.wait(2)
     end
 end
@@ -1323,23 +1281,11 @@ local toggle = Tab:AddToggle("AutoHopToggle", {
     Callback = function(state)
         autoHopEnabled = state
         if state then
-            task.spawn(checkPlayers)
+            task.spawn(autoHop)
         end
     end
 })
 
-Tab:AddInput("MinPlayersInput", {
-    Title = "Minimum Players",
-    Default = "4",
-    Placeholder = "Enter min players",
-    Numeric = true,
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num > 0 then
-            minPlayers = num
-        end
-    end
-})
 
 ----------------- OP Tab ------------------
 local plrs = game:GetService("Players")
