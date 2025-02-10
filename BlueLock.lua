@@ -256,8 +256,8 @@ local HitboxTitle = Tabs.Legit:AddSection("Hitbox")
 
 local dribblingEnabled = false
 
-local Toggle = Tabs.Legit:AddToggle("HitboxTG", { Title = "Hitbox", Default = false })
-Options.HitboxTG = Toggle
+local ToggleTG = Tabs.Legit:AddToggle("HitboxTG", { Title = "Hitbox", Default = false })
+Options.HitboxTG = ToggleTG
 
 local function updateHitboxSize()
     local football = findFootball()
@@ -272,7 +272,7 @@ local function updateHitboxSize()
     end
 end
 
-Toggle:OnChanged(function()
+ToggleTG:OnChanged(function()
     local toggleValue = Options.HitboxTG.Value
     if toggleValue then
         updateHitboxSize()
@@ -463,10 +463,10 @@ local vipToggle = Tabs.Legit:AddToggle("vipToggle", {
     end
 })
 
-local Toggle = Tabs.Legit:AddToggle("AntiAFK", {Title = "Anti-AFK", Default = false})
+local ToggleAFK = Tabs.Legit:AddToggle("AntiAFK", {Title = "Anti-AFK", Default = false})
 
 local afkLoop
-Toggle:OnChanged(function(state)
+ToggleAFK:OnChanged(function(state)
     if state then
         afkLoop = game:GetService("RunService").RenderStepped:Connect(function()
             local vu = game:GetService("VirtualUser")
@@ -1028,10 +1028,10 @@ Toggle2:OnChanged(function()
 end)
 
 -- Toggle สำหรับเปิด/ปิดระบบ Auto Goal
-local Toggle = Tabs.Kaitan:AddToggle("BlToggle", {Title = "BlackScreen", Default = false })
+local ToggleBL = Tabs.Kaitan:AddToggle("BlToggle", {Title = "BlackScreen", Default = false })
 
-Toggle:OnChanged(function()
-    running = Toggle.Value -- อัปเดตสถานะการทำงาน
+ToggleBL:OnChanged(function()
+    running = ToggleBL.Value -- อัปเดตสถานะการทำงาน
     if running then
         createUI()
     else
@@ -1227,7 +1227,7 @@ bs.RE.Shoot.OnClientEvent:Connect(function()
 end)
 
 -- Toggle to enable/disable Instant Goal
-local toggle = Tabs.Kaitan:AddToggle("InstantGoalToggle1", {
+local ToggleInstance = Tabs.Kaitan:AddToggle("InstantGoalToggle1", {
     Title = "Instant Goal (Auto Farm Only)",
     Default = false,
     Callback = function(s)
@@ -1240,42 +1240,41 @@ local HopTitle = Tabs.Kaitan:AddSection("Hop Server")
 local ts = game:GetService("TeleportService")
 local plr = game.Players.LocalPlayer
 local placeID = game.PlaceId
-local scriptURL = "https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/BlueLock.lua"
+local scriptURL = "https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/main/BlueLock.lua"
 local autoHopEnabled = false
+local playerThreshold = 5
 
 local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport or fluxus.queue_on_teleport or function(...) return ... end
 
-if _G.ScriptLoaded then return end
-_G.ScriptLoaded = true
+if not _G.ScriptLoaded then
+    _G.ScriptLoaded = true
+    task.spawn(function()
+        repeat task.wait() until game:IsLoaded()
+        wait(2)
+        loadstring(game:HttpGet(scriptURL, true))()
+    end)
+end
 
 game.Players.LocalPlayer.OnTeleport:Connect(function(state)
-    if state ~= Enum.TeleportState.Started then return end
-    if not _G.Teleporting then
-        _G.Teleporting = true
-        queue_on_teleport([[
-            repeat task.wait() until game:IsLoaded()
-            wait(2)
-            loadstring(game:HttpGet("]]..scriptURL..[[", true))()
-        ]])
+    if state == Enum.TeleportState.Started then
+        queue_on_teleport('repeat task.wait() until game:IsLoaded() wait(2) loadstring(game:HttpGet("'..scriptURL..'", true))()')
     end
 end)
 
-local function randomServer()
+local function randomServer()   
     ts:Teleport(placeID, plr)
 end
 
 local function autoHop()
     while autoHopEnabled do
-        randomServer()
+        if tonumber(playerThreshold) and #game.Players:GetPlayers() <= tonumber(playerThreshold) then
+            randomServer()
+        end
         task.wait(2)
     end
 end
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YourUI/Library/main/Library.lua"))()
-local Window = Library:CreateWindow("Server Hop")
-local Tab = Window:CreateTab("Settings")
-
-local toggle = Tab:AddToggle("AutoHopToggle", {
+local toggleHop = Tabs.Kaitan:AddToggle("AutoHopToggle", {
     Title = "Auto Hop",
     Default = false,
     Callback = function(state)
@@ -1286,6 +1285,16 @@ local toggle = Tab:AddToggle("AutoHopToggle", {
     end
 })
 
+local inputThreshold = Tabs.Kaitan:AddInput("AutoHopThreshold", {
+    Title = "Auto Hop When Players ≤",
+    Default = "5",
+    Callback = function(value)
+        local num = tonumber(value)
+        if num then
+            playerThreshold = num
+        end
+    end
+})
 
 ----------------- OP Tab ------------------
 local plrs = game:GetService("Players")
