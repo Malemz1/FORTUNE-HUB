@@ -1242,7 +1242,7 @@ local http = game:GetService("HttpService")
 local plr = game.Players.LocalPlayer
 local placeID = game.PlaceId
 local autoHopEnabled = false
-local playerThreshold = 5
+local playerThreshold = 4
 
 local function getNewServer()
     local url = "https://games.roblox.com/v1/games/"..placeID.."/servers/Public?sortOrder=Asc&limit=100"
@@ -1285,7 +1285,7 @@ local toggleHop = Tabs.Kaitan:AddToggle("AutoHopToggle", {
 
 local inputThreshold = Tabs.Kaitan:AddInput("AutoHopThreshold", {
     Title = "Auto Hop When Players ≤",
-    Description = "ย้ายเซิฟหากผู้เล่นน้อยกว่า"
+    Description = "ย้ายเซิฟหากผู้เล่นน้อยกว่า",
     Default = "4",
     Callback = function(value)
         local num = tonumber(value)
