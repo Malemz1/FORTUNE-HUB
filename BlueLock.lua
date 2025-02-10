@@ -1249,13 +1249,19 @@ local scriptURL = "https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/he
 
 local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport or fluxus.queue_on_teleport or function(...) return ... end
 
+if _G.ScriptLoaded then return end
+_G.ScriptLoaded = true
+
 game.Players.LocalPlayer.OnTeleport:Connect(function(state)
-    if state ~= Enum.TeleportState.Started and state ~= Enum.TeleportState.InProgress then return end
-    queue_on_teleport([[
-        repeat task.wait() until game:IsLoaded()
-        wait(2)
-        loadstring(game:HttpGet("]]..scriptURL..[[", true))()
-    ]])
+    if state ~= Enum.TeleportState.Started then return end
+    if not _G.Teleporting then
+        _G.Teleporting = true
+        queue_on_teleport([[
+            repeat task.wait() until game:IsLoaded()
+            wait(2)
+            loadstring(game:HttpGet("]]..scriptURL..[[", true))()
+        ]])
+    end
 end)
 
 local fileExists = pcall(function()
@@ -1303,11 +1309,15 @@ local function checkPlayers()
         if #game.Players:GetPlayers() < minPlayers then
             findServer()
         end
-        task.wait(2) -- เช็คทุก 2 วิ
+        task.wait(2)
     end
 end
 
-local toggle = Tabs.Kaitan:AddToggle("AutoHopToggle", {
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YourUI/Library/main/Library.lua"))()
+local Window = Library:CreateWindow("Server Hop")
+local Tab = Window:CreateTab("Settings")
+
+local toggle = Tab:AddToggle("AutoHopToggle", {
     Title = "Auto Hop",
     Default = false,
     Callback = function(state)
@@ -1318,7 +1328,7 @@ local toggle = Tabs.Kaitan:AddToggle("AutoHopToggle", {
     end
 })
 
-Tabs.Kaitan:AddInput("MinPlayersInput", {
+Tab:AddInput("MinPlayersInput", {
     Title = "Minimum Players",
     Default = "4",
     Placeholder = "Enter min players",
