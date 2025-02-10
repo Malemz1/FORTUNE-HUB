@@ -1188,6 +1188,7 @@ local rs = game:GetService("ReplicatedStorage")
 local teams = rs:WaitForChild("Teams")
 local players = game:GetService("Players")
 local localPlayer = players.LocalPlayer
+local runService = game:GetService("RunService")
 
 local remote = rs:WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("TeamService"):WaitForChild("RE"):WaitForChild("Select")
 
@@ -1212,32 +1213,37 @@ local function getAvailableTeam()
     return nil, nil
 end
 
+local connection
 local function autoTeam()
-    while AutoTeamEnabled1 do
+    if connection then connection:Disconnect() end -- ป้องกันการซ้อนกันของฟังก์ชัน
+    connection = runService.Heartbeat:Connect(function()
+        if not AutoTeamEnabled1 then
+            connection:Disconnect()
+            return
+        end
+
         local isVisitorNow, currentTeam = isVisitor()
 
-        -- ถ้าผู้เล่นออกจาก Visitor ให้หยุด
         if not isVisitorNow then
-            lastTeam = currentTeam
-            repeat
-                task.wait(1)
-                isVisitorNow, currentTeam = isVisitor()
-            until isVisitorNow or not AutoTeamEnabled1
+            if lastTeam ~= currentTeam then
+                lastTeam = currentTeam
+            end
+            return
         end
 
-        -- ถ้าเป็น Visitor ให้เลือกทีมใหม่
-        if AutoTeamEnabled1 and isVisitorNow then
-            local team, position = getAvailableTeam()
-            if team and position then
-                print("🚀 Assigning to:", team, position)
-                remote:FireServer(team, position)
-            end
+        if lastTeam ~= "Visitor" then
+            lastTeam = "Visitor"
         end
-    end
+
+        local team, position = getAvailableTeam()
+        if team and position then
+            remote:FireServer(team, position)
+        end
+    end)
 end
 
 local AutoTeamToggle1 = Tabs.Kaitan:AddToggle("AutoTeamToggle1", {
-    Title = "Auto Team & Position (ทำงานเฉพาะเมื่อเป็น Visitor)",
+    Title = "Auto Team & Position (For Auto Farm)",
     Default = false,
     Callback = function(Value)
         AutoTeamEnabled1 = Value
@@ -1251,6 +1257,7 @@ local AutoTeamToggle1 = Tabs.Kaitan:AddToggle("AutoTeamToggle1", {
         end
     end
 })
+
 
 TeamPositionDropdown:OnChanged(function(Value)
 end)
