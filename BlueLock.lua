@@ -826,7 +826,7 @@
                         local NoClipConnect
                         local TweenService = game:GetService("TweenService")
                         local Distance = (HumanoidRootPart.Position - Target.Position).Magnitude
-                        local Speed = 80
+                        local Speed = 85
                         local Tween = TweenService:Create(HumanoidRootPart, TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear), {CFrame = Target})
                         NoClipConnect = game:GetService("RunService").Stepped:Connect(noclip)
                         Tween:Play()
@@ -897,7 +897,7 @@
                             if HumanoidRootPart:FindFirstChild("Antifall") then
                                 if HasBall.Value then
                                     Goto(HumanoidRootPart.CFrame * CFrame.new(0, 50, 0), Goal[game.Players.LocalPlayer.Team.Name], "Kick")
-                                    task.wait(2)
+                                    task.wait(1)
                                 else
                                     if workspace:FindFirstChild("Football") then
                                         for BallIndex, BallValue in pairs(workspace:GetChildren()) do
