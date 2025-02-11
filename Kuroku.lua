@@ -47,6 +47,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 
 local Window = Fluent:CreateWindow({
     Title = "Fearise Hub" .. " | " .. "Kuroku" .. " | " .. "[Version X]",
+    SubTitle = "by Rowlet/Blobby",
     TabWidth = 160,
     Size = Device,
     Acrylic = false,
