@@ -61,6 +61,7 @@ local Tabs = {
     Kaitan = Window:AddTab({ Title = "Kaitan", Icon = "crown" }),
     OP = Window:AddTab({ Title = "OP", Icon = "apple" }),
     Spin = Window:AddTab({ Title = "Spin", Icon = "box" }),
+    Item = Window:AddTab({ Title = "Item", Icon = "archive" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
@@ -2046,6 +2047,87 @@ local AutoFlowToggle = Tabs.Spin:AddToggle("AutoFlowToggle", {
     end
 })
 
+local EffectsTitle = Tabs.Item:AddSection("Goal Effects")
+
+local opts = {"Conquer", "Blossom", "Heart", "Step", "Rin", "Sae", "Gingerbread", "Woderland", "Presents",
+"Snowflakes", "Glitch", "City", "Dragon", "Lantern", "Blackhole", "Card", "Thunder", 
+"Lightning", "Crow", "Fire", "Glass"}
+local sel = opts[1]
+
+local d = Tabs.Item:AddDropdown("Effects", {
+    Title = "Goal Effects",
+    Values = opts,
+    Multi = false,
+    Default = 1,
+})
+
+d:OnChanged(function(v)
+    sel = v
+end)
+
+Tabs.Item:AddButton({
+    Title = "Apply Effect",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages.Knit.Services.CustomizationService.RE.Customize:FireServer("GoalEffects", sel)
+    end
+})
+
+local opts = {
+    "Cape", "Santa Hat", "Peppermint Cape", "Snowman Cape", "Gingerbread Cape", "Santa Scarf",
+    "Angel Wings", "Heart Aura", "Fireworks", "Ninja", "SHADOW", "Shadow Cape", "GLITCH",
+    "Dribbler's Glasses", "Dragon Cape", "Lanterns!"
+}
+
+local CosmeticsTitle = Tabs.Item:AddSection("Cosmetics")
+
+local sel = opts[1]
+
+local d = Tabs.Item:AddDropdown("Cosmetics", {
+    Title = "Cosmetics",
+    Values = opts,
+    Multi = false,
+    Default = 1,
+})
+
+d:OnChanged(function(v)
+    sel = v
+end)
+
+Tabs.Item:AddButton({
+    Title = "Apply Cosmetic",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages.Knit.Services.CustomizationService.RE.Customize:FireServer("Cosmetics", sel)
+    end
+})
+
+local CardsTitle = Tabs.Item:AddSection("Cards")
+
+local opts = {
+    "Crystal", "Crow", "Heart", "Itoshi Rin", "Itoshi Sae", "Dragon", "Galaxy", "Golden Winter",
+    "Holiday", "New Years", "Glitch", "Street", "Premiere", "Golden", "Specialty", "Liga",
+    "Rage", "Inside", "Water", "Earthquake", "Blue Sky", "Pattern", "Forest", "Pinky",
+    "YingYang", "Orange", "Blue", "Red", "Green", "Wood", "Basic"
+}
+
+local sel = opts[1]
+
+local d = Tabs.Item:AddDropdown("Cards", {
+    Title = "Cards",
+    Values = opts,
+    Multi = false,
+    Default = 1,
+})
+
+d:OnChanged(function(v)
+    sel = v
+end)
+
+Tabs.Item:AddButton({
+    Title = "Apply Card",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages.Knit.Services.CustomizationService.RE.Customize:FireServer("Cards", sel)
+    end
+})
 
 
 -- Addons:
