@@ -2047,10 +2047,10 @@ local AutoFlowToggle = Tabs.Spin:AddToggle("AutoFlowToggle", {
     end
 })
 
-local EffectsTitle = Tabs.Legit:AddSection("Goal Effects")
+local EffectsTitle = Tabs.Item:AddSection("Goal Effects")
 
-local opts1 = {"Conquer", "Blossom", "Heart", "Step", "Rin", "Sae", "Gingerbread", "Woderland", "Presents",
-"Snowflakes", "Glitch", "City", "Dragon", "Lantern", "Blackhole", "Card", "Thunder", 
+local opts1 = {"Conquer", "Heart", "Rin", "Sae", "Gingerbread", "Presents",
+"Snowflakes", "Lantern", "Blackhole", "Card", "Thunder", 
 "Lightning", "Crow", "Fire", "Glass", "Time Stop"}
 local sel = opts1[1]
 
@@ -2074,11 +2074,11 @@ Tabs.Item:AddButton({
 
 local opts2 = {
     "Cape", "Santa Hat", "Peppermint Cape", "Snowman Cape", "Gingerbread Cape", "Santa Scarf",
-    "Angel Wings", "Heart Aura", "Fireworks", "Ninja", "SHADOW", "Shadow Cape", "GLITCH",
-    "Dribbler's Glasses", "Dragon Cape", "Lanterns!"
+    "Angel Wings", "Fireworks", "Ninja", "SHADOW", "Shadow Cape", "GLITCH",
+    "Dragon Cape", "Lanterns!"
 }
 
-local CosmeticsTitle = Tabs.Legit:AddSection("Cosmetics")
+local CosmeticsTitle = Tabs.Item:AddSection("Cosmetics")
 
 local sel = opts2[1]
 
@@ -2100,11 +2100,11 @@ Tabs.Item:AddButton({
     end
 })
 
-local CardsTitle = Tabs.Legit:AddSection("Cards")
+local CardsTitle = Tabs.Item:AddSection("Cards")
 
 local opts3 = {
-    "Crystal", "Crow", "Heart", "Itoshi Rin", "Itoshi Sae", "Dragon", "Galaxy", "Golden Winter",
-    "Holiday", "New Years", "Glitch", "Street", "Premiere", "Golden", "Specialty", "Liga",
+    "Crystal", "Crow", "Itoshi Rin", "Itoshi Sae", "Dragon", "Galaxy", "Golden Winter",
+    "Holiday", "New Years", "Premiere", "Golden", "Liga",
     "Rage", "Inside", "Water", "Earthquake", "Blue Sky", "Pattern", "Forest", "Pinky",
     "YingYang", "Orange", "Blue", "Red", "Green", "Wood", "Basic"
 }
