@@ -346,7 +346,7 @@ local d = 20
 local tracked = {}
 local enabled = false
 
-local AutoDB = Tabs.Legit:AddToggle("AutoDribble", {Title = "AutoDribble", Description = "Testing.", Default = false })
+local AutoDB = Tabs.Legit:AddToggle("AutoDribble", {Title = "AutoDribble (PC only)", Description = "Testing.", Default = false })
 
 AutoDB:OnChanged(function(val)
     enabled = val
