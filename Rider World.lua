@@ -29,11 +29,94 @@ local Window = Fluent:CreateWindow({
 
 local Tabs = {
     --[[ Tabs --]]
+    Legit = Window:AddTab({ Title = "Legit", Icon = "align-justify" }),
     pageSetting = Window:AddTab({ Title = "Settings", Icon = "settings" }),
     pageMain = Window:AddTab({ Title = "Main", Icon = "home" }),
     pageTeleport = Window:AddTab({ Title = "Teleport", Icon = "map" }),
 }
+    --[[ LEGIT ]]----------------------------------------------------------
+    local SpeedTitle = Tabs.Legit:AddSection("Player Modifiers")
 
+local p = game:GetService("Players").LocalPlayer
+local h
+local WalkSpeed = 16
+local WalkSpeedEnabled = false
+
+-- ฟังก์ชันสำหรับบังคับค่า WalkSpeed
+local function enforceWalkSpeed()
+    if h and WalkSpeedEnabled then
+        -- ใช้ทั้ง GetPropertyChangedSignal และ Loop
+        h:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+            if h.WalkSpeed ~= WalkSpeed then
+                h.WalkSpeed = WalkSpeed
+            end
+        end)
+
+        task.spawn(function()
+            while WalkSpeedEnabled do
+                task.wait(0.1)
+                if h.WalkSpeed ~= WalkSpeed then
+                    h.WalkSpeed = WalkSpeed
+                end
+            end
+        end)
+    end
+end
+
+-- ตรวจจับตัวละครของผู้เล่น
+local function onCharacterAdded(character)
+    h = character:WaitForChild("Humanoid")
+    if WalkSpeedEnabled then
+        h.WalkSpeed = WalkSpeed
+        enforceWalkSpeed()
+    end
+end
+
+-- ตรวจจับตัวละครปัจจุบัน
+if p.Character then
+    onCharacterAdded(p.Character)
+end
+p.CharacterAdded:Connect(onCharacterAdded)
+
+-- Toggle สำหรับเปิด/ปิด WalkSpeed
+local WalkSpeedToggle = Tabs.Legit:AddToggle("WalkSpeedToggle", {
+    Title = "Toggle WalkSpeed",
+    Default = false,
+    Callback = function(state)
+        WalkSpeedEnabled = state
+        if state and h then
+            h.WalkSpeed = WalkSpeed
+            enforceWalkSpeed()
+            Fluent:Notify({
+                Title = "WalkSpeed",
+                Content = "WalkSpeed enabled: " .. tostring(WalkSpeed),
+                Duration = 3
+            })
+        elseif h then
+            h.WalkSpeed = 16 -- ค่าเริ่มต้น
+            Fluent:Notify({
+                Title = "WalkSpeed",
+                Content = "WalkSpeed reset to default.",
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- Slider สำหรับตั้งค่า WalkSpeed
+local WalkSpeedSlider = Tabs.Legit:AddSlider("WalkSpeedSlider", {
+    Title = "WalkSpeed Slider",
+    Min = 16,   
+    Max = 90,
+    Default = WalkSpeed,
+    Rounding = 1,
+    Callback = function(value)
+        WalkSpeed = value
+        if WalkSpeedEnabled and h then
+            h.WalkSpeed = WalkSpeed
+        end
+    end
+})
     --[[ SETTINGS ]]--------------------------------------------------------
     local SelectKeySkill = Tabs.pageSetting:AddDropdown("SelectKeySkill", {
         Title = "Select Skill",
