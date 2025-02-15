@@ -1,7 +1,7 @@
 
 
 local player = game.Players.LocalPlayer
-local host = "http://ec2-3-27-63-79.ap-southeast-2.compute.amazonaws.com:3000/api"
+local host = "http://ec2-3-106-212-13.ap-southeast-2.compute.amazonaws.com:3000/api/"
 
 local url = host.."/getaccess?userKey=" .. getgenv().Key
 
