@@ -117,6 +117,23 @@ local WalkSpeedSlider = Tabs.Legit:AddSlider("WalkSpeedSlider", {
         end
     end
 })
+
+local plr = game:GetService("Players").LocalPlayer
+local uis = game:GetService("UserInputService")
+
+local t = Tabs.Legit:AddToggle("MyToggle", {Title = "Infinite Jump", Default = false})
+
+t:OnChanged(function(v)
+    if v then
+        con = uis.JumpRequest:Connect(function()
+            plr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(3)
+        end)
+    else
+        if con then
+            con:Disconnect()
+        end
+    end
+end)
     --[[ SETTINGS ]]--------------------------------------------------------
     local SelectKeySkill = Tabs.pageSetting:AddDropdown("SelectKeySkill", {
         Title = "Select Skill",
@@ -622,7 +639,7 @@ end)
     local DungeonSection = Tabs.pageMain:AddSection("Dungeons")
     local SelectDungeon = Tabs.pageMain:AddDropdown("SelectDungeon", {
         Title = "SelectDungeon",
-        Values = {"Ancient", "Oz", "Ethernal", "Jocker", "Diend", "Zyga", "Orca", "Odin"},
+        Values = {"Ancient", "Oz", "Ethernal", "Jocker", "Diend", "Zyga", "Orca", "Odin", "Greed"},
         Multi = false,
         Default = getgenv().Settings.SelectDungeon or "",
         Callback = function(Value)
