@@ -20,11 +20,5 @@ warn("Script Lodded")
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/Kuroku.lua", true))()
         else
             player:Kick("Your Not Have Game Access")
-    elseif  game.PlaceId == 9301186334 then
-        if string.find(path, "RiderWorld") then
-            print("Rider : World Lodded")
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/Rider%20World.lua", true))()
-        else
-            player:Kick("Your Not Have Game Access")
         end
     end
