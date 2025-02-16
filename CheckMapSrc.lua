@@ -28,4 +28,6 @@ warn("Script Lodded")
         else
             game.Players.LocalPlayer:Kick("Your Not Have Game Access")
         end
+    else
+        game.Players.LocalPlayer:Kick("This Game Not Register")
     end
