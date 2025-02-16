@@ -26,7 +26,7 @@ end
 -- ตรวจสอบว่า request() ใช้ได้หรือไม่
 local requestFunction = (http_request or request or syn.request)
 if not requestFunction then
-    return
+    return warn("[[DEBUG]]: HTTP request function not found.")
 end
 
 -- กำหนด Header และทำ Request
@@ -48,7 +48,7 @@ if response and response.Success then
         if not data.isBanned then
             if data.hwid and data.hwid == tostring(HWID) then
                 FeariseLodded()
-            local script_path = data.gameNames
+                script_path = data.gameNames
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/CheckMapSrc.lua", true))()
             elseif data.hwid and data.hwid == "N/A" then
                 local postData = game.HttpService:JSONEncode({
@@ -67,7 +67,7 @@ if response and response.Success then
 
                 if postResponse and postResponse.Success then
                     FeariseLodded()
-                local script_path = data.gameNames
+                    script_path = data.gameNames
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/CheckMapSrc.lua", true))()
                 end
             else
@@ -78,5 +78,18 @@ if response and response.Success then
         end
     end
 else
-    warn("Key cant Empty")
+    warn("Cant Fetch Data")
+    local response = requestFunction({
+        Url = "https://httpbin.org/user-agent", 
+        Method = "GET",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        }
+    })
+    if response and response.Success then
+    	local data = game:GetService("HttpService"):JSONDecode(response.Body)
+    	print("Executor: "..data["user-agent"])
+    else
+    	warn("[[DEBUG]]: Not Have Response")
+    end
 end
