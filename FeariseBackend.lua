@@ -5,23 +5,23 @@ local host = "http://ec2-3-106-212-13.ap-southeast-2.compute.amazonaws.com:3000/
 
 local url = host.."/getaccess?userKey=" .. getgenv().key
 
--- local function FeariseLodded()
---     print([[
+local function FeariseLodded()
+    print([[
                     
---                  ______              _          _    _       _     
---                 |  ____|            (_)        | |  | |     | |    
---                 | |__ ___  __ _ _ __ _ ___  ___| |__| |_   _| |__  
---                 |  __/ _ \/ _` | '__| / __|/ _ \  __  | | | | '_ \ 
---                 | | |  __/ (_| | |  | \__ \  __/ |  | | |_| | |_) |
---                 |_|  \___|\__,_|_|  |_|___/\___|_|  |_|\__,_|_.__/ 
---                     | |             | |   | |        | |          
---                     | |     ___   __| | __| | ___  __| |          
---                     | |    / _ \ / _` |/ _` |/ _ \/ _` |          
---                     | |___| (_) | (_| | (_| |  __/ (_| |          
---                     |______\___/ \__,_|\__,_|\___|\__,_|          
+                 ______              _          _    _       _     
+                |  ____|            (_)        | |  | |     | |    
+                | |__ ___  __ _ _ __ _ ___  ___| |__| |_   _| |__  
+                |  __/ _ \/ _` | '__| / __|/ _ \  __  | | | | '_ \ 
+                | | |  __/ (_| | |  | \__ \  __/ |  | | |_| | |_) |
+                |_|  \___|\__,_|_|  |_|___/\___|_|  |_|\__,_|_.__/ 
+                    | |             | |   | |        | |          
+                    | |     ___   __| | __| | ___  __| |          
+                    | |    / _ \ / _` |/ _` |/ _ \/ _` |          
+                    | |___| (_) | (_| | (_| |  __/ (_| |          
+                    |______\___/ \__,_|\__,_|\___|\__,_|          
                                                                     
---                 ]])
--- end
+                ]])
+end
 
 -- ตรวจสอบว่า request() ใช้ได้หรือไม่
 local requestFunction = (http_request or request or syn.request)
@@ -47,7 +47,7 @@ if response and response.Success then
     if data.success then
         if not data.isBanned then
             if data.hwid and data.hwid == tostring(HWID) then
-                --FeariseLodded()
+                FeariseLodded()
                 getgenv().path = data.gameNames
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/CheckMapSrc.lua", true))()
             elseif data.hwid and data.hwid == "N/A" then
@@ -66,7 +66,7 @@ if response and response.Success then
                 })
 
                 if postResponse and postResponse.Success then
-                    --FeariseLodded()
+                    FeariseLodded()
                     getgenv().path = data.gameNames
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/CheckMapSrc.lua", true))()
                 end
