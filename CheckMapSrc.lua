@@ -1,4 +1,4 @@
-local path = getgenv().path    
+local path = script_path    
 warn("Script Lodded")
     if game.PlaceId == 18668065416 then
         if string.find(path, "BluelockRival") then
