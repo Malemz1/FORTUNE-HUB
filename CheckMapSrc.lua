@@ -1,6 +1,6 @@
 local path = script_path    
 warn("Script Lodded")
-    if game.PlaceId == 18668065416 then
+    if game.PlaceId == 18668065416 or game.PlaceId == 92517437168342 then
         if string.find(path, "BluelockRival") then
             print("Bluelock : Rival Lodded")
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/BlueLock.lua", true))()
