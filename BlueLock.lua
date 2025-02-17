@@ -346,7 +346,7 @@ local d = 20
 local tracked = {}
 local enabled = false
 
-local AutoDB = Tabs.Legit:AddToggle("AutoDribble", {Title = "AutoDribble (PC only)", Description = "Testing.", Default = false })
+local AutoDB = Tabs.Legit:AddToggle("AutoDribble", {Title = "AutoDribble", Description = "Testing.", Default = false })
 
 AutoDB:OnChanged(function(val)
     enabled = val
@@ -709,6 +709,14 @@ for _, feature in pairs({"Style", "Awakening", "Flow", "Stamina"}) do
         end
     end)
 end
+
+local BallPredic = Tabs.Visual:AddToggle("PredicToggle", {Title = "ESP BallPredic", Default = false})
+
+BallPredic:OnChanged(function()
+    getgenv().Toggle = BallPredic.Value
+end)
+
+BallPredic:SetValue(false)
 
 ----------------- Kaitan Tab ------------------
 local Striker = Tabs.Kaitan:AddSection("Striker")
@@ -2049,14 +2057,15 @@ local AutoFlowToggle = Tabs.Spin:AddToggle("AutoFlowToggle", {
 
 local EffectsTitle = Tabs.Item:AddSection("Goal Effects")
 
-local opts1 = {"Conquer", "Heart", "Rin", "Sae", "Gingerbread", "Presents",
-"Snowflakes", "Lantern", "Blackhole", "Card", "Thunder", 
-"Lightning", "Crow", "Fire", "Glass", "Time Stop"}
-local sel = opts1[1]
+local efx = {}
+for _, v in ipairs(game:GetService("ReplicatedStorage").Assets.GoalEffects:GetChildren()) do
+    table.insert(efx, v.Name)
+end
+local sel = efx[1]
 
 local d = Tabs.Item:AddDropdown("Effects", {
     Title = "Goal Effects",
-    Values = opts1,
+    Values = efx,
     Multi = false,
     Default = 1,
 })
@@ -2072,19 +2081,17 @@ Tabs.Item:AddButton({
     end
 })
 
-local opts2 = {
-    "Cape", "Santa Hat", "Peppermint Cape", "Snowman Cape", "Gingerbread Cape", "Santa Scarf",
-    "Angel Wings", "Fireworks", "Ninja", "SHADOW", "Shadow Cape", "GLITCH",
-    "Dragon Cape", "Lanterns!"
-}
-
 local CosmeticsTitle = Tabs.Item:AddSection("Cosmetics")
 
-local sel = opts2[1]
+local csm = {}
+for _, v in ipairs(game:GetService("ReplicatedStorage").Assets.Cosmetics:GetChildren()) do
+    table.insert(csm, v.Name)
+end
+local sel = csm[1]
 
 local d = Tabs.Item:AddDropdown("Cosmetics", {
     Title = "Cosmetics",
-    Values = opts2,
+    Values = csm,
     Multi = false,
     Default = 1,
 })
@@ -2102,18 +2109,15 @@ Tabs.Item:AddButton({
 
 local CardsTitle = Tabs.Item:AddSection("Cards")
 
-local opts3 = {
-    "Crystal", "Crow", "Itoshi Rin", "Itoshi Sae", "Dragon", "Galaxy", "Golden Winter",
-    "Holiday", "New Years", "Premiere", "Golden", "Liga",
-    "Rage", "Inside", "Water", "Earthquake", "Blue Sky", "Pattern", "Forest", "Pinky",
-    "YingYang", "Orange", "Blue", "Red", "Green", "Wood", "Basic"
-}
-
-local sel = opts3[1]
+local crd = {}
+for _, v in ipairs(game:GetService("ReplicatedStorage").Assets.Customization.Cards:GetChildren()) do
+    table.insert(crd, v.Name)
+end
+local sel = crd[1]
 
 local d = Tabs.Item:AddDropdown("Cards", {
     Title = "Cards",
-    Values = opts3,
+    Values = crd,
     Multi = false,
     Default = 1,
 })
@@ -2128,6 +2132,135 @@ Tabs.Item:AddButton({
         game:GetService("ReplicatedStorage").Packages.Knit.Services.CustomizationService.RE.Customize:FireServer("Cards", sel)
     end
 })
+
+----------------- Script ------------------
+
+getgenv().Settings = {
+    ["RayColor"] = Color3.new(1, 0, 0), -- สีของเส้น (แดง)
+    ["RayThickness"] = 0.2, -- ความหนาของเส้น
+    ["TweenSpeed"] = 0.0001 -- ความเร็วของ Tween
+}
+
+local ball
+local lastPosition
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local GRAVITY = workspace.Gravity
+local TIME_STEP = 0.1
+local MAX_TIME = 3
+local VELOCITY_THRESHOLD = 1
+local MOVEMENT_THRESHOLD = 1
+
+local rayPart -- เส้นที่แสดงวิถีลูกบอล
+local tween -- Tween ปัจจุบัน
+
+function getballs()
+    for _, v in pairs(workspace:GetChildren()) do
+        if v.Name == "Football" and v:FindFirstChild("Hitbox") then
+            return v
+        end
+    end
+    return nil
+end
+
+function updateBall()
+    if not getgenv().Toggle then return end -- ถ้า Toggle ปิด ไม่ต้องอัปเดตบอล
+
+    local newBall = getballs()
+    if newBall and newBall ~= ball then
+        ball = newBall
+        lastPosition = ball.Position
+    end
+end
+
+function createRayPart()
+    if not rayPart then
+        rayPart = Instance.new("Part")
+        rayPart.Anchored = true
+        rayPart.CanCollide = false
+        rayPart.Material = Enum.Material.Neon
+        rayPart.Color = getgenv().Settings["RayColor"]
+        rayPart.Size = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], 1)
+        rayPart.Parent = workspace
+    end
+end
+
+function predictBallPath()
+    if not getgenv().Toggle then
+        if rayPart then
+            rayPart.Transparency = 1 -- ซ่อนเส้นเมื่อปิด Toggle
+        end
+        return
+    end
+
+    if not ball then return end
+
+    local velocity = ball.Velocity
+    local currentPosition = ball.Position
+    local movementAmount = (currentPosition - lastPosition).Magnitude
+
+    -- ตรวจสอบว่าบอลกำลังเคลื่อนที่หรือไม่
+    if velocity.Magnitude < VELOCITY_THRESHOLD or movementAmount < MOVEMENT_THRESHOLD then
+        if rayPart then
+            -- ถ้าบอลช้ามาก ปรับขนาดเส้นให้เล็กลง แทนที่จะซ่อน
+            local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tweenGoal = {Size = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], 0.1)}
+            if tween then tween:Cancel() end
+            tween = TweenService:Create(rayPart, tweenInfo, tweenGoal)
+            tween:Play()
+        end
+        return
+    end
+
+    -- สร้างเส้นถ้ายังไม่มี
+    createRayPart()
+
+    local position = currentPosition
+    local lastPos = position
+    local endPos = position
+
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {ball}
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    for t = 0, MAX_TIME, TIME_STEP do
+        local newPosition = position + velocity * t + Vector3.new(0, -0.5 * GRAVITY * t^2, 0)
+
+        local result = workspace:Raycast(lastPos, newPosition - lastPos, raycastParams)
+        if result then
+            endPos = result.Position
+            break
+        end
+
+        lastPos = newPosition
+        endPos = newPosition
+    end
+
+    -- อัปเดตตำแหน่งของเส้นด้วย Tween
+    local distance = (endPos - ball.Position).Magnitude
+    local newSize = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], distance)
+    local newPosition = ball.Position + (endPos - ball.Position) / 2
+    local newCFrame = CFrame.lookAt(newPosition, endPos)
+
+    local tweenInfo = TweenInfo.new(getgenv().Settings["TweenSpeed"], Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tweenGoal = {Size = newSize, Position = newPosition, CFrame = newCFrame}
+
+    if tween then tween:Cancel() end
+    tween = TweenService:Create(rayPart, tweenInfo, tweenGoal)
+    tween:Play()
+
+    -- แสดงเส้นตลอดเวลา
+    rayPart.Transparency = 0
+
+    lastPosition = currentPosition -- อัปเดตตำแหน่งล่าสุด
+end
+
+RunService.Stepped:Connect(function()
+    updateBall()
+end)
+
+RunService.RenderStepped:Connect(predictBallPath)
 
 
 -- Addons:
