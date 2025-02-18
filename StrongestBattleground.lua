@@ -550,15 +550,25 @@ task.spawn(function()
     end
 end)
 
-local FeariseToggle = CreateToggle()
-
-FeariseToggle.MouseButton1Click:Connect(function()
-    for _, guiObject in ipairs(game:GetService("CoreGui"):GetChildren()) do
-        if guiObject.Name == "FeariseHub" and guiObject:IsA("ScreenGui") then
-            guiObject.Enabled = not guiObject.Enabled
+local Players = game:GetService("Players")
+local function checkDevice()
+    local player = Players.LocalPlayer
+    if player then
+        local UserInputService = game:GetService("UserInputService")
+        
+        if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+            local FeariseToggle = CreateToggle()
+            FeariseToggle.MouseButton1Click:Connect(function()
+                for _, guiObject in ipairs(game:GetService("CoreGui"):GetChildren()) do
+                    if guiObject.Name == "FeariseHub" and guiObject:IsA("ScreenGui") then
+                        guiObject.Enabled = not guiObject.Enabled
+                    end
+                end
+            end)
         end
     end
-end)
+end
 
+checkDevice()
 
 Window:SelectTab(1)
