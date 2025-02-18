@@ -1,3 +1,4 @@
+--=========================================================== Device Check ===========================================================--
 repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 
 local Device
@@ -16,6 +17,8 @@ local function checkDevice()
 end
 
 checkDevice()
+
+--=========================================================== UI Libraly ===========================================================--
 
 local ToggleGui = Instance.new("ScreenGui")
 local Toggle = Instance.new("TextButton")
@@ -88,7 +91,7 @@ task.spawn(function()
         end
     end
 end)
------------------ Legit Tab ------------------
+--=========================================================== Legit Tab ===========================================================--
 local Options = {}
 
 local SpeedTitle = Tabs.Legit:AddSection("Player Modifiers")
@@ -576,7 +579,7 @@ local InputPower = Tabs.Legit:AddInput("PowerInput", {
         end
     end,
 })
------------------ ESP -------------------------
+--=========================================================== ESP Tab ===========================================================--
 local p = game:GetService("Players")
 local r = game:GetService("RunService")
 local cam = workspace.CurrentCamera
@@ -718,7 +721,7 @@ end)
 
 BallPredic:SetValue(false)
 
------------------ Kaitan Tab ------------------
+--=========================================================== Kaitan Tab ===========================================================--
 local Striker = Tabs.Kaitan:AddSection("Striker")
 
 -- 🛠️ โหลด Services
@@ -1380,7 +1383,7 @@ local inputThreshold = Tabs.Kaitan:AddInput("AutoHopThreshold", {
     end
 })
 
------------------ OP Tab ------------------
+--=========================================================== OP Tab ===========================================================--
 local plrs = game:GetService("Players")
 local runService = game:GetService("RunService")
 local lp = plrs.LocalPlayer
@@ -1898,7 +1901,7 @@ Tabs.OP:AddToggle("NoCooldownAirDash", {
     end
 })
 
------------------ Spin Tab ------------------
+--=========================================================== Spin Tab ===========================================================--
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
@@ -2055,6 +2058,8 @@ local AutoFlowToggle = Tabs.Spin:AddToggle("AutoFlowToggle", {
     end
 })
 
+--=========================================================== Spoof ===========================================================--
+
 local EffectsTitle = Tabs.Item:AddSection("Goal Effects")
 
 local efx = {}
@@ -2133,7 +2138,7 @@ Tabs.Item:AddButton({
     end
 })
 
------------------ Script ------------------
+--=========================================================== Script ===========================================================--
 
 getgenv().Settings = {
     ["RayColor"] = Color3.new(1, 0, 0), -- สีของเส้น (แดง)
@@ -2262,7 +2267,6 @@ end)
 
 RunService.RenderStepped:Connect(predictBallPath)
 
-
 -- Addons:
 -- SaveManager (Allows you to have a configuration system)
 -- InterfaceManager (Allows you to have a interface managment system)
@@ -2286,7 +2290,6 @@ SaveManager:SetFolder("Fearise Hub/BlueLock")
 
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
-
 
 Window:SelectTab(1)
 
