@@ -10,7 +10,60 @@ getgenv().Settings = {
     SafeMode = nil,
 }
 
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local function CreateToggle()
+    local toggleGui = Instance.new("ScreenGui")
+    toggleGui.Name = "ToggleGui"
+    toggleGui.DisplayOrder = 1e+04
+    toggleGui.IgnoreGuiInset = true
+    toggleGui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
+    toggleGui.ResetOnSpawn = false
+    toggleGui.Parent = game:GetService("CoreGui")
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    mainFrame.BackgroundTransparency = 1
+    mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Position = UDim2.fromScale(0.925, 0.116)
+    mainFrame.Size = UDim2.fromScale(0.083, 0.148)
+
+    local uICorner = Instance.new("UICorner")
+    uICorner.Name = "UICorner"
+    uICorner.CornerRadius = UDim.new(1, 0)
+    uICorner.Parent = mainFrame
+
+    local toggleButton = Instance.new("ImageButton")
+    toggleButton.Name = "ToggleButton"
+    toggleButton.Image = "rbxassetid://112196145837803"
+    toggleButton.ImageTransparency = 0.3
+    toggleButton.AnchorPoint = Vector2.new(0.5, 0.5)
+    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.BackgroundTransparency = 1
+    toggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    toggleButton.BorderSizePixel = 0
+    toggleButton.Position = UDim2.fromScale(0.491, 0.482)
+    toggleButton.Size = UDim2.fromScale(1, 1)
+
+    local uICorner1 = Instance.new("UICorner")
+    uICorner1.Name = "UICorner"
+    uICorner1.CornerRadius = UDim.new(1, 0)
+    uICorner1.Parent = toggleButton
+
+    toggleButton.Parent = mainFrame
+
+    local uIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+    uIAspectRatioConstraint.Name = "UIAspectRatioConstraint"
+    uIAspectRatioConstraint.AspectRatio = 1
+    uIAspectRatioConstraint.Parent = mainFrame
+
+    mainFrame.Parent = toggleGui
+
+    return toggleButton
+end
+
+local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/FeariseHub_UI.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
@@ -494,6 +547,16 @@ task.spawn(function()
                 anti:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
             end)
         end)
+    end
+end)
+
+local FeariseToggle = CreateToggle()
+
+FeariseToggle.MouseButton1Click:Connect(function()
+    for _, guiObject in ipairs(game:GetService("CoreGui"):GetChildren()) do
+        if guiObject.Name == "FeariseHub" and guiObject:IsA("ScreenGui") then
+            guiObject.Enabled = not guiObject.Enabled
+        end
     end
 end)
 
