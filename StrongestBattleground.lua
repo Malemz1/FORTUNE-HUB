@@ -254,7 +254,7 @@ do
                                         antifall.Name = "antifall"
                                         game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
                                     end
-                                until TargetHumanoid.Health <= 0 or humanoid.Health <= 0
+                                until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value
                                 for i,v in pairs(game.Players.LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
                                     if v.Name == "antifall" or v:IsA("BodyVelocity") then
                                         task.wait(.1)
