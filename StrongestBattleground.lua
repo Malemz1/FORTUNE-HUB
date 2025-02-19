@@ -8,6 +8,8 @@ getgenv().Settings = {
     WalkSpeed = nil,
     Fly = nil,
     SafeMode = nil,
+    AutoUltimate = nil,
+    AutoKillMode = nil,
 }
 
 local function CreateToggle()
@@ -114,7 +116,20 @@ local Tabs = {
 do
     --[[ MAIN ]]--------------------------------------------------------
     local AutomaticTitle = Tabs.pageMain:AddSection("Automatic")
+    local AutoKillMode = Tabs.pageMain:AddDropdown("AutoKillMode", {
+        Title = "Auto Kill Mode",
+        Values = {"Over", "Behide", "Under"},
+        Multi = false,
+        Default = getgenv().Settings.AutoKillMode or "Behide",
+        Callback = function(Value)
+            getgenv().Settings.AutoKillMode = Value
+        end
+    })
+    AutoKillMode:OnChanged(function(Value)
+        getgenv().Settings.AutoKillMode = Value
+    end)
     local AutoKill = Tabs.pageMain:AddToggle("AutoKill", {Title = "Auto Kill", Default = getgenv().Settings.AutoKill or false })
+    local AutoUltimate = Tabs.pageMain:AddToggle("AutoUltimate", {Title = "Auto Ultimate", Default = getgenv().Settings.AutoUltimate or false })
     local LegitsTitle = Tabs.pageMain:AddSection("Legits")
     local AutoBlock = Tabs.pageMain:AddToggle("AutoBlock", {Title = "Auto Block", Default = getgenv().Settings.AutoBlock or false })
     local LockOn = Tabs.pageMain:AddToggle("LockOn", {Title = "Lock On", Default = getgenv().Settings.Aimbot or false })
@@ -152,6 +167,7 @@ do
     local humanoidrootpart = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart", 5)
     local humanoid = character:FindFirstChild("Humanoid") or character:WaitForChild("Humanoid", 5)
     local remoteEvent = (character and character:FindFirstChild("Communicate")) or character:WaitForChild("Communicate", 9e99)
+    local SafeModeActive = false
 
     --[[ FUNCTION ]]--------------------------------------------------------
     player.CharacterAdded:Connect(function(newcharacter)
@@ -255,6 +271,22 @@ do
         return value + (value * (math.random(-range, range) / 100))
     end
 
+    local function simulateKeyPress(key)
+        remoteEvent:FireServer({
+            ["MoveDirection"] = Vector3.zero,
+            ["Key"] = key,
+            ["Goal"] = "KeyPress"
+        })
+    
+        task.wait()
+    
+        remoteEvent:FireServer({
+            ["Goal"] = "KeyRelease",
+            ["Key"] = key
+        })
+    end
+    
+
     --[[ SCRIPTS ]]--------------------------------------------------------
     AutoKill:OnChanged(function()
         getgenv().Settings.AutoKill = AutoKill.Value
@@ -267,10 +299,16 @@ do
                             local TargetHumanoidRootPart = enemy:FindFirstChild("HumanoidRootPart")
                             local TargetHumanoid = enemy:FindFirstChild("Humanoid")
                     
-                            if TargetHumanoid.Health > 0 and humanoid.Health > 0 then
+                            if TargetHumanoid.Health > 0 and humanoid.Health > 0 and not SafeModeActive then
                                 repeat task.wait()
                                     if humanoidrootpart:FindFirstChild("antifall") then
-                                        humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
+                                        if getgenv().Settings.AutoKillMode == "Over" then
+                                            humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, 5, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                                        elseif getgenv().Settings.AutoKillMode == "Behide" then
+                                            humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, 0, 5) 
+                                        elseif getgenv().Settings.AutoKillMode == "Under" then
+                                            humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, -5, 0) * CFrame.Angles(math.rad(90), 0, 0)
+                                        end
                                         task.spawn(function()
                                             AutoUse()
                                         end)
@@ -282,7 +320,7 @@ do
                                         antifall.Name = "antifall"
                                         game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
                                     end
-                                until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value or not enemy or not TargetHumanoidRootPart
+                                until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value or not TargetHumanoidRootPart or not TargetHumanoid or not game.Players:FindFirstChild(enemy.Name) or SafeModeActive
                                 for i,v in pairs(game.Players.LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
                                     if v.Name == "antifall" or v:IsA("BodyVelocity") then
                                         task.wait(.1)
@@ -297,6 +335,15 @@ do
                 if not Success then
                     warn("Error: "..err)
                 end
+            end
+        end)
+    end)
+
+    AutoUltimate:OnChanged(function()
+        task.spawn(function()
+            while AutoUltimate.Value do
+                task.wait(1)
+                simulateKeyPress(Enum.KeyCode.G)
             end
         end)
     end)
@@ -537,7 +584,6 @@ do
         end)
     end)
 
-    local SafeModeActive = false
     SafeMode:OnChanged(function()
         task.spawn(function()
             while SafeMode.Value do
@@ -551,7 +597,7 @@ do
                     SafeModeActive = true
                     repeat task.wait()
                         humanoidrootpart.CFrame = CFrame.new(291.61474609375, 684.2703857421875, 514.2841186523438)
-                    until humanoid.Health >= (humanoid.MaxHealth * 0.21)
+                    until humanoid.Health >= (humanoid.MaxHealth * 0.25)
                     Fluent:Notify({
                         Title = "FeariseHub",
                         Content = "SafeMode UnActived",
