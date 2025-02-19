@@ -63,6 +63,34 @@ local function CreateToggle()
     return toggleButton
 end
 
+local Device;
+local function checkDevice()
+    local player = game.Players.LocalPlayer
+    if player then
+        local UserInputService = game:GetService("UserInputService")
+        
+        if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+            local FeariseToggle = CreateToggle()
+            FeariseToggle.MouseButton1Click:Connect(function()
+                for _, guiObject in ipairs(game:GetService("CoreGui"):GetChildren()) do
+                    if guiObject.Name == "FeariseHub" and guiObject:IsA("ScreenGui") then
+                        guiObject.Enabled = not guiObject.Enabled
+                    end
+                end
+            end)
+            game:GetService("CoreGui").ChildRemoved:Connect(function(Value)
+                if Value.Name == "FeariseHub" then
+                    FeariseToggle.Parent.Parent:Destroy()
+                end
+            end)
+            Device = UDim2.fromOffset(480, 360)
+        else
+            Device = UDim2.fromOffset(580, 460)
+        end
+    end
+end
+checkDevice()
+
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/FeariseHub_UI.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
@@ -71,7 +99,7 @@ local Window = Fluent:CreateWindow({
     Title = "Fearise Hub" .. " | ".."[KJ] The Strongest Battlegrounds".." |",
     SubTitle = "by Blobby",
     TabWidth = 160,
-    Size =  UDim2.fromOffset(480, 360), --UDim2.fromOffset(480, 360), --default size (580, 460)
+    Size =  Device, --UDim2.fromOffset(480, 360), --default size (580, 460)
     Acrylic = false, -- การเบลออาจตรวจจับได้ การตั้งค่านี้เป็น false จะปิดการเบลอทั้งหมด
     Theme = "Rose", --Amethyst
     MinimizeKey = Enum.KeyCode.LeftControl
@@ -535,3 +563,25 @@ do
         end)
     end)
 end
+
+-- Anti AFK
+task.spawn(function()
+    while wait(320) do
+        pcall(function()
+            local anti = game:GetService("VirtualUser")
+            game:GetService("Players").LocalPlayer.Idled:connect(function()
+                anti:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+                wait(1)
+                anti:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+            end)
+        end)
+    end
+end)
+
+Fluent:Notify({
+    Title = "Fearise Hub",
+    Content = "Anti AFK Is Actived",
+    Duration = 5
+})
+
+Window:SelectTab(1)
