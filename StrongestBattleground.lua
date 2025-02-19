@@ -254,7 +254,7 @@ do
                                         antifall.Name = "antifall"
                                         game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
                                     end
-                                until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value
+                                until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value or not enemy or not TargetHumanoidRootPart
                                 for i,v in pairs(game.Players.LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
                                     if v.Name == "antifall" or v:IsA("BodyVelocity") then
                                         task.wait(.1)
@@ -535,44 +535,3 @@ do
         end)
     end)
 end
-
-local Players = game:GetService("Players")
-local function checkDevice()
-    local player = Players.LocalPlayer
-    if player then
-        local UserInputService = game:GetService("UserInputService")
-        
-        if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-            local FeariseToggle = CreateToggle()
-            FeariseToggle.MouseButton1Click:Connect(function()
-                for _, guiObject in ipairs(game:GetService("CoreGui"):GetChildren()) do
-                    if guiObject.Name == "FeariseHub" and guiObject:IsA("ScreenGui") then
-                        guiObject.Enabled = not guiObject.Enabled
-                    end
-                end
-            end)
-            game:GetService("CoreGui").ChildRemoved:Connect(function(Value)
-                if Value.Name == "FeariseHub" then
-                    FeariseToggle.Parent.Parent:Destroy()
-                end
-            end)
-        end
-    end
-end
-checkDevice()
-
--- Anti AFK
-task.spawn(function()
-    while wait(320) do
-        pcall(function()
-            local anti = game:GetService("VirtualUser")
-            game:GetService("Players").LocalPlayer.Idled:connect(function()
-                anti:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-                wait(1)
-                anti:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-            end)
-        end)
-    end
-end)
-
-Window:SelectTab(1)
