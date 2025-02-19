@@ -68,7 +68,7 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/d
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Blobby Hub" .. " | ".."[KJ] The Strongest Battlegrounds".." |",
+    Title = "Fearise Hub" .. " | ".."[KJ] The Strongest Battlegrounds".." |",
     SubTitle = "by Blobby",
     TabWidth = 160,
     Size =  UDim2.fromOffset(480, 360), --UDim2.fromOffset(480, 360), --default size (580, 460)
