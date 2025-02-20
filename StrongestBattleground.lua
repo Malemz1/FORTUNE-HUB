@@ -232,6 +232,7 @@ do
     local KilledCount = nil
     local successTeleport = false
     local QueueOnTeleport = false
+    local OnTeleporting = false
 
     --[[ FUNCTION ]]--------------------------------------------------------
     player.CharacterAdded:Connect(function(newcharacter)
@@ -365,7 +366,7 @@ do
                             local TargetHumanoid = enemy:FindFirstChild("Humanoid")
                     
                             if TargetHumanoid.Health > 0 and humanoid.Health > 0 and not SafeModeActive then
-                                if HopServer.Value and successTeleport then
+                                if HopServer.Value and OnTeleporting then
                                     humanoidrootpart.CFrame = CFrame.new(291.61474609375, 684.2703857421875, 514.2841186523438)
                                 else
                                     repeat task.wait()
@@ -388,7 +389,7 @@ do
                                             antifall.Name = "antifall"
                                             game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
                                         end
-                                    until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value or not TargetHumanoidRootPart or not TargetHumanoid or not game.Players:FindFirstChild(enemy.Name) or SafeModeActive or successTeleport
+                                    until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value or not TargetHumanoidRootPart or not TargetHumanoid or not game.Players:FindFirstChild(enemy.Name) or SafeModeActive or successTeleport or OnTeleporting
                                 end
                                 for i,v in pairs(game.Players.LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
                                     if v.Name == "antifall" or v:IsA("BodyVelocity") then
@@ -724,6 +725,7 @@ do
                             end
     
                             repeat
+                                OnTeleporting = true
                                 local availableServers = findServer()
     
                                 if #availableServers > 0 then
