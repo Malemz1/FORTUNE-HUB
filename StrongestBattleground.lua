@@ -10,6 +10,8 @@ getgenv().Settings = {
     SafeMode = nil,
     AutoUltimate = nil,
     AutoKillMode = nil,
+    NumberOfPlayersInput = nil,
+    HopServer = nil,
 }
 
 local function CreateToggle()
@@ -93,6 +95,39 @@ local function checkDevice()
 end
 checkDevice()
 
+local FileName = tostring(game.Players.LocalPlayer.UserId).."_Settings.FeariseHub"
+local BaseFolder = "FeariseHub"
+local SubFolder = "TSB"
+
+function SaveSetting() 
+    local json
+    local HttpService = game:GetService("HttpService")
+    
+    if writefile then
+        json = HttpService:JSONEncode(getgenv().Settings)
+
+        if not isfolder(BaseFolder) then
+            makefolder(BaseFolder)
+        end
+        if not isfolder(BaseFolder.."\\"..SubFolder) then
+            makefolder(BaseFolder.."\\"..SubFolder)
+        end
+        
+        writefile(BaseFolder.."\\"..SubFolder.."\\"..FileName, json)
+    else
+        error("ERROR: Can't save your settings")
+    end
+end
+
+function LoadSetting()
+    local HttpService = game:GetService("HttpService")
+    if readfile and isfile and isfile(BaseFolder.."\\"..SubFolder.."\\"..FileName) then
+        getgenv().Settings = HttpService:JSONDecode(readfile(BaseFolder.."\\"..SubFolder.."\\"..FileName))
+    end
+end
+
+LoadSetting()
+
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/FeariseHub_UI.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
@@ -111,6 +146,7 @@ local Tabs = {
     --[[ Tabs --]]
     pageMain = Window:AddTab({ Title = "Main", Icon = "home" }),
     pagePlayer = Window:AddTab({ Title = "Player", Icon = "user" }),
+    pageServer = Window:AddTab({ Title = "Server", Icon = "server" }),
 }
 
 do
@@ -123,10 +159,12 @@ do
         Default = getgenv().Settings.AutoKillMode or "Behide",
         Callback = function(Value)
             getgenv().Settings.AutoKillMode = Value
+            SaveSetting()
         end
     })
     AutoKillMode:OnChanged(function(Value)
         getgenv().Settings.AutoKillMode = Value
+        SaveSetting()
     end)
     local AutoKill = Tabs.pageMain:AddToggle("AutoKill", {Title = "Auto Kill", Default = getgenv().Settings.AutoKill or false })
     local AutoUltimate = Tabs.pageMain:AddToggle("AutoUltimate", {Title = "Auto Ultimate", Default = getgenv().Settings.AutoUltimate or false })
@@ -149,25 +187,51 @@ do
         Finished = false,
         Callback = function(Value)
             getgenv().Settings.WalkSpeedInput = Value
+            SaveSetting()
         end
     })
     WalkSpeedInput:OnChanged(function(Value)
         getgenv().Settings.WalkSpeedInput = Value
+        SaveSetting()
     end)
     local WalkSpeed = Tabs.pagePlayer:AddToggle("WalkSpeed", {Title = "Walk Speed", Default = getgenv().Settings.WalkSpeed or false })
     local Fly = Tabs.pagePlayer:AddToggle("Fly", {Title = "Fly", Default = getgenv().Settings.Fly or false })
 
+    --[[ SERVER ]]--------------------------------------------------------
+    local NumberOfPlayersInput = Tabs.pageServer:AddInput("NumberOfPlayersInput", {
+        Title = "Auto Hop When Kill ≥",
+        Description = "ย้ายเซิฟหากฆ่าผู้เล่นมากกว่าหรือเท่ากับตามจำนวนที่กำหนด",
+        Default = getgenv().Settings.NumberOfPlayersInput or 4,
+        Numeric = true,
+        Finished = false,
+        Callback = function(Value)
+            getgenv().Settings.NumberOfPlayersInput = Value
+            SaveSetting()
+        end
+    })
+    NumberOfPlayersInput:OnChanged(function(Value)
+        getgenv().Settings.NumberOfPlayersInput = Value
+        SaveSetting()
+    end)
+    local HopServer = Tabs.pageServer:AddToggle("HopServer", {Title = "Auto Hop", Default = getgenv().Settings.HopServer or false })
+
     --[[ VARIABLE ]]--------------------------------------------------------
+    local Players = game:GetService("Players")
     local RunService = game:GetService("RunService")
     local UserInputService = game:GetService("UserInputService")
     --local CollectionService = game:GetService("CollectionService")
     local VirtualInputManager = game:GetService("VirtualInputManager")
-    local player = game.Players.LocalPlayer
+    local HttpService = game:GetService("HttpService")
+    local TeleportService = game:GetService("TeleportService")
+    local player = Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidrootpart = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart", 5)
     local humanoid = character:FindFirstChild("Humanoid") or character:WaitForChild("Humanoid", 5)
     local remoteEvent = (character and character:FindFirstChild("Communicate")) or character:WaitForChild("Communicate", 9e99)
     local SafeModeActive = false
+    local KilledCount = nil
+    local successTeleport = false
+    local QueueOnTeleport = false
 
     --[[ FUNCTION ]]--------------------------------------------------------
     player.CharacterAdded:Connect(function(newcharacter)
@@ -290,6 +354,7 @@ do
     --[[ SCRIPTS ]]--------------------------------------------------------
     AutoKill:OnChanged(function()
         getgenv().Settings.AutoKill = AutoKill.Value
+        SaveSetting()
         task.spawn(function()
             while AutoKill.Value do
                 task.wait()
@@ -300,27 +365,31 @@ do
                             local TargetHumanoid = enemy:FindFirstChild("Humanoid")
                     
                             if TargetHumanoid.Health > 0 and humanoid.Health > 0 and not SafeModeActive then
-                                repeat task.wait()
-                                    if humanoidrootpart:FindFirstChild("antifall") then
-                                        if getgenv().Settings.AutoKillMode == "Over" then
-                                            humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, 5, 0) * CFrame.Angles(math.rad(-90), 0, 0)
-                                        elseif getgenv().Settings.AutoKillMode == "Behide" then
-                                            humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, 0, 5) 
-                                        elseif getgenv().Settings.AutoKillMode == "Under" then
-                                            humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, -5, 0) * CFrame.Angles(math.rad(90), 0, 0)
+                                if HopServer.Value and successTeleport then
+                                    humanoidrootpart.CFrame = CFrame.new(291.61474609375, 684.2703857421875, 514.2841186523438)
+                                else
+                                    repeat task.wait()
+                                        if humanoidrootpart:FindFirstChild("antifall") then
+                                            if getgenv().Settings.AutoKillMode == "Over" then
+                                                humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, 5, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                                            elseif getgenv().Settings.AutoKillMode == "Behide" then
+                                                humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, 0, 5) 
+                                            elseif getgenv().Settings.AutoKillMode == "Under" then
+                                                humanoidrootpart.CFrame = TargetHumanoidRootPart.CFrame * CFrame.new(0, -5, 0) * CFrame.Angles(math.rad(90), 0, 0)
+                                            end
+                                            task.spawn(function()
+                                                AutoUse()
+                                            end)
+                                        else
+                                            local antifall = Instance.new("BodyVelocity", game.Players.LocalPlayer.Character.HumanoidRootPart)
+                                            antifall.Velocity = Vector3.new(0, 0, 0)
+                                            antifall.MaxForce = Vector3.new(100000, 100000, 100000)
+                                            antifall.P = 1250
+                                            antifall.Name = "antifall"
+                                            game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
                                         end
-                                        task.spawn(function()
-                                            AutoUse()
-                                        end)
-                                    else
-                                        local antifall = Instance.new("BodyVelocity", game.Players.LocalPlayer.Character.HumanoidRootPart)
-                                        antifall.Velocity = Vector3.new(0, 0, 0)
-                                        antifall.MaxForce = Vector3.new(100000, 100000, 100000)
-                                        antifall.P = 1250
-                                        antifall.Name = "antifall"
-                                        game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
-                                    end
-                                until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value or not TargetHumanoidRootPart or not TargetHumanoid or not game.Players:FindFirstChild(enemy.Name) or SafeModeActive
+                                    until TargetHumanoid.Health <= 0 or humanoid.Health <= 0 or not AutoKill.Value or not TargetHumanoidRootPart or not TargetHumanoid or not game.Players:FindFirstChild(enemy.Name) or SafeModeActive or successTeleport
+                                end
                                 for i,v in pairs(game.Players.LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
                                     if v.Name == "antifall" or v:IsA("BodyVelocity") then
                                         task.wait(.1)
@@ -340,6 +409,8 @@ do
     end)
 
     AutoUltimate:OnChanged(function()
+        getgenv().Settings.AutoUltimate = AutoUltimate.Value
+        SaveSetting()
         task.spawn(function()
             while AutoUltimate.Value do
                 task.wait(1)
@@ -351,6 +422,7 @@ do
     AutoBlock:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.AutoBlock = AutoBlock.Value
+            SaveSetting()
         end)
     end)
 
@@ -474,6 +546,7 @@ do
     LockOn:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.Aimbot = LockOn.Value
+            SaveSetting()
 
             while LockOn.Value do
                 task.wait()
@@ -525,6 +598,7 @@ do
     CollectFrozen:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.CollectFrozen = CollectFrozen.Value
+            SaveSetting()
             while CollectFrozen.Value do
                 task.wait(1)
                 for i,v in pairs(workspace.Thrown:GetChildren()) do
@@ -538,6 +612,7 @@ do
 
     WalkSpeed:OnChanged(function()
         getgenv().Settings.WalkSpeed = WalkSpeed.Value
+        SaveSetting()
         task.spawn(function()
             while WalkSpeed.Value do
                 task.wait()
@@ -552,6 +627,7 @@ do
     local originalGravity = workspace.Gravity
     Fly:OnChanged(function()
         getgenv().Settings.Fly = Fly.Value
+        SaveSetting()
         task.spawn(function()
             while Fly.Value do
                 task.wait()
@@ -585,6 +661,8 @@ do
     end)
 
     SafeMode:OnChanged(function()
+        getgenv().Settings.SafeMode = SafeMode.Value
+        SaveSetting()
         task.spawn(function()
             while SafeMode.Value do
                 task.wait(.1)
@@ -604,6 +682,104 @@ do
                         Duration = 5
                     })
                     SafeModeActive = false
+                end
+            end
+        end)
+    end)
+
+    HopServer:OnChanged(function()
+        getgenv().Settings.HopServer = HopServer.Value
+        SaveSetting()
+        task.spawn(function()
+            while HopServer.Value do
+                task.wait(0.1)
+                local LeaderBoard = player:FindFirstChild("leaderstats") or player:WaitForChild("leaderstats", 9e99)
+                local Kills = LeaderBoard:FindFirstChild("Kills") or LeaderBoard:WaitForChild("Kills", 9e99)
+                if KilledCount then
+                    local http_request = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+                    if Kills.Value >= (KilledCount + getgenv().Settings.NumberOfPlayersInput) then
+                        if http_request then
+                            local function findServer()
+                                local servers = {}
+                                local url = string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true", game.PlaceId)
+    
+                                local success, response = pcall(function()
+                                    return http_request({ Url = url, Method = "GET" })
+                                end)
+    
+                                if success and response and response.Body then
+                                    local body = HttpService:JSONDecode(response.Body)
+                                    if body and body.data then
+                                        for _, v in pairs(body.data) do
+                                            if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) then
+                                                if v.playing < (v.maxPlayers - 1) and v.id ~= game.JobId then
+                                                    table.insert(servers, v.id)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+    
+                                return servers
+                            end
+    
+                            repeat
+                                local availableServers = findServer()
+    
+                                if #availableServers > 0 then
+                                    local randomServer = availableServers[math.random(#availableServers)]
+                                    local success, errorMessage = pcall(function()
+                                        TeleportService:TeleportToPlaceInstance(game.PlaceId, randomServer, Players.LocalPlayer)
+                                    end)
+    
+                                    if success then
+                                        local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport or fluxus.queue_on_teleport or function(...) return ... end
+    
+                                        Players.OnTeleport:Connect(function(state)
+                                            if state ~= Enum.TeleportState.Started and state ~= Enum.TeleportState.InProgress then return end
+                                            queue_on_teleport([[
+                                                repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+                                                wait(2)
+                                                loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/StrongestBattleground.lua"))()
+                                            ]])
+                                        end)
+                                        Fluent:Notify({
+                                            Title = "Fearise Hub",
+                                            Content = "✅ Teleport สำเร็จ!",
+                                            Duration = 5
+                                        })
+                                        successTeleport = true
+                                    else
+                                        Fluent:Notify({
+                                            Title = "Fearise Hub",
+                                            Content = "⚠️ Teleport ล้มเหลว:"..errorMessage,
+                                            Duration = 5
+                                        })
+                                    end
+                                else
+                                    Fluent:Notify({
+                                        Title = "Fearise Hub",
+                                        Content = "❌ ไม่พบเซิร์ฟเวอร์ที่ไม่เต็ม กำลังลองใหม่...",
+                                        Duration = 5
+                                    })
+                                end
+    
+                                task.wait(5) -- รอ 5 วินาทีเพื่อป้องกันการส่ง request ถี่เกินไป
+                            until successTeleport
+                            if successTeleport and not QueueOnTeleport then
+                                
+                            end
+                        else
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "🚫 httprequest ไม่สามารถใช้งานได้",
+                                Duration = 5
+                            })
+                        end
+                    end
+                elseif not KilledCount then
+                    KilledCount = Kills.Value
+                    task.wait(0.5)
                 end
             end
         end)
