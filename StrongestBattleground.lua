@@ -713,7 +713,7 @@ do
                                     if body and body.data then
                                         for _, v in pairs(body.data) do
                                             if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and tonumber(v.queuedPlayers) then
-                                                if v.playing < v.maxPlayers and v.queuedPlayers == 0 and v.id ~= game.JobId then
+                                                if v.playing < v.maxPlayers and v.id ~= game.JobId then
                                                     table.insert(servers, v.id)
                                                 end
                                             end
@@ -722,55 +722,54 @@ do
                                 end
                             
                                 return servers
-                            end                            
+                            end
     
-                            repeat
-                                OnTeleporting = true
-                                local availableServers = findServer()
-    
-                                if #availableServers > 0 then
-                                    local randomServer = availableServers[math.random(#availableServers)]
-                                    local success, errorMessage = pcall(function()
-                                        TeleportService:TeleportToPlaceInstance(game.PlaceId, randomServer, Players.LocalPlayer)
-                                    end)
-    
-                                    if success then
-                                        local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport or fluxus.queue_on_teleport or function(...) return ... end
-    
-                                        Players.OnTeleport:Connect(function(state)
-                                            if state ~= Enum.TeleportState.Started and state ~= Enum.TeleportState.InProgress then return end
-                                            queue_on_teleport([[
-                                                repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
-                                                wait(2)
-                                                loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/StrongestBattleground.lua"))()
-                                            ]])
+                            pcall(function()
+                                repeat
+                                    OnTeleporting = true
+                                    local availableServers = findServer()
+        
+                                    if #availableServers > 0 then
+                                        local randomServer = availableServers[math.random(#availableServers)]
+                                        local success, errorMessage = pcall(function()
+                                            TeleportService:TeleportToPlaceInstance(game.PlaceId, randomServer, Players.LocalPlayer)
                                         end)
-                                        Fluent:Notify({
-                                            Title = "Fearise Hub",
-                                            Content = "✅ Teleport สำเร็จ!",
-                                            Duration = 5
-                                        })
-                                        successTeleport = true
+        
+                                        if success then
+                                            local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport or fluxus.queue_on_teleport or function(...) return ... end
+        
+                                            Players.OnTeleport:Connect(function(state)
+                                                if state ~= Enum.TeleportState.Started and state ~= Enum.TeleportState.InProgress then return end
+                                                queue_on_teleport([[
+                                                    repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+                                                    wait(2)
+                                                    loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/StrongestBattleground.lua"))()
+                                                ]])
+                                            end)
+                                            Fluent:Notify({
+                                                Title = "Fearise Hub",
+                                                Content = "✅ Teleport สำเร็จ!",
+                                                Duration = 5
+                                            })
+                                            successTeleport = true
+                                        else
+                                            Fluent:Notify({
+                                                Title = "Fearise Hub",
+                                                Content = "⚠️ Teleport ล้มเหลว:"..errorMessage,
+                                                Duration = 5
+                                            })
+                                        end
                                     else
                                         Fluent:Notify({
                                             Title = "Fearise Hub",
-                                            Content = "⚠️ Teleport ล้มเหลว:"..errorMessage,
+                                            Content = "❌ ไม่พบเซิร์ฟเวอร์ที่ไม่เต็ม กำลังลองใหม่...",
                                             Duration = 5
                                         })
                                     end
-                                else
-                                    Fluent:Notify({
-                                        Title = "Fearise Hub",
-                                        Content = "❌ ไม่พบเซิร์ฟเวอร์ที่ไม่เต็ม กำลังลองใหม่...",
-                                        Duration = 5
-                                    })
-                                end
-    
-                                task.wait(5) -- รอ 5 วินาทีเพื่อป้องกันการส่ง request ถี่เกินไป
-                            until successTeleport or HopServer.Value
-                            if successTeleport and not QueueOnTeleport then
-                                
-                            end
+        
+                                    task.wait(5) -- รอ 5 วินาทีเพื่อป้องกันการส่ง request ถี่เกินไป
+                                until successTeleport or not HopServer.Value
+                            end)
                         else
                             Fluent:Notify({
                                 Title = "Fearise Hub",
