@@ -200,7 +200,7 @@ do
     --[[ SERVER ]]--------------------------------------------------------
     local NumberOfPlayersInput = Tabs.pageServer:AddInput("NumberOfPlayersInput", {
         Title = "Auto Hop When Kill ≥",
-        Description = "ย้ายเซิฟหากฆ่าผู้เล่นมากกว่าหรือเท่ากับตามจำนวนที่กำหนด",
+        Description = "ย้ายเซิฟหากฆ่าผู้เล่นมากกว่า",
         Default = getgenv().Settings.NumberOfPlayersInput or 4,
         Numeric = true,
         Finished = false,
@@ -703,26 +703,26 @@ do
                             local function findServer()
                                 local servers = {}
                                 local url = string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true", game.PlaceId)
-    
+                            
                                 local success, response = pcall(function()
                                     return http_request({ Url = url, Method = "GET" })
                                 end)
-    
+                            
                                 if success and response and response.Body then
                                     local body = HttpService:JSONDecode(response.Body)
                                     if body and body.data then
                                         for _, v in pairs(body.data) do
-                                            if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) then
-                                                if v.playing < (v.maxPlayers - 3) and v.id ~= game.JobId then
+                                            if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and tonumber(v.queuedPlayers) then
+                                                if v.playing < v.maxPlayers and v.queuedPlayers == 0 and v.id ~= game.JobId then
                                                     table.insert(servers, v.id)
                                                 end
                                             end
                                         end
                                     end
                                 end
-    
+                            
                                 return servers
-                            end
+                            end                            
     
                             repeat
                                 OnTeleporting = true
@@ -767,7 +767,7 @@ do
                                 end
     
                                 task.wait(5) -- รอ 5 วินาทีเพื่อป้องกันการส่ง request ถี่เกินไป
-                            until successTeleport
+                            until successTeleport or HopServer.Value
                             if successTeleport and not QueueOnTeleport then
                                 
                             end
