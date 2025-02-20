@@ -712,7 +712,7 @@ do
                                     if body and body.data then
                                         for _, v in pairs(body.data) do
                                             if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) then
-                                                if v.playing < (v.maxPlayers - 1) and v.id ~= game.JobId then
+                                                if v.playing < (v.maxPlayers - 3) and v.id ~= game.JobId then
                                                     table.insert(servers, v.id)
                                                 end
                                             end
