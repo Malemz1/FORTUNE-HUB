@@ -104,7 +104,6 @@ local WalkSpeedEnabled = false
 -- ฟังก์ชันสำหรับบังคับค่า WalkSpeed
 local function enforceWalkSpeed()
     if h and WalkSpeedEnabled then
-        -- ใช้ทั้ง GetPropertyChangedSignal และ Loop
         h:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
             if h.WalkSpeed ~= WalkSpeed then
                 h.WalkSpeed = WalkSpeed
@@ -400,7 +399,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
     for pws, data in pairs(tracked) do
         if pws and pws:FindFirstChild("HumanoidRootPart") then
             local p = game:GetService("Players"):FindFirstChild(pws.Name)
-            if p and isSameTeam(p) then continue end -- ❌ ไม่กด Q ถ้าอยู่ทีมเดียวกัน
+            if p and isSameTeam(p) then wait() end -- ❌ ไม่กด Q ถ้าอยู่ทีมเดียวกัน
 
             local dist = (lp.Character.HumanoidRootPart.Position - pws.HumanoidRootPart.Position).Magnitude
             local s = pws:FindFirstChild("Values") and pws.Values:FindFirstChild("Sliding")
