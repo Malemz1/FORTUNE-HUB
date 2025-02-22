@@ -1168,7 +1168,7 @@ local function autoTeam()
                     Duration = 2
                 })
             end
-end
+        end
 
         task.wait(3) -- รอ 3 วินาทีก่อนตรวจสอบใหม่
     end

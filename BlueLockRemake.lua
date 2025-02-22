@@ -523,7 +523,10 @@ do
 
     local Remotes = {
         Dribble = Services.ReplicatedStorage.Packages.Knit.Services.BallService.RE.Dribble,
-        Shoot = Services.ReplicatedStorage.Packages.Knit.Services.BallService.RE.Shoot
+        Shoot = Services.ReplicatedStorage.Packages.Knit.Services.BallService.RE.Shoot,
+        Drive = Services.ReplicatedStorage.Packages.Knit.Services.BallService.RE.Dive,
+        TeamService = Services.ReplicatedStorage.Packages.Knit.Services.TeamService
+
     }
     local Debris_Variables = {
         Function_Variables = {
@@ -571,10 +574,14 @@ do
             },
             createESP = {
                 espData,
+            },
+            warpBallToGoal = {
+                ball
             }
         },
         ESP_Features = {
-            Features = {Style = true, Awakening = true, Flow = true, Stamina = true},
+            espEnabled = false,
+            espFeatures = {Style = false, Awakening = false, Flow = false, Stamina = false},
             espObjects = {}
         },
         WalkSpeedToggle = {
@@ -599,10 +606,26 @@ do
             hasVIP
         },
         Raycast = {
-            lastPosition,
             ball,
-            GRAVITY,
+            lastPosition,
+            GRAVITY = workspace.Gravity,
+            TIME_STEP = 0.1,
+            MAX_TIME = 3,
+            VELOCITY_THRESHOLD = 1,
+            MOVEMENT_THRESHOLD = 1,
+            rayPart, -- เส้นที่แสดงวิถีลูกบอล
+            tween -- Tween ปัจจุบัน
             
+        },
+        AutoGKKeybind = {
+            State,
+            ball,
+            Distance
+        },
+        AutoTeamToggle {
+            selectedValue,
+            team,
+            position
         }
 
     }
@@ -658,102 +681,114 @@ do
     Function_Storage.shootBall = function()
         Remotes.Shoot:FireServer(unpack(Debris_Variables.Function_Variables.shootBall.Args))
     end
-    Function_Storage.createBillboard = function(size, offset, adornee)
-        Debris_Variables.Function_Variables.createBillboard.BillboardGui = Instance.new("BillboardGui")
-        Debris_Variables.Function_Variables.createBillboard.BillboardGui.Adornee = adornee
-        Debris_Variables.Function_Variables.createBillboard.BillboardGui.Size = size
-        Debris_Variables.Function_Variables.createBillboard.BillboardGui.StudsOffset = offset
-        Debris_Variables.Function_Variables.createBillboard.BillboardGui.AlwaysOnTop = true
-        Debris_Variables.Function_Variables.createBillboard.BillboardGui.Parent = Services.CoreGui
-        return Debris_Variables.Function_Variables.createBillboard.BillboardGui
-    end
-    Function_Storage.createBarGui = function(offset)
-        Debris_Variables.Function_Variables.createBarGui.gui = Function_Storage.createBillboard(UDim2.new(2, 0, 6, 0), offset)
-        Debris_Variables.Function_Variables.createBarGui.frame = Instance.new("Frame", Debris_Variables.Function_Variables.createBarGui.gui)
-        Debris_Variables.Function_Variables.createBarGui.frame.Size = UDim2.new(1, 0, 1, 0)
-        Debris_Variables.Function_Variables.createBarGui.frame.BackgroundTransparency = 1
-        return Debris_Variables.Function_Variables.createBarGui.gui, Debris_Variables.Function_Variables.createBarGui.frame
-    end
-    Function_Storage.createBar = function(parent, color, pos)
-        Debris_Variables.Function_Variables.createBar.BackgroundFrame = Instance.new("Frame", parent)
-        Debris_Variables.Function_Variables.createBar.BackgroundFrame.Size = UDim2.new(0.2, 0, 0.8, 0)
-        Debris_Variables.Function_Variables.createBar.BackgroundFrame.Position = UDim2.new(pos, 0, 0.1, 0)
-        Debris_Variables.Function_Variables.createBar.BackgroundFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-        Debris_Variables.Function_Variables.createBar.BackgroundFrame.BackgroundTransparency = 0.3
-        Debris_Variables.Function_Variables.createBar.BackgroundFrame.BorderSizePixel = 0
-
-        Debris_Variables.Function_Variables.createBar.FillFrame = Instance.new("Frame", Debris_Variables.Function_Variables.createBar.BackgroundFrame)
-        Debris_Variables.Function_Variables.createBar.FillFrame.Size = UDim2.new(1, 0, 1, 0)
-        Debris_Variables.Function_Variables.createBar.FillFrame.AnchorPoint = Vector2.new(0, 1)
-        Debris_Variables.Function_Variables.createBar.FillFrame.Position = UDim2.new(0, 0, 1, 0)
-        Debris_Variables.Function_Variables.createBar.FillFrame.BackgroundColor3 = color
-        Debris_Variables.Function_Variables.createBar.FillFrame.BorderSizePixel = 0
-
-        return Debris_Variables.Function_Variables.createBar.FillFrame
-    end
-    Function_Storage.onCharacterAdded = function(Character, Data)
-        Debris_Variables.Function_Variables.onCharacterAdded.HumanoidRootPart = Character:WaitForChild("HumanoidRootPart", 9e99)
-        if not Debris_Variables.Function_Variables.onCharacterAdded.HumanoidRootPart then return end
-
-        Debris_Variables.Function_Variables.onCharacterAdded.styleGui = Function_Storage.createBillboard(UDim2.new(3, 0, 1, 0), Vector3.new(0, 4, 0), Debris_Variables.Function_Variables.onCharacterAdded.HumanoidRootPart)
-        Debris_Variables.Function_Variables.onCharacterAdded.styleTxt = Instance.new("TextLabel", Debris_Variables.Function_Variables.onCharacterAdded.styleGui)
-        Debris_Variables.Function_Variables.onCharacterAdded.styleTxt.Size = UDim2.new(1, 0, 1, 0)
-        Debris_Variables.Function_Variables.onCharacterAdded.styleTxt.BackgroundTransparency = 1
-        Debris_Variables.Function_Variables.onCharacterAdded.styleTxt.TextStrokeTransparency = 0.5
-        Debris_Variables.Function_Variables.onCharacterAdded.styleTxt.TextColor3 = Color3.new(1, 1, 1)
-        Debris_Variables.Function_Variables.onCharacterAdded.styleTxt.TextScaled = true
-        Debris_Variables.Function_Variables.onCharacterAdded.styleTxt.Text = "Style: ???"
-
-        Debris_Variables.Function_Variables.onCharacterAdded.awakeGui, Debris_Variables.Function_Variables.onCharacterAdded.awakeFrame = Function_Storage.createBarGui(Vector3.new(4, 0, 0))
-        Debris_Variables.Function_Variables.onCharacterAdded.flowGui, Debris_Variables.Function_Variables.onCharacterAdded.flowFrame = Function_Storage.createBarGui(Vector3.new(4.2, 0, 0))
-        Debris_Variables.Function_Variables.onCharacterAdded.stamGui, Debris_Variables.Function_Variables.onCharacterAdded.stamFrame = Function_Storage.createBarGui(Vector3.new(4.4, 0, 0))
-
-        Debris_Variables.Function_Variables.onCharacterAdded.awkBar = Function_Storage.createBar(awakeFrame, Color3.new(1, 0.2, 0.2), 0)
-        Debris_Variables.Function_Variables.onCharacterAdded.flowBar = Function_Storage.createBar(flowFrame, Color3.new(0.921569, 1.000000, 0.200000), 0.25)
-        Debris_Variables.Function_Variables.onCharacterAdded.stmBar = Function_Storage.createBar(stamFrame, Color3.new(0.196078, 0.019608, 1.000000), 0.5)
-
-        table.insert(Data, {gui = Debris_Variables.Function_Variables.onCharacterAdded.styleGui, feature = "Style"})
-        table.insert(Data, {gui = Debris_Variables.Function_Variables.onCharacterAdded.awakeGui, feature = "Awakening"})
-        table.insert(Data, {gui = Debris_Variables.Function_Variables.onCharacterAdded.flowGui, feature = "Flow"})
-        table.insert(Data, {gui = Debris_Variables.Function_Variables.onCharacterAdded.stamGui, feature = "Stamina"})
-
-        Services.RunServices.RenderStepped:Connect(function()
-            if Character and Debris_Variables.Function_Variables.onCharacterAdded.HumanoidRootPart and camera then
-                Debris_Variables.Function_Variables.onCharacterAdded.Distance = (camera.CFrame.Position - Debris_Variables.Function_Variables.onCharacterAdded.HumanoidRootPart.Position).Magnitude
-                Debris_Variables.Function_Variables.onCharacterAdded.styleTxt.Size = UDim2.new(math.clamp(Debris_Variables.Function_Variables.onCharacterAdded.Distance / 10, 3, 10), 0, math.clamp(Debris_Variables.Function_Variables.onCharacterAdded.Distance / 20, 1, 5), 0)
-
-                Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats = player:FindFirstChild("PlayerStats")
-                if Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats then
-                    Debris_Variables.Function_Variables.onCharacterAdded.styleTxt.Text = (Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats:FindFirstChild("Style") and Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats.Style.Value or "None")
-                    Debris_Variables.Function_Variables.onCharacterAdded.awkBar.Size = UDim2.new(1, 0, math.clamp((Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats:FindFirstChild("AwakeningBar") and Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats.AwakeningBar.Value or 0) / 100, 0, 1), 0)
-                    Debris_Variables.Function_Variables.onCharacterAdded.flowBar.Size = UDim2.new(1, 0, math.clamp((Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats:FindFirstChild("FlowBar") and Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats.FlowBar.Value or 0) / 100, 0, 1), 0)
-                    Debris_Variables.Function_Variables.onCharacterAdded.stmBar.Size = UDim2.new(1, 0, math.clamp((Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats:FindFirstChild("Stamina") and Debris_Variables.Function_Variables.onCharacterAdded.PlayerStats.Stamina.Value or 0) / 100, 0, 1), 0)
-                end
-
-                for _, obj in ipairs(Data) do
-                    obj.gui.Enabled = espToggle.Value and Debris_Variables.ESP_Features.Features[obj.feature]
-                end
-            end
-        end)
-    end
-    Function_Storage.createESP = function(Player)
-        if Player == player then return end
+    Function_Storage.createESP = function(plr)
+        if plr == player then return end
         Debris_Variables.Function_Variables.createESP.espData = {}
 
-        if Player.Character then
-            Function_Storage.onCharacterAdded(Player.Character, Debris_Variables.Function_Variables.createESP.espData)
+        function onCharacterAdded(c)
+            local h = c:WaitForChild("HumanoidRootPart", 10)
+            if not h then return end
+
+            function createBillboard(size, offset)
+                local b = Instance.new("BillboardGui")
+                b.Adornee = h
+                b.Size = size
+                b.StudsOffset = offset
+                b.AlwaysOnTop = true
+                b.Parent = game.CoreGui
+                return b
+            end
+
+            local styleGui = createBillboard(UDim2.new(3, 0, 1, 0), Vector3.new(0, 4, 0))
+            local styleTxt = Instance.new("TextLabel", styleGui)
+            styleTxt.Size = UDim2.new(1, 0, 1, 0)
+            styleTxt.BackgroundTransparency = 1
+            styleTxt.TextStrokeTransparency = 0.5
+            styleTxt.TextColor3 = Color3.new(1, 1, 1)
+            styleTxt.TextScaled = true
+            styleTxt.Text = "Style: ???"
+
+            function createBarGui(offset)
+                local gui = createBillboard(UDim2.new(2, 0, 6, 0), offset)
+                local frame = Instance.new("Frame", gui)
+                frame.Size = UDim2.new(1, 0, 1, 0)
+                frame.BackgroundTransparency = 1
+                return gui, frame
+            end
+
+            function createBar(parent, color, pos)
+                local bg = Instance.new("Frame", parent)
+                bg.Size = UDim2.new(0.2, 0, 0.8, 0)
+                bg.Position = UDim2.new(pos, 0, 0.1, 0)
+                bg.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+                bg.BackgroundTransparency = 0.3
+                bg.BorderSizePixel = 0
+
+                local fill = Instance.new("Frame", bg)
+                fill.Size = UDim2.new(1, 0, 1, 0)
+                fill.AnchorPoint = Vector2.new(0, 1)
+                fill.Position = UDim2.new(0, 0, 1, 0)
+                fill.BackgroundColor3 = color
+                fill.BorderSizePixel = 0
+
+                return fill
+            end
+
+            local awakeGui, awakeFrame = createBarGui(Vector3.new(4, 0, 0))
+            local flowGui, flowFrame = createBarGui(Vector3.new(4.2, 0, 0))
+            local stamGui, stamFrame = createBarGui(Vector3.new(4.4, 0, 0))
+
+            local awkBar = createBar(awakeFrame, Color3.new(1, 0.2, 0.2), 0)
+            local flowBar = createBar(flowFrame, Color3.new(0.921569, 1.000000, 0.200000), 0.25)
+            local stmBar = createBar(stamFrame, Color3.new(0.196078, 0.019608, 1.000000), 0.5)
+
+            table.insert(Debris_Variables.Function_Variables.createESP.espData, {gui = styleGui, feature = "Style"})
+            table.insert(Debris_Variables.Function_Variables.createESP.espData, {gui = awakeGui, feature = "Awakening"})
+            table.insert(Debris_Variables.Function_Variables.createESP.espData, {gui = flowGui, feature = "Flow"})
+            table.insert(Debris_Variables.Function_Variables.createESP.espData, {gui = stamGui, feature = "Stamina"})
+
+            Services.RunServices.RenderStepped:Connect(function()
+                if c and h and camera then
+                    local dist = (camera.CFrame.Position - h.Position).Magnitude
+                    styleGui.Size = UDim2.new(math.clamp(dist / 10, 3, 10), 0, math.clamp(dist / 20, 1, 5), 0)
+
+                    local s = plr:FindFirstChild("PlayerStats")
+                    if s then
+                        styleTxt.Text = (s:FindFirstChild("Style") and s.Style.Value or "None")
+                        awkBar.Size = UDim2.new(1, 0, math.clamp((s:FindFirstChild("AwakeningBar") and s.AwakeningBar.Value or 0) / 100, 0, 1), 0)
+                        flowBar.Size = UDim2.new(1, 0, math.clamp((s:FindFirstChild("FlowBar") and s.FlowBar.Value or 0) / 100, 0, 1), 0)
+                        stmBar.Size = UDim2.new(1, 0, math.clamp((s:FindFirstChild("Stamina") and s.Stamina.Value or 0) / 100, 0, 1), 0)
+                    end
+
+                    for _, obj in ipairs(Debris_Variables.Function_Variables.createESP.espData) do
+                        obj.gui.Enabled = Debris_Variables.ESP_Features.espEnabled and Debris_Variables.ESP_Features.espFeatures[obj.feature]
+                    end
+                end
+            end)
         end
-        Player.CharacterAdded:Connect(Function_Storage.onCharacterAdded)
-    
-        Debris_Variables.Function_Variables.ESP_Features.espObjects[Player] = Debris_Variables.Function_Variables.createESP.espData
+
+        if plr.Character then
+            onCharacterAdded(plr.Character)
+        end
+        plr.CharacterAdded:Connect(onCharacterAdded)
+
+        Debris_Variables.ESP_Features.espObjects[plr] = Debris_Variables.Function_Variables.createESP.espData
     end
-    Function_Storage.getballs = function()
-        for _, v in pairs(workspace:GetChildren()) do
-            if v.Name == "Football" and v:FindFirstChild("Hitbox") then
-                return v
+    Function_Storage.warpBallToGoal = function()
+        Debris_Variables.Function_Variables.warpBallToGoal.ball = Function_Storage.GetBall()
+        if Debris_Variables.Function_Variables.warpBallToGoal.ball then
+            -- Find the goal based on the player's team
+            local goal
+            if player.Team and player.Team.Name == "Home" then
+                goal = workspace.Goals.Home -- Warp ball to the opponent's goal
+            elseif player.Team and player.Team.Name == "Away" then
+                goal = workspace.Goals.Away -- Warp ball to the opponent's goal
+            end
+
+            if goal then
+                Debris_Variables.Function_Variables.warpBallToGoal.ball.CFrame = goal.CFrame + Vector3.new(0, 1, 0) -- Warp ball directly to the goal's position with slight offset
             end
         end
-        return nil
     end
 
     -------------------------------------------------------[[ CONNECTION ]]-------------------------------------------------------
@@ -762,8 +797,11 @@ do
         humanoid = newCharacter:FindFirstChild("Humanoid") or newCharacter:WaitForChild("Humanoid", 9e99)
         humanoidrootpart = newCharacter:FindFirstChild("HumanoidRootPart") or newCharacter:WaitForChild("HumanoidRootPart", 9e99)
     end)
-
+    for _, v in pairs(Services.Players:GetPlayers()) do
+        Function_Storage.createESP(v)
+    end
     Services.Players.PlayerAdded:Connect(Function_Storage.createESP)
+
 
     -------------------------------------------------------[[ SCRIPT WORKING ]]-------------------------------------------------------
     -------------------------------------------------------[[ LEGITS SCRIPT ]]-------------------------------------------------------
@@ -920,20 +958,22 @@ do
 
     -------------------------------------------------------[[ VISUAL SCRIPT ]]-------------------------------------------------------
     espToggle:OnChanged(function()
+        Debris_Variables.ESP_Features.espEnabled = espToggle.Value
         task.spawn(function()
-            for _, data in pairs(Debris_Variables.Function_Variables.ESP_Features.espObjects) do
+            for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
-                    obj.gui.Enabled = espToggle.Value and Debris_Variables.Function_Variables.ESP_Features.Features[obj.feature]
+                    obj.gui.Enabled = Debris_Variables.ESP_Features.espEnabled and Debris_Variables.ESP_Features.espFeatures[obj.feature]
                 end
             end
         end)
     end)
     espStyleToggle:OnChanged(function()
         task.spawn(function()
-            for _, data in pairs(Debris_Variables.Function_Variables.ESP_Features.espObjects) do
+            Debris_Variables.ESP_Features.espFeatures["Style"] = espStyleToggle.Value
+            for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
                     if obj.feature == "Style" then
-                        obj.gui.Enabled = espStyleToggle.Value and Debris_Variables.Function_Variables.ESP_Features.Features["Style"]
+                        obj.gui.Enabled = Debris_Variables.ESP_Features.espEnabled and Debris_Variables.ESP_Features.espFeatures["Style"]
                     end
                 end
             end
@@ -941,10 +981,11 @@ do
     end)
     espAwakeningToggle:OnChanged(function()
         task.spawn(function()
-            for _, data in pairs(Debris_Variables.Function_Variables.ESP_Features.espObjects) do
+            Debris_Variables.ESP_Features.espFeatures["Awakening"] = espAwakeningToggle.Value
+            for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
                     if obj.feature == "Awakening" then
-                        obj.gui.Enabled = espAwakeningToggle.Value and Debris_Variables.Function_Variables.ESP_Features.Features["Awakening"]
+                        obj.gui.Enabled = Debris_Variables.ESP_Features.espEnabled and Debris_Variables.ESP_Features.espFeatures["Awakening"]
                     end
                 end
             end
@@ -952,10 +993,11 @@ do
     end)
     espFlowToggle:OnChanged(function()
         task.spawn(function()
-            for _, data in pairs(Debris_Variables.Function_Variables.ESP_Features.espObjects) do
+            Debris_Variables.ESP_Features.espFeatures["Flow"] = espFlowToggle.Value
+            for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
                     if obj.feature == "Flow" then
-                        obj.gui.Enabled = espFlowToggle.Value and Debris_Variables.Function_Variables.ESP_Features.Features["Flow"]
+                        obj.gui.Enabled = Debris_Variables.ESP_Features.espEnabled and Debris_Variables.ESP_Features.espFeatures["Flow"]
                     end
                 end
             end
@@ -963,10 +1005,11 @@ do
     end)
     espStaminaToggle:OnChanged(function()
         task.spawn(function()
-            for _, data in pairs(Debris_Variables.Function_Variables.ESP_Features.espObjects) do
+            Debris_Variables.ESP_Features.espFeatures["Stamina"] = espStaminaToggle.Value
+            for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
                     if obj.feature == "Stamina" then
-                        obj.gui.Enabled = espStaminaToggle.Value and Debris_Variables.Function_Variables.ESP_Features.Features["Stamina"]
+                        obj.gui.Enabled = Debris_Variables.ESP_Features.espEnabled and Debris_Variables.ESP_Features.espFeatures["Stamina"]
                     end
                 end
             end
@@ -981,66 +1024,62 @@ do
         ["RayColor"] = Color3.new(1, 0, 0), -- สีของเส้น (แดง)
         ["RayThickness"] = 0.2, -- ความหนาของเส้น
         ["TweenSpeed"] = 0.0001 -- ความเร็วของ Tween
-    }
-    
-    local GRAVITY = workspace.Gravity
-    local TIME_STEP = 0.1
-    local MAX_TIME = 3
-    local VELOCITY_THRESHOLD = 1
-    local MOVEMENT_THRESHOLD = 1
-    
-    local rayPart -- เส้นที่แสดงวิถีลูกบอล
-    local tween -- Tween ปัจจุบัน
-    
+    }  
+
     function getballs()
-        
+        for _, v in pairs(workspace:GetChildren()) do
+            if v.Name == "Football" and v:FindFirstChild("Hitbox") then
+                return v
+            end
+        end
+        return nil
     end
     
     function updateBall()
-        if not getgenv().Toggle then return end -- ถ้า Toggle ปิด ไม่ต้องอัปเดตบอล
+        if not getgenv().Settings.BallPredicToggle then return end -- ถ้า Toggle ปิด ไม่ต้องอัปเดตบอล
     
         local newBall = getballs()
-        if newBall and newBall ~= ball then
-            ball = newBall
-            lastPosition = ball.Position
+        if newBall and newBall ~= Debris_Variables.Raycast.ball then
+            Debris_Variables.Raycast.ball = newBall
+            Debris_Variables.Raycast.lastPosition = Debris_Variables.Raycast.ball.Position
         end
     end
     
     function createRayPart()
-        if not rayPart then
-            rayPart = Instance.new("Part")
-            rayPart.Anchored = true
-            rayPart.CanCollide = false
-            rayPart.Material = Enum.Material.Neon
-            rayPart.Color = getgenv().Settings["RayColor"]
-            rayPart.Size = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], 1)
-            rayPart.Parent = workspace
+        if not Debris_Variables.Raycast.rayPart then
+            Debris_Variables.Raycast.rayPart = Instance.new("Part")
+            Debris_Variables.Raycast.rayPart.Anchored = true
+            Debris_Variables.Raycast.rayPart.CanCollide = false
+            Debris_Variables.Raycast.rayPart.Material = Enum.Material.Neon
+            Debris_Variables.Raycast.rayPart.Color = getgenv().Settings["RayColor"]
+            Debris_Variables.Raycast.rayPart.Size = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], 1)
+            Debris_Variables.Raycast.rayPart.Parent = workspace
         end
     end
     
     function predictBallPath()
-        if not getgenv().Toggle then
-            if rayPart then
-                rayPart.Transparency = 1 -- ซ่อนเส้นเมื่อปิด Toggle
+        if not getgenv().Settings.BallPredicToggle then
+            if Debris_Variables.Raycast.rayPart then
+                Debris_Variables.Raycast.rayPart.Transparency = 1 -- ซ่อนเส้นเมื่อปิด Toggle
             end
             return
         end
     
-        if not ball then return end
+        if not Debris_Variables.Raycast.ball then return end
     
-        local velocity = ball.Velocity
-        local currentPosition = ball.Position
-        local movementAmount = (currentPosition - lastPosition).Magnitude
+        local velocity = Debris_Variables.Raycast.ball.Velocity
+        local currentPosition = Debris_Variables.Raycast.ball.Position
+        local movementAmount = (currentPosition - Debris_Variables.Raycast.lastPosition).Magnitude
     
         -- ตรวจสอบว่าบอลกำลังเคลื่อนที่หรือไม่
-        if velocity.Magnitude < VELOCITY_THRESHOLD or movementAmount < MOVEMENT_THRESHOLD then
-            if rayPart then
+        if velocity.Magnitude < Debris_Variables.Raycast.VELOCITY_THRESHOLD or movementAmount < Debris_Variables.Raycast.MOVEMENT_THRESHOLD then
+            if Debris_Variables.Raycast.rayPart then
                 -- ถ้าบอลช้ามาก ปรับขนาดเส้นให้เล็กลง แทนที่จะซ่อน
                 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
                 local tweenGoal = {Size = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], 0.1)}
-                if tween then tween:Cancel() end
-                tween = TweenService:Create(rayPart, tweenInfo, tweenGoal)
-                tween:Play()
+                if Debris_Variables.Raycast.tween then Debris_Variables.Raycast.tween:Cancel() end
+                Debris_Variables.Raycast.tween = Services.TweenService:Create(Debris_Variables.Raycast.rayPart, tweenInfo, tweenGoal)
+                Debris_Variables.Raycast.tween:Play()
             end
             return
         end
@@ -1053,11 +1092,11 @@ do
         local endPos = position
     
         local raycastParams = RaycastParams.new()
-        raycastParams.FilterDescendantsInstances = {ball}
+        raycastParams.FilterDescendantsInstances = {Debris_Variables.Raycast.ball}
         raycastParams.FilterType = Enum.RaycastFilterType.Exclude
     
-        for t = 0, MAX_TIME, TIME_STEP do
-            local newPosition = position + velocity * t + Vector3.new(0, -0.5 * GRAVITY * t^2, 0)
+        for t = 0, Debris_Variables.Raycast.MAX_TIME, Debris_Variables.Raycast.TIME_STEP do
+            local newPosition = position + velocity * t + Vector3.new(0, -0.5 * Debris_Variables.Raycast.GRAVITY * t^2, 0)
     
             local result = workspace:Raycast(lastPos, newPosition - lastPos, raycastParams)
             if result then
@@ -1070,69 +1109,349 @@ do
         end
     
         -- อัปเดตตำแหน่งของเส้นด้วย Tween
-        local distance = (endPos - ball.Position).Magnitude
+        local distance = (endPos - Debris_Variables.Raycast.ball.Position).Magnitude
         local newSize = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], distance)
-        local newPosition = ball.Position + (endPos - ball.Position) / 2
+        local newPosition = Debris_Variables.Raycast.ball.Position + (endPos - Debris_Variables.Raycast.ball.Position) / 2
         local newCFrame = CFrame.lookAt(newPosition, endPos)
     
         local tweenInfo = TweenInfo.new(getgenv().Settings["TweenSpeed"], Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         local tweenGoal = {Size = newSize, Position = newPosition, CFrame = newCFrame}
     
-        if tween then tween:Cancel() end
-        tween = TweenService:Create(rayPart, tweenInfo, tweenGoal)
-        tween:Play()
-
-        rayPart.Transparency = 0
+        if Debris_Variables.Raycast.tween then Debris_Variables.Raycast.tween:Cancel() end
+        Debris_Variables.Raycast.tween = Services.TweenService:Create(Debris_Variables.Raycast.rayPart, tweenInfo, tweenGoal)
+        Debris_Variables.Raycast.tween:Play()
     
-        lastPosition = currentPosition
+        -- แสดงเส้นตลอดเวลา
+        Debris_Variables.Raycast.rayPart.Transparency = 0
+    
+        Debris_Variables.Raycast.lastPosition = currentPosition -- อัปเดตตำแหน่งล่าสุด
     end
     
-    RunService.Stepped:Connect(function()
+    Services.RunServices.Stepped:Connect(function()
         updateBall()
     end)
     
-    RunService.RenderStepped:Connect(predictBallPath)
+    Services.RunServices.RenderStepped:Connect(predictBallPath)
 
     -------------------------------------------------------[[ KAITAN SCRIPT ]]-------------------------------------------------------
     AutoFarmTweenToggle:OnChanged(function()
         task.spawn(function()
+            if AutoFarmTweenToggle.Value then
+                task.spawn(function()
+                    while AutoFarmTweenToggle.Value do
+                        task.wait()
+                        local function noclip()
+                            for i, v in pairs(character:GetChildren()) do
+                                if v:IsA("BasePart") and v.CanCollide == true then
+                                    v.CanCollide = false
+                                    humanoidrootpart.Velocity = Vector3.new(0,0,0)
+                                end
+                            end
+                        end
         
+                        local function Goto(Target, Goal, Action)
+                            local NoClipConnect
+                            local TweenService = game:GetService("TweenService")
+                            local Distance = (humanoidrootpart.Position - Target.Position).Magnitude
+                            local Speed = 80
+                            local Tween = TweenService:Create(humanoidrootpart, TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear), {CFrame = Target})
+                            NoClipConnect = game:GetService("RunService").Stepped:Connect(noclip)
+                            Tween:Play()
+                            local ActionActive = Action or "None"
+                            if ActionActive == "Slide" then
+                                Tween.Completed:Connect(function()
+                                    if Distance < 3 then
+                                        game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Slide:FireServer()
+                                    end
+                                end)
+                            elseif ActionActive == "Kick" then
+                                Tween.Completed:Connect(function()
+                                    local args = {
+                                        [1] = 100,
+                                        [4] = workspace.Goals[Goal].Position
+                                    }
+                                    game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Shoot:FireServer(unpack(args))
+                                    task.wait(.1)
+                                    local Ball = workspace:FindFirstChild("Football") or workspace:WaitForChild("Football", 5)
+                                    if Ball then
+                                        repeat task.wait()
+                                            Ball.CFrame = workspace.Goals[Goal].CFrame * CFrame.new(0, 0, 10)
+                                            NoClipConnect:Disconnect()
+                                        until Ball.CFrame == workspace.Goals[Goal].CFrame * CFrame.new(0, 0, 10)
+                                    end
+                                end)
+                            end
+                        end
+        
+                        function ClosestCharacter(originCharacter, searchInWorkspace)
+                            local closestCharacter = nil
+                            local shortestDistance = math.huge
+                            
+                            if not originCharacter or not originCharacter:FindFirstChild("HumanoidRootPart") then
+                                return nil
+                            end
+                            
+                            local originPosition = originCharacter.HumanoidRootPart.Position
+        
+                            local searchArea = searchInWorkspace or game.Workspace
+        
+                            for _, model in ipairs(searchArea:GetDescendants()) do
+                                if model:IsA("Model") and model ~= originCharacter and model:FindFirstChild("Humanoid") and model:FindFirstChild("HumanoidRootPart") and model:FindFirstChild("Football") then
+                                    local targetPosition = model.HumanoidRootPart.Position
+                                    local distance = (originPosition - targetPosition).Magnitude
+        
+                                    if distance < shortestDistance then 
+                                        shortestDistance = distance
+                                        closestCharacter = model
+                                    end
+                                end
+                            end
+        
+                            return closestCharacter
+                        end
+        
+                        while AutoFarmTweenToggle.Value do
+                            task.wait()
+                            local Values = character:FindFirstChild("Values") or character:WaitForChild("Values", 5)
+                            local HasBall = Values:FindFirstChild("HasBall") or Values:WaitForChild("HasBall", 5)
+                            local Goal = {
+                                ["Away"] = "Away",
+                                ["Home"] = "Home"
+                            }
+                            if player.Team.Name == "Visitor" then
+                                task.wait(.1)
+                            else
+                                if humanoidrootpart:FindFirstChild("Antifall") then
+                                    if HasBall.Value then
+                                        Goto(humanoidrootpart.CFrame * CFrame.new(0, 50, 0), Goal[game.Players.LocalPlayer.Team.Name], "Kick")
+                                        task.wait(2)
+                                    else
+                                        if workspace:FindFirstChild("Football") then
+                                            for BallIndex, BallValue in pairs(workspace:GetChildren()) do
+                                                if BallValue.Name == "Football" and BallValue:FindFirstChild("Hitbox") then
+                                                    Goto(BallValue.CFrame * CFrame.new(0, 3.5, 0), Goal[game.Players.LocalPlayer.Team.Name])
+                                                end
+                                            end
+                                        else
+                                            local Target = ClosestCharacter(character)
+                                            local Ball = Target:FindFirstChild("Football") or Target:WaitForChild("Football")
+        
+                                            Goto(Ball.CFrame, Goal[game.Players.LocalPlayer.Team.Name], "Slide")
+                                        end
+                                    end
+                                else
+                                    local antifall = Instance.new("BodyVelocity", humanoidrootpart)
+                                    antifall.P = 1250
+                                    antifall.Velocity = Vector3.new(0, 0, 0)
+                                    antifall.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                    antifall.Name = "Antifall"
+                                end
+                            end
+                        end
+                        task.wait(.1)
+                        if not AutoFarmTweenToggle.Value then
+                            for i, v in pairs(humanoidrootpart:GetChildren()) do
+                                if v.Name == "Antifall" and v:IsA("BodyVelocity") then
+                                    v:Destroy()
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
         end)
     end)
     AutoFarmTeleportToggle:OnChanged(function()
         task.spawn(function()
-        
+            if AutoFarmTeleportToggle.Value then
+                task.spawn(function()
+                    while AutoFarmTeleportToggle.Value do
+                        task.wait()
+                        function Goto(t, g, a)
+                            humanoidrootpart.CFrame = t
+                            if a == "Slide" then
+                                game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Slide:FireServer()
+                            elseif a == "Kick" then
+                                game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Shoot:FireServer(100, nil, nil, workspace.Goals[g].Position)
+                                task.wait(.1)
+                                local ball = workspace:FindFirstChild("Football") or workspace:WaitForChild("Football", 5)
+                                if ball then
+                                    repeat task.wait()
+                                        ball.CFrame = workspace.Goals[g].CFrame * CFrame.new(0, 0, 10)
+                                    until ball.CFrame == workspace.Goals[g].CFrame * CFrame.new(0, 0, 10)
+                                end
+                            end
+                        end
+
+                        function ClosestCharacter(o, w)
+                            local c, d = nil, math.huge
+                            if not o or not o:FindFirstChild("HumanoidRootPart") then return nil end
+                            for _, m in ipairs((w or workspace):GetDescendants()) do
+                                if m:IsA("Model") and m ~= o and m:FindFirstChild("Humanoid") and m:FindFirstChild("HumanoidRootPart") and m:FindFirstChild("Football") then
+                                    local dist = (o.HumanoidRootPart.Position - m.HumanoidRootPart.Position).Magnitude
+                                    if dist < d then c, d = m, dist end
+                                end
+                            end
+                            return c
+                        end
+
+                        while AutoFarmTeleportToggle.Value do
+                            task.wait()
+                            local v = character:FindFirstChild("Values") or character:WaitForChild("Values", 5)
+                            local h = v:FindFirstChild("HasBall") or v:WaitForChild("HasBall", 5)
+                            local g = {["Away"] = "Away", ["Home"] = "Home"}
+                            if player.Team.Name == "Visitor" then
+                                task.wait(.1)
+                            else
+                                if humanoidrootpart:FindFirstChild("Antifall") then
+                                    if h.Value then
+                                        Goto(humanoidrootpart.CFrame * CFrame.new(0, 50, 0), g[player.Team.Name], "Kick")
+                                        task.wait(2)
+                                    else
+                                        local b = workspace:FindFirstChild("Football")
+                                        if b then
+                                            for _, v in pairs(workspace:GetChildren()) do
+                                                if v.Name == "Football" and v:FindFirstChild("Hitbox") then
+                                                    Goto(v.CFrame * CFrame.new(0, 3.5, 0), g[player.Team.Name])
+                                                end
+                                            end
+                                        else
+                                            local t = ClosestCharacter(character)
+                                            local b = t and t:FindFirstChild("Football") or t:WaitForChild("Football")
+                                            if b then Goto(b.CFrame, g[player.Team.Name], "Slide") end
+                                        end
+                                    end
+                                else
+                                    local af = Instance.new("BodyVelocity", humanoidrootpart)
+                                    af.P = 1250
+                                    af.Velocity = Vector3.new(0, 0, 0)
+                                    af.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                    af.Name = "Antifall"
+                                end
+                            end
+                        end
+                        task.wait(.1)
+                        if not AutoFarmTeleportToggle.Value then
+                            for _, v in pairs(humanoidrootpart:GetChildren()) do
+                                if v.Name == "Antifall" and v:IsA("BodyVelocity") then
+                                    v:Destroy()
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
         end)
     end)
     WhiteScreen:OnChanged(function()
         task.spawn(function()
-        
+            Services.RunServices:Set3dRenderingEnabled(WhiteScreen.Value)
         end)
     end)
     AutoGoalKeeper:OnChanged(function()
         task.spawn(function()
-        
+            getgenv().Settings.AutoGoalKeeper = AutoGoalKeeper.Value
         end)
     end)
     AutoGKKeybind:OnClick(function()
         task.spawn(function()
-            --AutoGKKeybind:GetState()
+            Debris_Variables.AutoGKKeybind.State = not AutoGoalKeeper.Value
+            AutoGoalKeeper:SetValue(Debris_Variables.AutoGKKeybind.State)
         end)
+    end)
+    Services.RunServices.RenderStepped:Connect(function()
+        if not AutoGoalKeeper.Value then return end
+    
+        Debris_Variables.AutoGKKeybind.ball = Function_Storage.GetBall()
+        if not Debris_Variables.AutoGKKeybind.ball or not Debris_Variables.AutoGKKeybind.ball.Parent or Function_Storage.GetBallInPlayer() then return end
+    
+        Debris_Variables.AutoGKKeybind.Distance = (humanoidrootpart.Position - Debris_Variables.AutoGKKeybind.ball.Position).Magnitude
+        if Debris_Variables.AutoGKKeybind.Distance > 3 and Debris_Variables.AutoGKKeybind.Distance <= 50 then
+            humanoidrootpart.CFrame = CFrame.new(Debris_Variables.AutoGKKeybind.ball.Position)
+            Remotes.Drive:FireServer()
+        end
     end)
     AutoTeamToggle:OnChanged(function()
         task.spawn(function()
+            while AutoTeamToggle.Value do
+                -- ตรวจสอบว่าผู้เล่นอยู่ในทีม Visitor
+                if player.Team and player.Team.Name == "Visitor" then
+                    Debris_Variables.AutoTeamToggle.selectedValue = getgenv().Settings.TeamPositionDropdown
+                    if Debris_Variables.AutoTeamToggle.selectedValue then
+                        Debris_Variables.AutoTeamToggle.team, Debris_Variables.AutoTeamToggle.position = unpack(string.split(Debris_Variables.AutoTeamToggle.selectedValue, "_"))
+                        if Debris_Variables.AutoTeamToggle.team and Debris_Variables.AutoTeamToggle.position then
+                            -- ส่งคำสั่งเลือกทีมและตำแหน่งไปยังเซิร์ฟเวอร์
+                            Remotes.TeamService.RE.Select:FireServer(Debris_Variables.AutoTeamToggle.team, Debris_Variables.AutoTeamToggle.position)
+                            Fluent:Notify({
+                                Title = "Team Selection",
+                                Content = "Attempted to select team: " .. Debris_Variables.AutoTeamToggle.team .. ", position: " .. Debris_Variables.AutoTeamToggle.position,
+                                Duration = 2
+                            })
+                        else
+                            Fluent:Notify({
+                                Title = "Error",
+                                Content = "Invalid team or position selected.",
+                                Duration = 2
+                            })
+                        end
+                    else
+                        Fluent:Notify({
+                            Title = "Error",
+                            Content = "No team or position selected.",
+                            Duration = 2
+                        })
+                    end
+                end
         
+                task.wait(3) -- รอ 3 วินาทีก่อนตรวจสอบใหม่
+            end
         end)
     end)
     AutoTeamForAutoFarmToggle:OnChanged(function()
         task.spawn(function()
+            while AutoTeamToggle.Value do
+                -- ตรวจสอบว่าผู้เล่นอยู่ในทีม Visitor
+                if player.Team and player.Team.Name == "Visitor" then
+                    Debris_Variables.AutoTeamToggle.selectedValue = getgenv().Settings.TeamPositionDropdown
+                    if Debris_Variables.AutoTeamToggle.selectedValue then
+                        Debris_Variables.AutoTeamToggle.team, Debris_Variables.AutoTeamToggle.position = unpack(string.split(Debris_Variables.AutoTeamToggle.selectedValue, "_"))
+                        if Debris_Variables.AutoTeamToggle.team and Debris_Variables.AutoTeamToggle.position then
+                            -- ส่งคำสั่งเลือกทีมและตำแหน่งไปยังเซิร์ฟเวอร์
+                            Remotes.TeamService.RE.Select:FireServer(Debris_Variables.AutoTeamToggle.team, Debris_Variables.AutoTeamToggle.position)
+                            Fluent:Notify({
+                                Title = "Team Selection",
+                                Content = "Attempted to select team: " .. Debris_Variables.AutoTeamToggle.team .. ", position: " .. Debris_Variables.AutoTeamToggle.position,
+                                Duration = 2
+                            })
+                        else
+                            Fluent:Notify({
+                                Title = "Error",
+                                Content = "Invalid team or position selected.",
+                                Duration = 2
+                            })
+                        end
+                    else
+                        Fluent:Notify({
+                            Title = "Error",
+                            Content = "No team or position selected.",
+                            Duration = 2
+                        })
+                    end
+                end
         
+                task.wait(3) -- รอ 3 วินาทีก่อนตรวจสอบใหม่
+            end
         end)
     end)
     InstantGoalToggle:OnChanged(function()
         task.spawn(function()
-        
+            getgenv().Settings.InstantGoalToggle = InstantGoalToggle.Value
         end)
+    end)
+    Remotes.Shoot.OnClientEvent:Connect(function()
+        if getgenv().Settings.InstantGoalToggle then
+            Function_Storage.warpBallToGoal()
+        end
     end)
     AutoHopToggle:OnChanged(function()
         task.spawn(function()
