@@ -19,7 +19,8 @@ getgenv().Settings = {
     BallPredicToggle = nil,
     AutoFarmTweenToggle = nil,
     AutoFarmTeleportToggle = nil,
-    WhiteScreen = nil,
+    InfiniteStamina = nil,
+    -- WhiteScreen = nil,
     AutoGoalKeeper = nil,
     AutoGKKeybind = nil,
     TeamPositionDropdown = nil,
@@ -29,7 +30,7 @@ getgenv().Settings = {
     AutoHopToggle = nil,
     AutoHopThresholdInput = nil,
     KaiserToggle = nil,
-    InstantKeybind = nil,
+    KaiserKeybide = nil,
     CurveShotProMaxToggle = nil,
     CurveShotProMaxKeybind = nil,
     NoCooldownStealToggle = nil,
@@ -99,7 +100,7 @@ local function CreateToggle()
 end
 
 local Device;
-local function checkDevice()
+function checkDevice()
     local player = game.Players.LocalPlayer
     if player then
         local UserInputService = game:GetService("UserInputService")
@@ -211,13 +212,14 @@ do
     local MiscTitle = Tabs.pageLegit:AddSection("Misc")
     local AutoDribble = Tabs.pageLegit:AddToggle("AutoDribble", {Title = "AutoDribble", Description = "Testing.", Default = getgenv().Settings.AutoDribble or false })
     local vipToggle = Tabs.pageLegit:AddToggle("vipToggle", {Title = "vipToggle", Description = "Testing.", Default = getgenv().Settings.vipToggle or false })
-    local InfiniteStaminaButton Tabs.pageLegit:AddButton({
-        Title = "Infinite Stamina",
-        Description = "Click to enable Infinite Stamina (cannot be disabled)",
-        Callback = function()
+    local InfiniteStamina = Tabs.pageLegit:AddToggle("InfiniteStamina", {Title = "InfiniteStamina", Description = "Testing.", Default = getgenv().Settings.InfiniteStamina or false })
+    -- local InfiniteStaminaButton Tabs.pageLegit:AddButton({
+    --     Title = "Infinite Stamina",
+    --     Description = "Click to enable Infinite Stamina (cannot be disabled)",
+    --     Callback = function()
             
-        end
-    })
+    --     end
+    -- })
     local EnchantedTitle = Tabs.pageLegit:AddSection("Enchanted")
     local InstantKickKeybind = Tabs.pageLegit:AddKeybind("InstantKickKeybind", {
         Title = "Shoot Keybind",
@@ -259,7 +261,7 @@ do
     local Striker = Tabs.pageKaitan:AddSection("Striker")
     local AutoFarmTweenToggle = Tabs.pageKaitan:AddToggle("AutoFarmTweenToggle", { Title = "Auto Farm(Tween)", Default = getgenv().Settings.AutoFarmTweenToggle or false })
     local AutoFarmTeleportToggle = Tabs.pageKaitan:AddToggle("AutoFarmTeleportToggle", { Title = "Auto Farm(TP)", Default = getgenv().Settings.AutoFarmTeleportToggle or false })
-    local WhiteScreen = Tabs.pageKaitan:AddToggle("WhiteScreen", { Title = "WhiteScreen [GPU 0%]", Default = getgenv().Settings.WhiteScreen or false })
+    -- local WhiteScreen = Tabs.pageKaitan:AddToggle("WhiteScreen", { Title = "WhiteScreen [GPU 0%]", Default = getgenv().Settings.WhiteScreen or false })
     local GoalTitle = Tabs.pageKaitan:AddSection("Goal (In Testing)")
     local AutoGoalKeeper = Tabs.pageKaitan:AddToggle("WhitAutoGoalKeepereScreen", { Title = "Auto GK", Default = getgenv().Settings.AutoGoalKeeper or false })
     local AutoGKKeybind = Tabs.pageKaitan:AddKeybind("AutoGKKeybind", {
@@ -305,33 +307,33 @@ do
         Placeholder = "Enter Number Of Players",
         Numeric = true,
         Finished = false,
-        Callback = function(Value)
-            getgenv().Settings.AutoHopThresholdInput = Value
+        Callback = function(v)
+            getgenv().Settings.AutoHopThresholdInput = tonumber(v)
         end
     })
-    AutoHopThresholdInput:OnChanged(function(Value)
-        getgenv().Settings.AutoHopThresholdInput = Value
+    AutoHopThresholdInput:OnChanged(function(v)
+        getgenv().Settings.AutoHopThresholdInput = tonumber(v)
     end)
 
     -------------------------------------------------------[[ OP ]]-------------------------------------------------------
     local KaiserToggle = Tabs.pageOP:AddToggle("KaiserToggle", { Title = "Kaiser Impack", Default = getgenv().Settings.KaiserToggle or false })
-    local InstantKeybind = Tabs.pageOP:AddKeybind("InstantKeybind", {
+    local KaiserKeybide = Tabs.pageOP:AddKeybind("KaiserKeybide", {
         Title = "Toggle Kaiser Impack Keybind",
         Mode = "Toggle",
-        Default = getgenv().Settings.InstantKeybind or "",
+        Default = getgenv().Settings.KaiserKeybide or "",
         Callback = function(Value)
-            getgenv().Settings.InstantKeybind = Value
+            getgenv().Settings.KaiserKeybide = Value
         end,
         ChangedCallback = function(Value)
-            getgenv().Settings.InstantKeybind = Value
+            getgenv().Settings.KaiserKeybide = Value
         end
     })
-    InstantKeybind:OnChanged(function(Value)
-        getgenv().Settings.InstantKeybind = Value
+    KaiserKeybide:OnChanged(function(Value)
+        getgenv().Settings.KaiserKeybide = Value
     end)
-    local CurveShotProMaxToggle = Tabs.pageOP:AddToggle("CurveShotProMaxToggle", { Title = "Curve Shot Pro Max", Default = getgenv().Settings.CurveShotProMaxToggle or false })
+    local CurveShotProMaxToggle = Tabs.pageOP:AddToggle("CurveShotProMaxToggle", { Title = "Gyro Shot Pro Max", Default = getgenv().Settings.CurveShotProMaxToggle or false })
     local CurveShotProMaxKeybind = Tabs.pageOP:AddKeybind("CurveShotProMaxKeybind", {
-        Title = "Toggle Curve Shot Keybind",
+        Title = "Toggle Gyro Shot Keybind",
         Mode = "Toggle",
         Default = getgenv().Settings.CurveShotProMaxKeybind or "",
         Callback = function(Value)
@@ -526,7 +528,7 @@ do
         Shoot = Services.ReplicatedStorage.Packages.Knit.Services.BallService.RE.Shoot,
         Drive = Services.ReplicatedStorage.Packages.Knit.Services.BallService.RE.Dive,
         TeamService = Services.ReplicatedStorage.Packages.Knit.Services.TeamService
-
+    
     }
     local Debris_Variables = {
         Function_Variables = {
@@ -579,6 +581,9 @@ do
                 ball
             }
         },
+        Modules = {
+
+        },
         ESP_Features = {
             espEnabled = false,
             espFeatures = {Style = false, Awakening = false, Flow = false, Stamina = false},
@@ -622,14 +627,39 @@ do
             ball,
             Distance
         },
-        AutoTeamToggle {
+        AutoTeamToggle = {
             selectedValue,
             team,
             position
+        },
+        KaiserKeybide = {
+            State
+        },
+        CurveShotProMaxKeybind = {
+            State
+        },
+        NoCooldownStealToggle = {
+            originalSteal = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Bachira.Steal),
+            newSteal
+        },
+        NoCooldownAirDribbleToggle = {
+            airdribbleModule = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDribble)
+        },
+        NoCooldownAirDashToggle = {
+            originalAirDash = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDash)
         }
-
     }
 
+    local goalCFrames = {
+        Home = {
+            CFrame.new(323.849396, 11.1665344, -29.958168, -0.346998423, -2.85511348e-08, -0.937865734, 2.543152e-08, 1, -3.98520079e-08, 0.937865734, -3.76799356e-08, -0.346998423),
+            CFrame.new(326.027893, 11.1665325, -67.0218277, 0.910013974, -1.74189319e-09, -0.414577574, -1.44234642e-08, 1, -3.58616781e-08, 0.414577574, 3.86142709e-08, 0.910013974)
+        },
+        Away = {
+            CFrame.new(-247.79953, 11.1665344, -68.2236633, 0.441729337, -3.98036413e-08, -0.897148371, 8.61732801e-08, 1, -1.93767069e-09, 0.897148371, -7.64542918e-08, 0.441729337),
+            CFrame.new(-247.711075, 25.6309118, -30.344408, 0.936370671, 0.0215997752, -0.350347638, -3.86210353e-08, 0.99810493, 0.0615354702, 0.351012826, -0.0576199964, 0.934596181)
+        }
+    }
     -------------------------------------------------------[[ FUNCTION STORAGE ]]-------------------------------------------------------
     local Function_Storage = {}
 
@@ -790,7 +820,428 @@ do
             end
         end
     end
+    Function_Storage.autoHop = function()
+        local v = getgenv().Settings
+        while v.AutoHopToggle do
+            local t = tonumber(v.AutoHopThresholdInput) or 4
+            if #game:GetService("Players"):GetPlayers() <= t then
+                local s, p, sId = game:GetService("TeleportService"), game.JobId, game.PlaceId
+                local g = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. sId .. "/servers/Public?sortOrder=Asc&limit=100"))
+                for _, d in ipairs(g.data) do
+                    if d.id ~= p and d.playing < d.maxPlayers then
+                        game:GetService("Players").LocalPlayer.OnTeleport:Connect(function(state)
+                            if state == Enum.TeleportState.Started then
+                                queue_on_teleport([[loadstring(game:HttpGet(""))()]]) -- ใส่ลิงก์โหลดสคริปต์ใหม่
+                            end
+                        end)
+                        s:TeleportToPlaceInstance(sId, d.id, game:GetService("Players").LocalPlayer)
+                        return
+                    end
+                end
+                task.wait(3)
+            end
+            task.wait(1)
+        end
+    end
+    Function_Storage.getRandomTargetCFrame = function(team)
+        if team == "Home" then
+            return goalCFrames.Away[math.random(1, #goalCFrames.Away)]
+        elseif team == "Away" then
+            return goalCFrames.Home[math.random(1, #goalCFrames.Home)]
+        end
+    end
+    
+    Function_Storage.KaiserShoot = function(ball, startPos, targetCF, height, duration, curveIntensity)
+        local startTime = tick()
+        local connection
+        local endPos = targetCF.Position
+        connection = Services.RunServices.RenderStepped:Connect(function()
+            local elapsed = tick() - startTime
+            if elapsed > duration then
+                ball.CFrame = targetCF
+                connection:Disconnect()
+                return
+            end
+    
+            local t = elapsed / duration
+            local currentXZ = startPos:Lerp(endPos, t)
+            local arcHeight = math.sin(t * math.pi) * height
+            local curve = math.sin(t * math.pi * curveIntensity) * 15 
+    
+            ball.CFrame = CFrame.new(currentXZ.X + curve, startPos.Y + arcHeight, currentXZ.Z)
+        end)
+    end
+    
+    Function_Storage.CurveShoot = function(ball, startPos, targetCF, height, duration, curveIntensity)
+        local startTime = tick()
+        local connection
+        local endPos = targetCF.Position
+        
+        local curveDirection = math.random(0, 1) == 0 and -1 or 1
+        
+        connection = Services.RunServices.RenderStepped:Connect(function()
+            local elapsed = tick() - startTime
+            if elapsed > duration then
+                ball.CFrame = targetCF
+                connection:Disconnect()
+                return
+            end
+    
+            local t = elapsed / duration
+            local lerpPos = startPos:Lerp(endPos, t)
+    
+            -- ใช้ sin และ cos เพื่อทำให้วิถีการเคลื่อนที่เป็นวงกลม (เส้นวงแหวน)
+            local angle = t * math.pi * 2 * curveIntensity -- ควบคุมความเร็วการหมุน
+            local radius = 10 -- กำหนดรัศมีของวงแหวน
+            
+            local horizontalOffset = math.cos(angle) * radius
+            local verticalOffset = math.sin(angle) * radius
+    
+            -- เพิ่มความสูงให้ลูกลอยขึ้นไปก่อนตกลงมาแบบโค้ง
+            local arcHeight = math.sin(t * math.pi) * height
+    
+            -- หมุนรอบตัวเอง
+            local spinEffect = math.rad(t * 360 * 4) -- หมุนเร็วขึ้น
+    
+            -- ปรับตำแหน่งลูกบอลให้เคลื่อนที่เป็นวงแหวน
+            ball.CFrame = CFrame.new(
+                lerpPos.X + horizontalOffset,  -- หมุนซ้ายขวาเป็นวงกลม
+                startPos.Y + arcHeight + verticalOffset, -- ให้วิถีอยู่ในแนวโค้ง
+                lerpPos.Z
+            ) * CFrame.Angles(0, spinEffect, 0) -- หมุนรอบตัวเอง
+        end)
+    end
+    
 
+    Function_Storage.teleportBallToGoalKaiser = function()
+        local ball = Function_Storage.GetBall()
+        if ball and ball.Position then
+            print("Ball Position:", ball.Position)
+            local team = player.Team and player.Team.Name
+            if team then
+                local startPos = ball.Position
+                local targetCFrame = Function_Storage.getRandomTargetCFrame(team)
+                if targetCFrame then
+                    Function_Storage.KaiserShoot(ball, startPos, targetCFrame, 40, 1, 5)
+                end
+            end
+        else
+            warn("Failed to retrieve ball object")
+        end
+    end
+
+    Function_Storage.teleportBallToGoalCurve = function()
+        local ball = Function_Storage.GetBall()
+        if ball and ball.Position then
+            print("Ball Position:", ball.Position)
+            local team = player.Team and player.Team.Name
+            if team then
+                local startPos = ball.Position
+                local targetCFrame = Function_Storage.getRandomTargetCFrame(team)
+                if targetCFrame then
+                    Function_Storage.CurveShoot(ball, startPos, targetCFrame, 40, 1.5, 5)
+                end
+            end
+        else
+            warn("Failed to retrieve ball object")
+        end
+    end
+
+    Function_Storage.CreateFeariseHubMobileToggle = function()
+        local feariseHubMobile = Instance.new("ScreenGui")
+        feariseHubMobile.Name = "FeariseHubMobile"
+        feariseHubMobile.IgnoreGuiInset = true
+        feariseHubMobile.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
+        feariseHubMobile.ResetOnSpawn = false
+        feariseHubMobile.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+        if protect_gui then
+            feariseHubMobile.Parent = protect_gui(game:GetService("CoreGui"))
+        elseif gethui then
+            feariseHubMobile.Parent = gethui(game:GetService("CoreGui"))
+        else
+            feariseHubMobile.Parent = game:GetService("CoreGui")
+        end
+
+        local mainFrame = Instance.new("Frame")
+        mainFrame.Name = "MainFrame"
+        mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        mainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        mainFrame.BackgroundTransparency = 1
+        mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        mainFrame.BorderSizePixel = 0
+        mainFrame.Position = UDim2.fromScale(0.5, 0.5)
+        mainFrame.Size = UDim2.fromScale(1, 1)
+
+        local uIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+        uIAspectRatioConstraint.Name = "UIAspectRatioConstraint"
+        uIAspectRatioConstraint.AspectRatio = 1.78
+        uIAspectRatioConstraint.Parent = mainFrame
+
+        local instantKick = Instance.new("ImageButton")
+        instantKick.Name = "InstantKick"
+        instantKick.Image = "rbxassetid://100284446653174"
+        instantKick.AnchorPoint = Vector2.new(0.5, 0.5)
+        instantKick.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        instantKick.BackgroundTransparency = 1
+        instantKick.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        instantKick.BorderSizePixel = 0
+        instantKick.Position = UDim2.fromScale(0.954, 0.725)
+        instantKick.Size = UDim2.fromScale(0.124, 0.124)
+        instantKick.SizeConstraint = Enum.SizeConstraint.RelativeYY
+
+        local buttonName = Instance.new("TextLabel")
+        buttonName.Name = "ButtonName"
+        buttonName.FontFace = Font.new(
+        "rbxasset://fonts/families/GothamSSm.json",
+        Enum.FontWeight.ExtraBold,
+        Enum.FontStyle.Normal
+        )
+        buttonName.Text = "Instant Kick"
+        buttonName.TextColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName.TextScaled = true
+        buttonName.TextSize = 14
+        buttonName.TextWrapped = true
+        buttonName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName.BackgroundTransparency = 1
+        buttonName.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        buttonName.BorderSizePixel = 0
+        buttonName.Position = UDim2.fromScale(-0.215, 0.33)
+        buttonName.Size = UDim2.fromScale(1.4, 0.449)
+        buttonName.ZIndex = 2
+
+        local uIStroke = Instance.new("UIStroke")
+        uIStroke.Name = "UIStroke"
+        uIStroke.Thickness = 3
+        uIStroke.Transparency = 0.5
+        uIStroke.Parent = buttonName
+
+        local uIPadding = Instance.new("UIPadding")
+        uIPadding.Name = "UIPadding"
+        uIPadding.PaddingBottom = UDim.new(0.00668, 0)
+        uIPadding.PaddingLeft = UDim.new(0.223, 0)
+        uIPadding.PaddingRight = UDim.new(0.223, 0)
+        uIPadding.PaddingTop = UDim.new(0.00668, 0)
+        uIPadding.Parent = buttonName
+
+        buttonName.Parent = instantKick
+
+        instantKick.Parent = mainFrame
+
+        local kaiserImpack = Instance.new("ImageButton")
+        kaiserImpack.Name = "KaiserImpack"
+        kaiserImpack.Image = "rbxassetid://100284446653174"
+        kaiserImpack.AnchorPoint = Vector2.new(0.5, 0.5)
+        kaiserImpack.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        kaiserImpack.BackgroundTransparency = 1
+        kaiserImpack.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        kaiserImpack.BorderSizePixel = 0
+        kaiserImpack.Position = UDim2.fromScale(0.903, 0.846)
+        kaiserImpack.Size = UDim2.fromScale(0.124, 0.124)
+        kaiserImpack.SizeConstraint = Enum.SizeConstraint.RelativeYY
+
+        local buttonName1 = Instance.new("TextLabel")
+        buttonName1.Name = "ButtonName"
+        buttonName1.FontFace = Font.new(
+        "rbxasset://fonts/families/GothamSSm.json",
+        Enum.FontWeight.ExtraBold,
+        Enum.FontStyle.Normal
+        )
+        buttonName1.Text = "Kaiser Impack"
+        buttonName1.TextColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName1.TextScaled = true
+        buttonName1.TextSize = 14
+        buttonName1.TextWrapped = true
+        buttonName1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName1.BackgroundTransparency = 1
+        buttonName1.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        buttonName1.BorderSizePixel = 0
+        buttonName1.Position = UDim2.fromScale(-0.215, 0.33)
+        buttonName1.Size = UDim2.fromScale(1.4, 0.449)
+        buttonName1.ZIndex = 2
+
+        local uIStroke1 = Instance.new("UIStroke")
+        uIStroke1.Name = "UIStroke"
+        uIStroke1.Thickness = 3
+        uIStroke1.Transparency = 0.5
+        uIStroke1.Parent = buttonName1
+
+        local uIPadding1 = Instance.new("UIPadding")
+        uIPadding1.Name = "UIPadding"
+        uIPadding1.PaddingBottom = UDim.new(0.00668, 0)
+        uIPadding1.PaddingLeft = UDim.new(0.223, 0)
+        uIPadding1.PaddingRight = UDim.new(0.223, 0)
+        uIPadding1.PaddingTop = UDim.new(0.00668, 0)
+        uIPadding1.Parent = buttonName1
+
+        buttonName1.Parent = kaiserImpack
+
+        kaiserImpack.Parent = mainFrame
+
+        local curveShotProMax = Instance.new("ImageButton")
+        curveShotProMax.Name = "CurveShotProMax"
+        curveShotProMax.Image = "rbxassetid://100284446653174"
+        curveShotProMax.AnchorPoint = Vector2.new(0.5, 0.5)
+        curveShotProMax.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        curveShotProMax.BackgroundTransparency = 1
+        curveShotProMax.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        curveShotProMax.BorderSizePixel = 0
+        curveShotProMax.Position = UDim2.fromScale(0.786, 0.344)
+        curveShotProMax.Size = UDim2.fromScale(0.124, 0.124)
+        curveShotProMax.SizeConstraint = Enum.SizeConstraint.RelativeYY
+
+        local buttonName2 = Instance.new("TextLabel")
+        buttonName2.Name = "ButtonName"
+        buttonName2.FontFace = Font.new(
+        "rbxasset://fonts/families/GothamSSm.json",
+        Enum.FontWeight.ExtraBold,
+        Enum.FontStyle.Normal
+        )
+        buttonName2.Text = "Curve Shot"
+        buttonName2.TextColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName2.TextScaled = true
+        buttonName2.TextSize = 14
+        buttonName2.TextWrapped = true
+        buttonName2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName2.BackgroundTransparency = 1
+        buttonName2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        buttonName2.BorderSizePixel = 0
+        buttonName2.Position = UDim2.fromScale(-0.215, 0.33)
+        buttonName2.Size = UDim2.fromScale(1.4, 0.449)
+        buttonName2.ZIndex = 2
+
+        local uIStroke2 = Instance.new("UIStroke")
+        uIStroke2.Name = "UIStroke"
+        uIStroke2.Thickness = 3
+        uIStroke2.Transparency = 0.5
+        uIStroke2.Parent = buttonName2
+
+        local uIPadding2 = Instance.new("UIPadding")
+        uIPadding2.Name = "UIPadding"
+        uIPadding2.PaddingBottom = UDim.new(0.00668, 0)
+        uIPadding2.PaddingLeft = UDim.new(0.223, 0)
+        uIPadding2.PaddingRight = UDim.new(0.223, 0)
+        uIPadding2.PaddingTop = UDim.new(0.00668, 0)
+        uIPadding2.Parent = buttonName2
+
+        buttonName2.Parent = curveShotProMax
+
+        curveShotProMax.Parent = mainFrame
+
+        local autoGK = Instance.new("ImageButton")
+        autoGK.Name = "AutoGK"
+        autoGK.Image = "rbxassetid://100284446653174"
+        autoGK.AnchorPoint = Vector2.new(0.5, 0.5)
+        autoGK.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        autoGK.BackgroundTransparency = 1
+        autoGK.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        autoGK.BorderSizePixel = 0
+        autoGK.Position = UDim2.fromScale(0.0837, 0.315)
+        autoGK.Size = UDim2.fromScale(0.124, 0.124)
+        autoGK.SizeConstraint = Enum.SizeConstraint.RelativeYY
+
+        local buttonName3 = Instance.new("TextLabel")
+        buttonName3.Name = "ButtonName"
+        buttonName3.FontFace = Font.new(
+        "rbxasset://fonts/families/GothamSSm.json",
+        Enum.FontWeight.ExtraBold,
+        Enum.FontStyle.Normal
+        )
+        buttonName3.Text = "AutoGK Toggle"
+        buttonName3.TextColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName3.TextScaled = true
+        buttonName3.TextSize = 14
+        buttonName3.TextWrapped = true
+        buttonName3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName3.BackgroundTransparency = 1
+        buttonName3.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        buttonName3.BorderSizePixel = 0
+        buttonName3.Position = UDim2.fromScale(-0.215, 0.33)
+        buttonName3.Size = UDim2.fromScale(1.4, 0.449)
+        buttonName3.ZIndex = 2
+
+        local uIStroke3 = Instance.new("UIStroke")
+        uIStroke3.Name = "UIStroke"
+        uIStroke3.Thickness = 3
+        uIStroke3.Transparency = 0.5
+        uIStroke3.Parent = buttonName3
+
+        local uIPadding3 = Instance.new("UIPadding")
+        uIPadding3.Name = "UIPadding"
+        uIPadding3.PaddingBottom = UDim.new(0.00668, 0)
+        uIPadding3.PaddingLeft = UDim.new(0.223, 0)
+        uIPadding3.PaddingRight = UDim.new(0.223, 0)
+        uIPadding3.PaddingTop = UDim.new(0.00668, 0)
+        uIPadding3.Parent = buttonName3
+
+        buttonName3.Parent = autoGK
+
+        autoGK.Parent = mainFrame
+
+        local hitBox = Instance.new("ImageButton")
+        hitBox.Name = "HitBox"
+        hitBox.Image = "rbxassetid://100284446653174"
+        hitBox.AnchorPoint = Vector2.new(0.5, 0.5)
+        hitBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        hitBox.BackgroundTransparency = 1
+        hitBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        hitBox.BorderSizePixel = 0
+        hitBox.Position = UDim2.fromScale(0.0837, 0.465)
+        hitBox.Size = UDim2.fromScale(0.124, 0.124)
+        hitBox.SizeConstraint = Enum.SizeConstraint.RelativeYY
+
+        local buttonName4 = Instance.new("TextLabel")
+        buttonName4.Name = "ButtonName"
+        buttonName4.FontFace = Font.new(
+        "rbxasset://fonts/families/GothamSSm.json",
+        Enum.FontWeight.ExtraBold,
+        Enum.FontStyle.Normal
+        )
+        buttonName4.Text = "HitBox Toggle"
+        buttonName4.TextColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName4.TextScaled = true
+        buttonName4.TextSize = 14
+        buttonName4.TextWrapped = true
+        buttonName4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        buttonName4.BackgroundTransparency = 1
+        buttonName4.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        buttonName4.BorderSizePixel = 0
+        buttonName4.Position = UDim2.fromScale(-0.215, 0.33)
+        buttonName4.Size = UDim2.fromScale(1.4, 0.449)
+        buttonName4.ZIndex = 2
+
+        local uIStroke4 = Instance.new("UIStroke")
+        uIStroke4.Name = "UIStroke"
+        uIStroke4.Thickness = 3
+        uIStroke4.Transparency = 0.5
+        uIStroke4.Parent = buttonName4
+
+        local uIPadding = Instance.new("UIPadding")
+        uIPadding.Name = "UIPadding"
+        uIPadding.PaddingBottom = UDim.new(0.00668, 0)
+        uIPadding.PaddingLeft = UDim.new(0.223, 0)
+        uIPadding.PaddingRight = UDim.new(0.223, 0)
+        uIPadding.PaddingTop = UDim.new(0.00668, 0)
+        uIPadding.Parent = buttonName4
+
+        buttonName4.Parent = hitBox
+
+        hitBox.Parent = mainFrame
+
+        mainFrame.Parent = feariseHubMobile
+
+        local ToggleList = {
+            feariseHubMobileUI = feariseHubMobile,
+            instantKickToggle = instantKick,
+            kaiserImpackToggle = kaiserImpack,
+            curveShotProMaxToggle = curveShotProMax,
+            autoGKToggle = autoGK,
+            hitBoxToggle = hitBox
+        }
+
+        return ToggleList
+    end
+    
     -------------------------------------------------------[[ CONNECTION ]]-------------------------------------------------------
     player.CharacterAdded:Connect(function(newCharacter)
         character = newCharacter
@@ -805,6 +1256,7 @@ do
 
     -------------------------------------------------------[[ SCRIPT WORKING ]]-------------------------------------------------------
     -------------------------------------------------------[[ LEGITS SCRIPT ]]-------------------------------------------------------
+    
     WalkSpeedToggle:OnChanged(function()
         task.spawn(function()
             if WalkSpeedToggle.Value then
@@ -953,6 +1405,39 @@ do
     InstantKickKeybind:OnClick(function()
         task.spawn(function()
             Function_Storage.shootBall()
+        end)
+    end)
+    InfiniteStamina:OnChanged(function()
+        task.spawn(function()
+            local stats = player:FindFirstChild("PlayerStats")
+            local originalStamina = stats and stats:FindFirstChild("Stamina")
+            
+            if InfiniteStamina.Value then
+                -- ย้าย Stamina ไปไว้ที่ ReplicatedStorage
+                if originalStamina then
+                    originalStamina.Parent = Services.ReplicatedStorage
+                end
+    
+                -- สร้าง fakeStamina
+                local fakeStamina = Instance.new("NumberValue")
+                fakeStamina.Name = "Stamina"
+                fakeStamina.Value = math.huge
+                fakeStamina.Parent = stats
+            else
+                pcall(function()
+                    -- ลบ fakeStamina
+                    local fakeStamina = stats and stats:FindFirstChild("Stamina")
+                    if fakeStamina then
+                        fakeStamina:Destroy()
+                    end
+        
+                    -- ย้าย stamina กลับมาที่เดิม
+                    local storedStamina = Services.ReplicatedStorage:FindFirstChild("Stamina")
+                    if storedStamina then
+                        storedStamina.Parent = stats
+                    end
+                end)
+            end
         end)
     end)
 
@@ -1343,11 +1828,11 @@ do
             end
         end)
     end)
-    WhiteScreen:OnChanged(function()
-        task.spawn(function()
-            Services.RunServices:Set3dRenderingEnabled(WhiteScreen.Value)
-        end)
-    end)
+    -- WhiteScreen:OnChanged(function()
+    --     task.spawn(function()
+    --         Services.RunServices:Set3dRenderingEnabled(WhiteScreen.Value)
+    --     end)
+    -- end)
     AutoGoalKeeper:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.AutoGoalKeeper = AutoGoalKeeper.Value
@@ -1453,60 +1938,430 @@ do
             Function_Storage.warpBallToGoal()
         end
     end)
-    AutoHopToggle:OnChanged(function()
-        task.spawn(function()
-        
-        end)
+    AutoHopToggle:OnChanged(function(v)
+        getgenv().Settings.AutoHopToggle = v
+        if v then
+            task.spawn(Function_Storage.autoHop)
+        end
     end)
 
     -------------------------------------------------------[[ OP SCRIPT ]]-------------------------------------------------------
     KaiserToggle:OnChanged(function()
         task.spawn(function()
-        
+            getgenv().Settings.KaiserToggle = KaiserToggle.Value
         end)
     end)
-    InstantKeybind:OnClick(function()
+    Remotes.Shoot.OnClientEvent:Connect(function()
+        if getgenv().Settings.KaiserToggle then
+            Function_Storage.teleportBallToGoalKaiser()
+        end
+    end)
+    KaiserKeybide:OnClick(function()
         task.spawn(function()
-            --AutoGKKeybind:GetState()
+            Debris_Variables.KaiserKeybide.State = not KaiserToggle.Value
+            KaiserToggle:SetValue(Debris_Variables.KaiserKeybide.State)
         end)
     end)
     CurveShotProMaxToggle:OnChanged(function()
         task.spawn(function()
-        
+            getgenv().Settings.CurveShotProMaxToggle = CurveShotProMaxToggle.Value
         end)
+    end)
+    Remotes.Shoot.OnClientEvent:Connect(function()
+        if getgenv().Settings.CurveShotProMaxToggle then
+            Function_Storage.teleportBallToGoalCurve()
+        end
     end)
     CurveShotProMaxKeybind:OnClick(function()
         task.spawn(function()
-            --CurveShotProMaxKeybind:GetState()
+            Debris_Variables.CurveShotProMaxKeybind.State = not CurveShotProMaxToggle.Value
+            CurveShotProMaxToggle:SetValue(Debris_Variables.CurveShotProMaxKeybind.State)
         end)
     end)
     NoCooldownStealToggle:OnChanged(function()
         task.spawn(function()
-        
+            if NoCooldownStealToggle.Value then        
+                Debris_Variables.NoCooldownStealToggle.newSteal = function(v11, v12, v13)
+                    -- ข้ามเงื่อนไขคูลดาวน์และพลังงาน
+                    if false then -- ข้ามการตรวจสอบทุกอย่าง
+                        return
+                    end
+                
+                    if v11.ABC then
+                        v11.ABC:Clean()
+                    end
+                    if v11.SlideTrove then
+                        v11.SlideTrove:Destroy()
+                    end
+                
+                    -- ส่วนสำหรับเมื่อผู้เล่นมีบอล
+                    if v13.Values.HasBall.Value then
+                        v11.AbilityController:AbilityCooldown("1", 1) -- ไม่มีคูลดาวน์
+                        v11.StaminaService.DecreaseStamina:Fire(10) -- ไม่ลด Stamina
+                        v11.StatesController.States.Ability = true
+                        v11.StatesController.OwnWalkState = true
+                        v11.StatesController.SpeedBoost = 5
+                
+                        task.delay(2, function()
+                            v11.StatesController.States.Ability = false
+                            v11.StatesController.OwnWalkState = false
+                            v11.StatesController.SpeedBoost = 0
+                        end)
+                
+                        v11.Animations:StopAnims()
+                        v11.Animations.Abilities.HeelPass.Priority = Enum.AnimationPriority.Action3
+                        v11.Animations.Abilities.HeelPass:Play()
+                        v11.Animations.Ball.HeelPass.Priority = Enum.AnimationPriority.Action3
+                        v11.Animations.Ball.HeelPass:Play()
+                        v11.AbilityService.Ability:Fire("HeelPass")
+                        v11.ABC:Connect(v11.AbilityService.Ability, function(v14)
+                            v11.ABC:Clean()
+                            v11.StatesController.States.Ability = false
+                            v11.StatesController.OwnWalkState = false
+                            v11.StatesController.SpeedBoost = 0
+                            v14.AssemblyLinearVelocity = (v13.HumanoidRootPart.CFrame.LookVector + Vector3.new(0, 0.55, 0)) * 80
+                            v11.BallController:DragBall(v14)
+                        end)
+                    else
+                        -- ส่วนสำหรับเมื่อผู้เล่นไม่มีบอล
+                        v11.AbilityController:AbilityCooldown("1", 1) -- ไม่มีคูลดาวน์
+                        v11.StaminaService.DecreaseStamina:Fire(10) -- ไม่ลด Stamina
+                        v11.Animations:StopAnims()
+                        v11.Animations.Abilities.Steal.Priority = Enum.AnimationPriority.Action
+                        v11.Animations.Abilities.Steal:Play()
+                
+                        -- เรียกใช้ RemoteEvent "Slide" เพื่อ FireServer
+                        game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Slide:FireServer()
+                
+                        -- ใช้ TweenService แทนการพุ่งด้วย BodyVelocity
+                        local rootPart = v13.HumanoidRootPart
+                        if rootPart then
+                            local targetPosition = rootPart.Position + (rootPart.CFrame.LookVector * 30) -- พุ่งไปข้างหน้า 10 หน่วย
+                
+                            local tweenInfo = TweenInfo.new(
+                                0.4, -- ระยะเวลาพุ่ง (0.5 วินาที)
+                                Enum.EasingStyle.Linear, -- รูปแบบการเคลื่อนไหวแบบ Linear
+                                Enum.EasingDirection.Out, -- ทิศทางการเคลื่อนไหวแบบ Out
+                                0, -- จำนวนรอบ (0 = ไม่ทำซ้ำ)
+                                false, -- ไม่ย้อนกลับ
+                                0 -- ไม่มีดีเลย์ก่อนเริ่ม Tween
+                            )
+                
+                            local tweenGoal = {Position = targetPosition}
+                            local tween = Services.TweenService:Create(rootPart, tweenInfo, tweenGoal)
+                
+                            tween:Play()
+                
+                            tween.Completed:Connect(function()
+                                tween:Destroy() -- ลบ Tween หลังการใช้งาน
+                            end)
+                        end
+                    end
+                end
+                
+                -- แทนที่ฟังก์ชันใน ModuleScript
+                hookfunction(Debris_Variables.NoCooldownStealToggle.originalSteal, Debris_Variables.NoCooldownStealToggle.newSteal)
+                Fluent:Notify({ Title = "No Cooldown - Steal Enabled", Content = "Cooldown removed for Steal.", Duration = 3 })
+            else
+                Fluent:Notify({ Title = "No Cooldown - Steal Disabled", Content = "Cooldown restored for Steal.", Duration = 3 })
+            end
         end)
     end)
     NoCooldownAirDribbleToggle:OnChanged(function()
         task.spawn(function()
-        
+            if NoCooldownAirDribbleToggle.Value then
+                -- Hook the original AirDribble function
+                local originalAirDribble = Debris_Variables.NoCooldownAirDribbleToggle.airdribbleModule
+                
+                -- Define the new function
+                local function newAirDribble(v13, v14, v15)
+                    if v13.__trapped then
+                        if not v15.Values.HasBall.Value then
+                            return
+                        else
+                            v14.PlayerGui.InGameUI.Bottom.Abilities["1"].Timer.Text = "Trap"
+                            v13.Animations:StopAnims()
+                            v13.Animations.Abilities.AirDribbleShoot.Priority = Enum.AnimationPriority.Action4
+                            v13.Animations.Abilities.AirDribbleShoot:Play()
+                            v13.Animations.Ball.AirDribbleShoot.Priority = Enum.AnimationPriority.Action4
+                            v13.Animations.Ball.AirDribbleShoot:Play()
+                            if v13.ABC then
+                                v13.ABC:Clean()
+                            end
+                            v13.ABC:Add(function()
+                                v13.__trapped = nil
+                            end)
+                            task.delay(0.35, function()
+                                v13.AbilityService.Ability:Fire("AirDribble", "shotStart")
+                            end)
+                            v13.ABC:Add(v13.AbilityService.Ability:Connect(function(v16)
+                                v16.AssemblyLinearVelocity = (workspace.CurrentCamera.CFrame.LookVector + Vector3.new(0, 0.35, 0)) * 125
+                                v13.BallController:DragBall(v16)
+                            end))
+                            return
+                        end
+                    else
+                        if v13.ABC then
+                            v13.ABC:Clean()
+                        end
+                        v14.PlayerGui.InGameUI.Bottom.Abilities["1"].Timer.Text = "Shoot"
+                        task.delay(0.45, function()
+                            v13.InAbility = true
+                        end)
+                        local l_Value_0 = v15.Values.HasBall.Value
+                        v15.HumanoidRootPart.Anchored = true
+                        v13.AbilityService.Ability:Fire("AirDribble")
+                        v13.Animations:StopAnims()
+                        if l_Value_0 then
+                            v13.Animations.Abilities.AirDribbleUp.Priority = Enum.AnimationPriority.Action2
+                            v13.Animations.Abilities.AirDribbleUp:Play()
+                            v13.Animations.Ball.AirDribbleUp.Priority = Enum.AnimationPriority.Action2
+                            v13.Animations.Ball.AirDribbleUp:Play()
+                            v13.Animations.Abilities.AirDribbleUp:AdjustSpeed(1.35)
+                            v13.Animations.Ball.AirDribbleUp:AdjustSpeed(1.35)
+                        end
+                        v13.Animations.Ball.AirDribbleStart.Priority = Enum.AnimationPriority.Action3
+                        v13.Animations.Ball.AirDribbleStart:Play()
+                        v13.Animations.Ball.AirDribbleStart:AdjustSpeed(1.35)
+                        v13.Animations.Abilities.AirDribbleStart.Priority = Enum.AnimationPriority.Action3
+                        v13.Animations.Abilities.AirDribbleStart:Play()
+                        v13.__trapped = true
+                        v13.ABC:Add(function()
+                            v13.__trapped = nil
+                        end)
+                        local v18 = os.time() + 4
+                        task.delay(0.65, function()
+                            v13.ABC:Connect(game:GetService("RunService").Heartbeat, function()
+                                if v15 == nil then
+                                    if v13.ABC then
+                                        v13.ABC:Clean()
+                                    end
+                                    v13.InAbility = false
+                                    return
+                                else
+                                    if v15.Values.HasBall.Value then
+                                        l_Value_0 = true
+                                    end
+                                    if (v18 < os.time() or not v13.InAbility or not v15.Values.HasBall.Value and l_Value_0) and v13.ABC then
+                                        v13.ABC:Clean()
+                                    end
+                                    return
+                                end
+                            end)
+                        end)
+                        v13.ABC:Add(function()
+                            v14.PlayerGui.InGameUI.Bottom.Abilities["1"].Timer.Text = "Trap"
+                            task.delay(0.15, function()
+                                v15.HumanoidRootPart.Anchored = false
+                            end)
+                            v13.InAbility = false
+                            v13.Animations.Abilities.AirDribbleStart:Stop()
+                            v13.Animations.Ball.AirDribbleStart:Stop()
+                        end)
+                        return
+                    end
+                end
+                
+                -- Hook the function using hookfunction
+                hookfunction(originalAirDribble, newAirDribble)
+                Fluent:Notify({ Title = "No Cooldown - AirDribble Enabled", Content = "Cooldown removed for AirDribble.", Duration = 3 })
+            else
+                Fluent:Notify({ Title = "No Cooldown - AirDribble Disabled", Content = "Cooldown restored for AirDribble.", Duration = 3 })
+            end
         end)
     end)
     NoCooldownAirDashToggle:OnChanged(function()
         task.spawn(function()
-        
+            if NoCooldownAirDashToggle.Value then
+                local function newAirDash(v13, v14, v15)
+                    if v13.ABC then
+                        v13.ABC:Clean()
+                    end
+    
+                    v15.HumanoidRootPart.Anchored = false
+                    v13.Animations:StopAnims()
+    
+                    local hrp = v15.HumanoidRootPart
+                    local dashDirection = hrp.CFrame:VectorToObjectSpace(v15.Humanoid.MoveDirection).X < 0 and "Left" or "Right"
+                    local directionVector = dashDirection == "Right" and hrp.CFrame.RightVector or hrp.CFrame.RightVector * -1
+    
+                    v13.AbilityService.Ability:Fire("AirDash", directionVector)
+                    v13.Animations.Abilities["AirDribble" .. dashDirection].Priority = Enum.AnimationPriority.Action4
+                    v13.Animations.Abilities["AirDribble" .. dashDirection]:Play()
+                    v13.Animations.Ball["AirDribble" .. dashDirection].Priority = Enum.AnimationPriority.Action4
+                    v13.Animations.Ball["AirDribble" .. dashDirection]:Play()
+                end
+    
+                hookfunction(Debris_Variables.NoCooldownAirDashToggle.originalAirDash, newAirDash)
+                Fluent:Notify({ Title = "No Cooldown - AirDash Enabled", Content = "Cooldown removed for AirDash.", Duration = 3 })
+            else
+                Fluent:Notify({ Title = "No Cooldown - AirDash Disabled", Content = "Cooldown restored for AirDash.", Duration = 3 })
+            end
         end)
     end)
 
     -------------------------------------------------------[[ SPIN SCRIPT ]]-------------------------------------------------------
+    local ProfileStats = player:WaitForChild("ProfileStats")
+    local PlayerStats = player:WaitForChild("PlayerStats")
+    local Spins = ProfileStats:WaitForChild("Spins")
+    local Money = ProfileStats:WaitForChild("Money")
+    local FlowSpins = ProfileStats:WaitForChild("FlowSpins")
+    local Style = PlayerStats:WaitForChild("Style")
+    local Flow = PlayerStats:WaitForChild("Flow")
     AutoSpinToggle:OnChanged(function()
         task.spawn(function()
-        
+            while AutoSpinToggle.Value do
+                -- Check if player has Spins and Money
+                if Spins.Value > 0 or Money.Value > 2500 then
+                    -- Check if the current style matches any selected style
+                    if table.find(getgenv().Settings.StyleLockDropdown, Style.Value) then
+                        Fluent:Notify({
+                            Title = "Style Locked",
+                            Content = "You obtained: " .. Style.Value,
+                            Duration = 5
+                        })
+                        AutoSpinToggle:SetValue(false)
+                        break
+                    end
+
+                    -- Fire the Spin Remote
+                    game:GetService("ReplicatedStorage").Packages.Knit.Services.StyleService.RE.Spin:FireServer()
+                    task.wait(0.5) -- Add a small delay to prevent spamming
+
+                else
+                    Fluent:Notify({
+                        Title = "Auto Spin",
+                        Content = "Insufficient Spins or Money.",
+                        Duration = 5
+                    })
+                    AutoSpinToggle:SetValue(false)
+                    break
+                end
+            end
         end)
     end)
     AutoFlowToggle:OnChanged(function()
         task.spawn(function()
-        
+            while AutoFlowToggle.Value do
+                -- Check if player has Spins and Money
+                if FlowSpins.Value > 0 or Money.Value >= 2000 then -- Adjusted Money value for spin cost
+                    -- Check if the current style matches any selected style
+                    if table.find(getgenv().Settings.FlowLockDropdown, Flow.Value) then
+                        Fluent:Notify({
+                            Title = "Flow Lock Activated",
+                            Content = "You obtained: " .. Flow.Value,
+                            Duration = 5
+                        })
+                        AutoFlowToggle:SetValue(false)
+                        break
+                    end
+
+                    -- Fire the Spin Remote
+                    game:GetService("ReplicatedStorage").Packages.Knit.Services.FlowService.RE.Spin:FireServer()
+                    task.wait(0.5) -- Delay to prevent spamming
+
+                else
+                    Fluent:Notify({
+                        Title = "Auto Flow Spin",
+                        Content = "Insufficient Spins or Money.",
+                        Duration = 5
+                    })
+                    AutoFlowToggle:SetValue(false)
+                    break
+                end
+            end
         end)
     end)
+
+    -------------------------------------------------------[[ MOBILE SCRIPT ]]-------------------------------------------------------
+    function checkDeviceUi()
+        local player = game.Players.LocalPlayer
+        if player then
+            local UserInputService = game:GetService("UserInputService")
+            
+            if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+                local MobileUI = Function_Storage.CreateFeariseHubMobileToggle()
+
+                MobileUI.instantKickToggle.MouseButton1Click:Connect(function()
+                    Function_Storage.shootBall()
+                end)
+                MobileUI.kaiserImpackToggle.MouseButton1Click:Connect(function()
+                    Debris_Variables.KaiserKeybide.State = not KaiserToggle.Value
+                    KaiserToggle:SetValue(Debris_Variables.KaiserKeybide.State)
+                    if Debris_Variables.KaiserKeybide.State then
+                        Fluent:Notify({
+                            Title = "Fearise Hub",
+                            Content = "Kaiser Impack Actived.",
+                            Duration = 3
+                        })
+                    else
+                        Fluent:Notify({
+                            Title = "Fearise Hub",
+                            Content = "Kaiser Impack Not Actived.",
+                            Duration = 3
+                        })
+                    end
+                end)
+                MobileUI.curveShotProMaxToggle.MouseButton1Click:Connect(function()
+                    Debris_Variables.CurveShotProMaxKeybind.State = not CurveShotProMaxToggle.Value
+                    CurveShotProMaxToggle:SetValue(Debris_Variables.CurveShotProMaxKeybind.State)
+                    if Debris_Variables.CurveShotProMaxKeybind.State then
+                        Fluent:Notify({
+                            Title = "Fearise Hub",
+                            Content = "CurveShotProMax Actived.",
+                            Duration = 3
+                        })
+                    else
+                        Fluent:Notify({
+                            Title = "Fearise Hub",
+                            Content = "CurveShotProMax Not Actived.",
+                            Duration = 3
+                        })
+                    end
+                end)
+                MobileUI.autoGKToggle.MouseButton1Click:Connect(function()
+                    Debris_Variables.AutoGKKeybind.State = not AutoGoalKeeper.Value
+                    AutoGoalKeeper:SetValue(Debris_Variables.AutoGKKeybind.State)
+                    if Debris_Variables.AutoGKKeybind.State then
+                        Fluent:Notify({
+                            Title = "Fearise Hub",
+                            Content = "AutoGK Actived.",
+                            Duration = 3
+                        })
+                    else
+                        Fluent:Notify({
+                            Title = "Fearise Hub",
+                            Content = "AutoGK Not Actived.",
+                            Duration = 3
+                        })
+                    end
+                end)
+                MobileUI.hitBoxToggle.MouseButton1Click:Connect(function()
+                    Debris_Variables.HitboxKeybind.State = not HitboxToggle.Value
+                    HitboxToggle:SetValue(Debris_Variables.HitboxKeybind.State)
+                    if Debris_Variables.HitboxKeybind.State then
+                        Fluent:Notify({
+                            Title = "Fearise Hub",
+                            Content = "Hitbox Actived.",
+                            Duration = 3
+                        })
+                    else
+                        Fluent:Notify({
+                            Title = "Fearise Hub",
+                            Content = "Hitbox Not Actived.",
+                            Duration = 3
+                        })
+                    end
+                end)
+                game:GetService("CoreGui").ChildRemoved:Connect(function(Value)
+                    if Value.Name == "FeariseHub" then
+                        MobileUI.feariseHubMobileUI:Destroy()
+                    end
+                end)
+            end
+        end
+    end
+    checkDeviceUi()
 end
 
 -- Anti AFK
@@ -1530,300 +2385,3 @@ Fluent:Notify({
 })
 
 Window:SelectTab(1)
-
---[[
-function CreateFeariseHubMobileToggle()
-    local feariseHubMobile = Instance.new("ScreenGui")
-    feariseHubMobile.Name = "FeariseHubMobile"
-    feariseHubMobile.IgnoreGuiInset = true
-    feariseHubMobile.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
-    feariseHubMobile.ResetOnSpawn = false
-    feariseHubMobile.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-    if protect_gui then
-        feariseHubMobile.Parent = protect_gui(game:GetService("CoreGui"))
-    elseif gethui then
-        feariseHubMobile.Parent = gethui(game:GetService("CoreGui"))
-    else
-        feariseHubMobile.Parent = game:GetService("CoreGui")
-    end
-
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Name = "MainFrame"
-    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    mainFrame.BackgroundTransparency = 1
-    mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    mainFrame.BorderSizePixel = 0
-    mainFrame.Position = UDim2.fromScale(0.5, 0.5)
-    mainFrame.Size = UDim2.fromScale(1, 1)
-
-    local uIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
-    uIAspectRatioConstraint.Name = "UIAspectRatioConstraint"
-    uIAspectRatioConstraint.AspectRatio = 1.78
-    uIAspectRatioConstraint.Parent = mainFrame
-
-    local instantKick = Instance.new("ImageButton")
-    instantKick.Name = "InstantKick"
-    instantKick.Image = "rbxassetid://100284446653174"
-    instantKick.AnchorPoint = Vector2.new(0.5, 0.5)
-    instantKick.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    instantKick.BackgroundTransparency = 1
-    instantKick.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    instantKick.BorderSizePixel = 0
-    instantKick.Position = UDim2.fromScale(0.954, 0.725)
-    instantKick.Size = UDim2.fromScale(0.124, 0.124)
-    instantKick.SizeConstraint = Enum.SizeConstraint.RelativeYY
-
-    local buttonName = Instance.new("TextLabel")
-    buttonName.Name = "ButtonName"
-    buttonName.FontFace = Font.new(
-    "rbxasset://fonts/families/GothamSSm.json",
-    Enum.FontWeight.ExtraBold,
-    Enum.FontStyle.Normal
-    )
-    buttonName.Text = "Instant Kick"
-    buttonName.TextColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName.TextScaled = true
-    buttonName.TextSize = 14
-    buttonName.TextWrapped = true
-    buttonName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName.BackgroundTransparency = 1
-    buttonName.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    buttonName.BorderSizePixel = 0
-    buttonName.Position = UDim2.fromScale(-0.215, 0.33)
-    buttonName.Size = UDim2.fromScale(1.4, 0.449)
-    buttonName.ZIndex = 2
-
-    local uIStroke = Instance.new("UIStroke")
-    uIStroke.Name = "UIStroke"
-    uIStroke.Thickness = 3
-    uIStroke.Transparency = 0.5
-    uIStroke.Parent = buttonName
-
-    local uIPadding = Instance.new("UIPadding")
-    uIPadding.Name = "UIPadding"
-    uIPadding.PaddingBottom = UDim.new(0.00668, 0)
-    uIPadding.PaddingLeft = UDim.new(0.223, 0)
-    uIPadding.PaddingRight = UDim.new(0.223, 0)
-    uIPadding.PaddingTop = UDim.new(0.00668, 0)
-    uIPadding.Parent = buttonName
-
-    buttonName.Parent = instantKick
-
-    instantKick.Parent = mainFrame
-
-    local kaiserImpack = Instance.new("ImageButton")
-    kaiserImpack.Name = "KaiserImpack"
-    kaiserImpack.Image = "rbxassetid://100284446653174"
-    kaiserImpack.AnchorPoint = Vector2.new(0.5, 0.5)
-    kaiserImpack.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    kaiserImpack.BackgroundTransparency = 1
-    kaiserImpack.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    kaiserImpack.BorderSizePixel = 0
-    kaiserImpack.Position = UDim2.fromScale(0.903, 0.846)
-    kaiserImpack.Size = UDim2.fromScale(0.124, 0.124)
-    kaiserImpack.SizeConstraint = Enum.SizeConstraint.RelativeYY
-
-    local buttonName1 = Instance.new("TextLabel")
-    buttonName1.Name = "ButtonName"
-    buttonName1.FontFace = Font.new(
-    "rbxasset://fonts/families/GothamSSm.json",
-    Enum.FontWeight.ExtraBold,
-    Enum.FontStyle.Normal
-    )
-    buttonName1.Text = "Kaiser Impack"
-    buttonName1.TextColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName1.TextScaled = true
-    buttonName1.TextSize = 14
-    buttonName1.TextWrapped = true
-    buttonName1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName1.BackgroundTransparency = 1
-    buttonName1.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    buttonName1.BorderSizePixel = 0
-    buttonName1.Position = UDim2.fromScale(-0.215, 0.33)
-    buttonName1.Size = UDim2.fromScale(1.4, 0.449)
-    buttonName1.ZIndex = 2
-
-    local uIStroke1 = Instance.new("UIStroke")
-    uIStroke1.Name = "UIStroke"
-    uIStroke1.Thickness = 3
-    uIStroke1.Transparency = 0.5
-    uIStroke1.Parent = buttonName1
-
-    local uIPadding1 = Instance.new("UIPadding")
-    uIPadding1.Name = "UIPadding"
-    uIPadding1.PaddingBottom = UDim.new(0.00668, 0)
-    uIPadding1.PaddingLeft = UDim.new(0.223, 0)
-    uIPadding1.PaddingRight = UDim.new(0.223, 0)
-    uIPadding1.PaddingTop = UDim.new(0.00668, 0)
-    uIPadding1.Parent = buttonName1
-
-    buttonName1.Parent = kaiserImpack
-
-    kaiserImpack.Parent = mainFrame
-
-    local curveShotProMax = Instance.new("ImageButton")
-    curveShotProMax.Name = "CurveShotProMax"
-    curveShotProMax.Image = "rbxassetid://100284446653174"
-    curveShotProMax.AnchorPoint = Vector2.new(0.5, 0.5)
-    curveShotProMax.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    curveShotProMax.BackgroundTransparency = 1
-    curveShotProMax.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    curveShotProMax.BorderSizePixel = 0
-    curveShotProMax.Position = UDim2.fromScale(0.786, 0.344)
-    curveShotProMax.Size = UDim2.fromScale(0.124, 0.124)
-    curveShotProMax.SizeConstraint = Enum.SizeConstraint.RelativeYY
-
-    local buttonName2 = Instance.new("TextLabel")
-    buttonName2.Name = "ButtonName"
-    buttonName2.FontFace = Font.new(
-    "rbxasset://fonts/families/GothamSSm.json",
-    Enum.FontWeight.ExtraBold,
-    Enum.FontStyle.Normal
-    )
-    buttonName2.Text = "Curve Shot"
-    buttonName2.TextColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName2.TextScaled = true
-    buttonName2.TextSize = 14
-    buttonName2.TextWrapped = true
-    buttonName2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName2.BackgroundTransparency = 1
-    buttonName2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    buttonName2.BorderSizePixel = 0
-    buttonName2.Position = UDim2.fromScale(-0.215, 0.33)
-    buttonName2.Size = UDim2.fromScale(1.4, 0.449)
-    buttonName2.ZIndex = 2
-
-    local uIStroke2 = Instance.new("UIStroke")
-    uIStroke2.Name = "UIStroke"
-    uIStroke2.Thickness = 3
-    uIStroke2.Transparency = 0.5
-    uIStroke2.Parent = buttonName2
-
-    local uIPadding2 = Instance.new("UIPadding")
-    uIPadding2.Name = "UIPadding"
-    uIPadding2.PaddingBottom = UDim.new(0.00668, 0)
-    uIPadding2.PaddingLeft = UDim.new(0.223, 0)
-    uIPadding2.PaddingRight = UDim.new(0.223, 0)
-    uIPadding2.PaddingTop = UDim.new(0.00668, 0)
-    uIPadding2.Parent = buttonName2
-
-    buttonName2.Parent = curveShotProMax
-
-    curveShotProMax.Parent = mainFrame
-
-    local autoGK = Instance.new("ImageButton")
-    autoGK.Name = "AutoGK"
-    autoGK.Image = "rbxassetid://100284446653174"
-    autoGK.AnchorPoint = Vector2.new(0.5, 0.5)
-    autoGK.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    autoGK.BackgroundTransparency = 1
-    autoGK.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    autoGK.BorderSizePixel = 0
-    autoGK.Position = UDim2.fromScale(0.0837, 0.315)
-    autoGK.Size = UDim2.fromScale(0.124, 0.124)
-    autoGK.SizeConstraint = Enum.SizeConstraint.RelativeYY
-
-    local buttonName3 = Instance.new("TextLabel")
-    buttonName3.Name = "ButtonName"
-    buttonName3.FontFace = Font.new(
-    "rbxasset://fonts/families/GothamSSm.json",
-    Enum.FontWeight.ExtraBold,
-    Enum.FontStyle.Normal
-    )
-    buttonName3.Text = "AutoGK Toggle"
-    buttonName3.TextColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName3.TextScaled = true
-    buttonName3.TextSize = 14
-    buttonName3.TextWrapped = true
-    buttonName3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName3.BackgroundTransparency = 1
-    buttonName3.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    buttonName3.BorderSizePixel = 0
-    buttonName3.Position = UDim2.fromScale(-0.215, 0.33)
-    buttonName3.Size = UDim2.fromScale(1.4, 0.449)
-    buttonName3.ZIndex = 2
-
-    local uIStroke3 = Instance.new("UIStroke")
-    uIStroke3.Name = "UIStroke"
-    uIStroke3.Thickness = 3
-    uIStroke3.Transparency = 0.5
-    uIStroke3.Parent = buttonName3
-
-    local uIPadding3 = Instance.new("UIPadding")
-    uIPadding3.Name = "UIPadding"
-    uIPadding3.PaddingBottom = UDim.new(0.00668, 0)
-    uIPadding3.PaddingLeft = UDim.new(0.223, 0)
-    uIPadding3.PaddingRight = UDim.new(0.223, 0)
-    uIPadding3.PaddingTop = UDim.new(0.00668, 0)
-    uIPadding3.Parent = buttonName3
-
-    buttonName3.Parent = autoGK
-
-    autoGK.Parent = mainFrame
-
-    local hitBox = Instance.new("ImageButton")
-    hitBox.Name = "HitBox"
-    hitBox.Image = "rbxassetid://100284446653174"
-    hitBox.AnchorPoint = Vector2.new(0.5, 0.5)
-    hitBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    hitBox.BackgroundTransparency = 1
-    hitBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    hitBox.BorderSizePixel = 0
-    hitBox.Position = UDim2.fromScale(0.0837, 0.465)
-    hitBox.Size = UDim2.fromScale(0.124, 0.124)
-    hitBox.SizeConstraint = Enum.SizeConstraint.RelativeYY
-
-    local buttonName4 = Instance.new("TextLabel")
-    buttonName4.Name = "ButtonName"
-    buttonName4.FontFace = Font.new(
-    "rbxasset://fonts/families/GothamSSm.json",
-    Enum.FontWeight.ExtraBold,
-    Enum.FontStyle.Normal
-    )
-    buttonName4.Text = "HitBox Toggle"
-    buttonName4.TextColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName4.TextScaled = true
-    buttonName4.TextSize = 14
-    buttonName4.TextWrapped = true
-    buttonName4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    buttonName4.BackgroundTransparency = 1
-    buttonName4.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    buttonName4.BorderSizePixel = 0
-    buttonName4.Position = UDim2.fromScale(-0.215, 0.33)
-    buttonName4.Size = UDim2.fromScale(1.4, 0.449)
-    buttonName4.ZIndex = 2
-
-    local uIStroke4 = Instance.new("UIStroke")
-    uIStroke4.Name = "UIStroke"
-    uIStroke4.Thickness = 3
-    uIStroke4.Transparency = 0.5
-    uIStroke4.Parent = buttonName4
-
-    local uIPadding = Instance.new("UIPadding")
-    uIPadding.Name = "UIPadding"
-    uIPadding.PaddingBottom = UDim.new(0.00668, 0)
-    uIPadding.PaddingLeft = UDim.new(0.223, 0)
-    uIPadding.PaddingRight = UDim.new(0.223, 0)
-    uIPadding.PaddingTop = UDim.new(0.00668, 0)
-    uIPadding.Parent = buttonName4
-
-    buttonName4.Parent = hitBox
-
-    hitBox.Parent = mainFrame
-
-    mainFrame.Parent = feariseHubMobile
-
-    local ToggleList = {
-        feariseHubMobileUI = feariseHubMobile,
-        instantKickToggle = instantKick,
-        kaiserImpackToggle = kaiserImpack,
-        curveShotProMaxToggle = curveShotProMax,
-        autoGKToggle = autoGK,
-        hitBoxToggle = hitBox
-    }
-
-    return ToggleList
-end
-]]--
