@@ -19,7 +19,7 @@ getgenv().Settings = {
     BallPredicToggle = nil,
     AutoFarmTweenToggle = nil,
     AutoFarmTeleportToggle = nil,
-    InfiniteStamina = nil,
+    InfiniteStamina = false,
     -- WhiteScreen = nil,
     AutoGoalKeeper = nil,
     AutoGKKeybind = nil,
@@ -212,14 +212,46 @@ do
     local MiscTitle = Tabs.pageLegit:AddSection("Misc")
     local AutoDribble = Tabs.pageLegit:AddToggle("AutoDribble", {Title = "AutoDribble", Description = "Testing.", Default = getgenv().Settings.AutoDribble or false })
     local vipToggle = Tabs.pageLegit:AddToggle("vipToggle", {Title = "vipToggle", Description = "Testing.", Default = getgenv().Settings.vipToggle or false })
-    local InfiniteStamina = Tabs.pageLegit:AddToggle("InfiniteStamina", {Title = "InfiniteStamina", Description = "Testing.", Default = getgenv().Settings.InfiniteStamina or false })
-    -- local InfiniteStaminaButton Tabs.pageLegit:AddButton({
-    --     Title = "Infinite Stamina",
-    --     Description = "Click to enable Infinite Stamina (cannot be disabled)",
-    --     Callback = function()
-            
-    --     end
-    -- })
+    local InfiniteStaminaButton Tabs.pageLegit:AddButton({
+        Title = "Infinite Stamina",
+        Description = "Click to enable Infinite Stamina (cannot be disabled)",
+        Callback = function()
+            if not getgenv().Settings.InfiniteStamina then
+                getgenv().Settings.InfiniteStamina = true
+                Fluent:Notify({
+                    Title = "Infinite Stamina",
+                    Content = "Enabled",
+                    Duration = 3
+                })
+            else
+                Fluent:Notify({
+                    Title = "Infinite Stamina",
+                    Content = "Already Enabled",
+                    Duration = 3
+                })
+            end
+        end
+    })
+    task.spawn(function()
+        while task.wait(0.1) do
+            if getgenv().Settings.InfiniteStamina then
+                pcall(function()
+                    local plr = game.Players.LocalPlayer
+                    local stats = plr:FindFirstChild("PlayerStats")
+                    if stats then
+                        local stamina = stats:FindFirstChild("Stamina")
+                        if stamina then
+                            stamina:Destroy()
+                            local fakeStamina = Instance.new("NumberValue")
+                            fakeStamina.Name = "Stamina"
+                            fakeStamina.Value = math.huge
+                            fakeStamina.Parent = stats
+                        end
+                    end
+                end)
+            end
+        end
+    end)
     local EnchantedTitle = Tabs.pageLegit:AddSection("Enchanted")
     local InstantKickKeybind = Tabs.pageLegit:AddKeybind("InstantKickKeybind", {
         Title = "Shoot Keybind",
@@ -242,11 +274,12 @@ do
         Numeric = true,
         Finished = false,
         Callback = function(Value)
-            getgenv().Settings.InputPower = Value
+            getgenv().Settings.InputPower = tonumber(Value)
         end
     })
     InputPower:OnChanged(function(Value)
-        getgenv().Settings.InputPower = Value
+        getgenv().Settings.InputPower = tonumber(Value)
+        print(getgenv().Settings.InputPower)
     end)
 
     -------------------------------------------------------[[ VISUAL ]]-------------------------------------------------------
@@ -541,12 +574,6 @@ do
             triggerQ = {
                 Distance
             },
-            shootBall = {
-                Args = {
-                    [1] = tonumber(getgenv().Settings.InputPower),
-                    [4] = mouse
-                }
-            },
             createBillboard = {
                 BillboardGui
             },
@@ -709,7 +736,11 @@ do
         return false
     end
     Function_Storage.shootBall = function()
-        Remotes.Shoot:FireServer(unpack(Debris_Variables.Function_Variables.shootBall.Args))
+        local args = {
+            [1] = getgenv().Settings.InputPower,
+            [4] = mouse
+        }
+        game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Shoot:FireServer(unpack(args))        
     end
     Function_Storage.createESP = function(plr)
         if plr == player then return end
@@ -1405,39 +1436,6 @@ do
     InstantKickKeybind:OnClick(function()
         task.spawn(function()
             Function_Storage.shootBall()
-        end)
-    end)
-    InfiniteStamina:OnChanged(function()
-        task.spawn(function()
-            local stats = player:FindFirstChild("PlayerStats")
-            local originalStamina = stats and stats:FindFirstChild("Stamina")
-            
-            if InfiniteStamina.Value then
-                -- ย้าย Stamina ไปไว้ที่ ReplicatedStorage
-                if originalStamina then
-                    originalStamina.Parent = Services.ReplicatedStorage
-                end
-    
-                -- สร้าง fakeStamina
-                local fakeStamina = Instance.new("NumberValue")
-                fakeStamina.Name = "Stamina"
-                fakeStamina.Value = math.huge
-                fakeStamina.Parent = stats
-            else
-                pcall(function()
-                    -- ลบ fakeStamina
-                    local fakeStamina = stats and stats:FindFirstChild("Stamina")
-                    if fakeStamina then
-                        fakeStamina:Destroy()
-                    end
-        
-                    -- ย้าย stamina กลับมาที่เดิม
-                    local storedStamina = Services.ReplicatedStorage:FindFirstChild("Stamina")
-                    if storedStamina then
-                        storedStamina.Parent = stats
-                    end
-                end)
-            end
         end)
     end)
 
