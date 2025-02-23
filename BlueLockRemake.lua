@@ -280,7 +280,6 @@ do
     })
     InputPower:OnChanged(function(Value)
         getgenv().Settings.InputPower = tonumber(Value)
-        print(getgenv().Settings.InputPower)
     end)
 
     -------------------------------------------------------[[ VISUAL ]]-------------------------------------------------------
