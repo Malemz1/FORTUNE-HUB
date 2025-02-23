@@ -43,7 +43,7 @@ getgenv().Settings = {
     EffectsDropdown = nil,
     CosmeticsDropdown = nil,
     CardsDropdown = nil,
-
+    LagSwitchToggle = nil,
 }
 
 local function CreateToggle()
@@ -147,6 +147,7 @@ local Tabs = {
     pageVisual = Window:AddTab({ Title = "Visual", Icon = "view" }),
     pageKaitan = Window:AddTab({ Title = "Kaitan", Icon = "crown" }),
     pageOP = Window:AddTab({ Title = "OP", Icon = "apple" }),
+    pageRage = Window:AddTab({ Title = "Rage", Icon = "bug" }),
     pageSpin = Window:AddTab({ Title = "Spin", Icon = "box" }),
     pageItem = Window:AddTab({ Title = "Item", Icon = "archive" }),
 }
@@ -383,6 +384,9 @@ do
     local NoCooldownStealToggle = Tabs.pageOP:AddToggle("NoCooldownStealToggle", { Title = "No Cooldown - Steal", Default = getgenv().Settings.NoCooldownStealToggle or false })
     local NoCooldownAirDribbleToggle = Tabs.pageOP:AddToggle("NoCooldownAirDribbleToggle", { Title = "No Cooldown - AirDribble", Default = getgenv().Settings.NoCooldownAirDribbleToggle or false })
     local NoCooldownAirDashToggle = Tabs.pageOP:AddToggle("NoCooldownAirDashToggle", { Title = "No Cooldown - AirDash", Default = getgenv().Settings.NoCooldownAirDashToggle or false })
+
+    -------------------------------------------------------[[ RAGE ]]-------------------------------------------------------
+    local LagSwitchToggle = Tabs.pageRage:AddToggle("LagSwitchToggle", {Title = "Lag Switch", Default = getgenv().Settings.LagSwitchToggle or false })
 
     -------------------------------------------------------[[ SPIN ]]-------------------------------------------------------
     local StyleTitle = Tabs.pageSpin:AddSection("Style Spin")
@@ -1380,29 +1384,54 @@ do
     Services.RunServices.Heartbeat:Connect(function()
         if not AutoDribble.Value then return end
 
-        for PlayerIndex, PlayerValue in pairs(Debris_Variables.AutoDribble.tracked) do
-            if PlayerIndex and PlayerIndex:FindFirstChild("HumanoidRootPart") then
-                Debris_Variables.AutoDribble.TargetPlayer = Services.Players:FindFirstChild(PlayerIndex.Name)
-                if Debris_Variables.AutoDribble.TargetPlayer and Debris_Variables.AutoDribble.TargetPlayer.Team == player.Team then wait() end
+        local animationController = Services.ReplicatedStorage:WaitForChild("Controllers"):WaitForChild("AnimatonController")
+        local slideAnimation = animationController:WaitForChild("Isagi")
 
-                Debris_Variables.AutoDribble.Distance = (humanoidrootpart.Position - PlayerIndex.HumanoidRootPart.Position).Magnitude
-                Debris_Variables.AutoDribble.Sliding = PlayerIndex:FindFirstChild("Values") and PlayerIndex.Values:FindFirstChild("Sliding")
-                Debris_Variables.AutoDribble.isSliding = Debris_Variables.AutoDribble.Sliding and Debris_Variables.AutoDribble.Sliding.Value
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if not animator then
+            animator = Instance.new("Animator")
+            animator.Parent = humanoid
+        end
 
-                for SlideIndex, SlideValue in pairs(PlayerIndex:GetChildren()) do
-                    if SlideValue.Name:match("^Slide%d+$") or Debris_Variables.AutoDribble.isSliding then
-                        if Debris_Variables.AutoDribble.Distance <= 20 and not data.inside then
-                            if Function_Storage.triggerQ(PlayerIndex) then
-                                Debris_Variables.AutoDribble.tracked[PlayerIndex].inside = true
-                            end
-                        elseif Debris_Variables.AutoDribble.Distance > 20 then
-                            Debris_Variables.AutoDribble.tracked[PlayerIndex].inside = false
-                        end
-                        break
+        local animationTrack = animator:LoadAnimation(slideAnimation)
+
+        for DribbleIndex, DribbleValue in pairs(workspace:GetChildren()) do
+            if DribbleValue:IsA("Model") and DribbleValue ~= character and DribbleValue:FindFirstChild("Values") then
+                local TargetHumanoidRootPart = DribbleValue:FindFirstChild("HumanoidRootPart")
+                local TargetValue = DribbleValue:FindFirstChild("Values")
+                local Distance = (TargetHumanoidRootPart.Position - humanoidrootpart.Position).Magnitude
+                if Distance <= 20 and TargetValue.Sliding.Value then
+                    Remotes.Dribble:FireServer()
+                    if character.Values.Dribbling.Value then
+                        animationTrack:Play()
                     end
                 end
             end
         end
+
+        -- for PlayerIndex, PlayerValue in pairs(Debris_Variables.AutoDribble.tracked) do
+        --     if PlayerIndex and PlayerIndex:FindFirstChild("HumanoidRootPart") then
+        --         Debris_Variables.AutoDribble.TargetPlayer = Services.Players:FindFirstChild(PlayerIndex.Name)
+        --         if Debris_Variables.AutoDribble.TargetPlayer and Debris_Variables.AutoDribble.TargetPlayer.Team == player.Team then wait() end
+
+        --         Debris_Variables.AutoDribble.Distance = (humanoidrootpart.Position - PlayerIndex.HumanoidRootPart.Position).Magnitude
+        --         Debris_Variables.AutoDribble.Sliding = PlayerIndex:FindFirstChild("Values") and PlayerIndex.Values:FindFirstChild("Sliding")
+        --         Debris_Variables.AutoDribble.isSliding = Debris_Variables.AutoDribble.Sliding and Debris_Variables.AutoDribble.Sliding.Value
+
+        --         for SlideIndex, SlideValue in pairs(PlayerIndex:GetChildren()) do
+        --             if SlideValue.Name:match("^Slide%d+$") or Debris_Variables.AutoDribble.isSliding then
+        --                 if Debris_Variables.AutoDribble.Distance <= 20 and not data.inside then
+        --                     if Function_Storage.triggerQ(PlayerIndex) then
+        --                         Debris_Variables.AutoDribble.tracked[PlayerIndex].inside = true
+        --                     end
+        --                 elseif Debris_Variables.AutoDribble.Distance > 20 then
+        --                     Debris_Variables.AutoDribble.tracked[PlayerIndex].inside = false
+        --                 end
+        --                 break
+        --             end
+        --         end
+        --     end
+        -- end
     end)
     vipToggle:OnChanged(function()
         task.spawn(function()
@@ -2194,6 +2223,26 @@ do
                 Fluent:Notify({ Title = "No Cooldown - AirDash Enabled", Content = "Cooldown removed for AirDash.", Duration = 3 })
             else
                 Fluent:Notify({ Title = "No Cooldown - AirDash Disabled", Content = "Cooldown restored for AirDash.", Duration = 3 })
+            end
+        end)
+    end)
+
+    -------------------------------------------------------[[ RAGE SCRIPT ]]-------------------------------------------------------
+    LagSwitchToggle:OnChanged(function()
+        task.spawn(function()
+            while LagSwitchToggle.Value do
+                task.wait()
+                local args = {
+                    [1] = 1,
+                    [4] = mouse
+                }
+                
+                for i = 1, 400 do
+                    spawn(function()
+                        game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Shoot:FireServer(unpack(args))
+                        task.wait(0.00001)
+                    end)
+                end
             end
         end)
     end)
