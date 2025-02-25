@@ -127,6 +127,39 @@ function checkDevice()
 end
 checkDevice()
 
+local FileName = tostring(game.Players.LocalPlayer.UserId).."_Settings.FeariseHub"
+local BaseFolder = "FeariseHub"
+local SubFolder = "BlueLockRivals"
+
+function SaveSetting() 
+    local json
+    local HttpService = game:GetService("HttpService")
+    
+    if writefile then
+        json = HttpService:JSONEncode(getgenv().Settings)
+
+        if not isfolder(BaseFolder) then
+            makefolder(BaseFolder)
+        end
+        if not isfolder(BaseFolder.."\\"..SubFolder) then
+            makefolder(BaseFolder.."\\"..SubFolder)
+        end
+        
+        writefile(BaseFolder.."\\"..SubFolder.."\\"..FileName, json)
+    else
+        error("ERROR: Can't save your settings")
+    end
+end
+
+function LoadSetting()
+    local HttpService = game:GetService("HttpService")
+    if readfile and isfile and isfile(BaseFolder.."\\"..SubFolder.."\\"..FileName) then
+        getgenv().Settings = HttpService:JSONDecode(readfile(BaseFolder.."\\"..SubFolder.."\\"..FileName))
+    end
+end
+
+LoadSetting()
+
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/FeariseHub_UI.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
@@ -163,10 +196,12 @@ do
         Finished = false,
         Callback = function(Value)
             getgenv().Settings.WalkSpeedInput = Value
+            SaveSetting()
         end
     })
     WalkSpeedInput:OnChanged(function(Value)
         getgenv().Settings.WalkSpeedInput = Value
+        SaveSetting()
     end)
     local JumpPowerToggle = Tabs.pageLegit:AddToggle("JumpPowerToggle", {Title = "Toggle JumpPower", Default = getgenv().Settings.JumpPowerToggle or false })
     local JumpPowerInput = Tabs.pageLegit:AddInput("JumpPowerInput", {
@@ -176,10 +211,12 @@ do
         Finished = false,
         Callback = function(Value)
             getgenv().Settings.JumpPowerInput = Value
+            SaveSetting()
         end
     })
     JumpPowerInput:OnChanged(function(Value)
         getgenv().Settings.JumpPowerInput = Value
+        SaveSetting()
     end)
     local HitboxTitle = Tabs.pageLegit:AddSection("Hitbox")
     local HitboxToggle = Tabs.pageLegit:AddToggle("HitboxToggle", { Title = "Hitbox", Default = getgenv().Settings.HitboxToggle or false })
@@ -191,10 +228,12 @@ do
         Finished = false,
         Callback = function(Value)
             getgenv().Settings.HitboxInput = Value
+            SaveSetting()
         end
     })
     HitboxInput:OnChanged(function(Value)
         getgenv().Settings.HitboxInput = Value
+        SaveSetting()
     end)
     local HitboxKeybind = Tabs.pageLegit:AddKeybind("HitboxKeybind", {
         Title = "Toggle Hitbox Keybind",
@@ -202,13 +241,16 @@ do
         Default = getgenv().Settings.HitboxKeybind or "",
         Callback = function(Value)
             getgenv().Settings.HitboxKeybind = Value
+            SaveSetting()
         end,
         ChangedCallback = function(NewKey)
             getgenv().Settings.HitboxKeybind = NewKey
+            SaveSetting()
         end
     })
     HitboxKeybind:OnChanged(function(Value)
         getgenv().Settings.HitboxKeybind = Value
+        SaveSetting()
     end)
     local MiscTitle = Tabs.pageLegit:AddSection("Misc")
     local AutoDribble = Tabs.pageLegit:AddToggle("AutoDribble", {Title = "AutoDribble", Description = "Testing.", Default = getgenv().Settings.AutoDribble or false })
@@ -219,6 +261,7 @@ do
         Callback = function()
             if not getgenv().Settings.InfiniteStamina then
                 getgenv().Settings.InfiniteStamina = true
+                SaveSetting()
                 Fluent:Notify({
                     Title = "Infinite Stamina",
                     Content = "Enabled",
@@ -260,13 +303,16 @@ do
         Default = getgenv().Settings.InstantKickKeybind or "",
         Callback = function(Value)
             getgenv().Settings.InstantKickKeybind = Value
+            SaveSetting()
         end,
         ChangedCallback = function(Value)
             getgenv().Settings.InstantKickKeybind = Value
+            SaveSetting()
         end
     })
     InstantKickKeybind:OnChanged(function(Value)
         getgenv().Settings.InstantKickKeybind = Value
+        SaveSetting()
     end)
     local InputPower = Tabs.pageLegit:AddInput("InputPower", {
         Title = "Adjust Power (1-100000)",
@@ -276,10 +322,12 @@ do
         Finished = false,
         Callback = function(Value)
             getgenv().Settings.InputPower = tonumber(Value)
+            SaveSetting()
         end
     })
     InputPower:OnChanged(function(Value)
         getgenv().Settings.InputPower = tonumber(Value)
+        SaveSetting()
     end)
 
     -------------------------------------------------------[[ VISUAL ]]-------------------------------------------------------
@@ -303,13 +351,16 @@ do
         Default = getgenv().Settings.AutoGKKeybind or "",
         Callback = function(Value)
             getgenv().Settings.AutoGKKeybind = Value
+            SaveSetting()
         end,
         ChangedCallback = function(Value)
             getgenv().Settings.AutoGKKeybind = Value
+            SaveSetting()
         end
     })
     AutoGKKeybind:OnChanged(function(Value)
         getgenv().Settings.AutoGKKeybind = Value
+        SaveSetting()
     end)
     local Properties = Tabs.pageKaitan:AddSection("Properties")
     local TeamPositionDropdown = Tabs.pageKaitan:AddDropdown("TeamPositionDropdown", {
@@ -323,10 +374,12 @@ do
         Default = getgenv().Settings.TeamPositionDropdown or "Home_CF",
         Callback = function(Value)
             getgenv().Settings.TeamPositionDropdown = Value
+            SaveSetting()
         end
     })
     TeamPositionDropdown:OnChanged(function(Value)
         getgenv().Settings.TeamPositionDropdown = Value
+        SaveSetting()
     end)
     local AutoTeamToggle = Tabs.pageKaitan:AddToggle("AutoTeamToggle", { Title = "Auto Team & Position", Default = getgenv().Settings.AutoTeamToggle or false })
     local AutoTeamForAutoFarmToggle = Tabs.pageKaitan:AddToggle("AutoTeamForAutoFarmToggle", { Title = "Auto Team & Position (For Auto Farm)", Default = getgenv().Settings.AutoTeamForAutoFarmToggle or false })
@@ -342,10 +395,12 @@ do
         Finished = false,
         Callback = function(v)
             getgenv().Settings.AutoHopThresholdInput = tonumber(v)
+            SaveSetting()
         end
     })
     AutoHopThresholdInput:OnChanged(function(v)
         getgenv().Settings.AutoHopThresholdInput = tonumber(v)
+        SaveSetting()
     end)
 
     -------------------------------------------------------[[ OP ]]-------------------------------------------------------
@@ -356,13 +411,16 @@ do
         Default = getgenv().Settings.KaiserKeybide or "",
         Callback = function(Value)
             getgenv().Settings.KaiserKeybide = Value
+            SaveSetting()
         end,
         ChangedCallback = function(Value)
             getgenv().Settings.KaiserKeybide = Value
+            SaveSetting()
         end
     })
     KaiserKeybide:OnChanged(function(Value)
         getgenv().Settings.KaiserKeybide = Value
+        SaveSetting()
     end)
     local CurveShotProMaxToggle = Tabs.pageOP:AddToggle("CurveShotProMaxToggle", { Title = "Gyro Shot Pro Max", Default = getgenv().Settings.CurveShotProMaxToggle or false })
     local CurveShotProMaxKeybind = Tabs.pageOP:AddKeybind("CurveShotProMaxKeybind", {
@@ -371,13 +429,16 @@ do
         Default = getgenv().Settings.CurveShotProMaxKeybind or "",
         Callback = function(Value)
             getgenv().Settings.CurveShotProMaxKeybind = Value
+            SaveSetting()
         end,
         ChangedCallback = function(Value)
             getgenv().Settings.CurveShotProMaxKeybind = Value
+            SaveSetting()
         end
     })
     CurveShotProMaxKeybind:OnChanged(function(Value)
         getgenv().Settings.CurveShotProMaxKeybind = Value
+        SaveSetting()
     end)
     local SkillTitle = Tabs.pageOP:AddSection("No CD Skill (Wave Required)")
     local NoCooldownStealToggle = Tabs.pageOP:AddToggle("NoCooldownStealToggle", { Title = "No Cooldown - Steal", Default = getgenv().Settings.NoCooldownStealToggle or false })
@@ -402,6 +463,7 @@ do
             table.insert(Values, Value)
         end
         getgenv().Settings.StyleLockDropdown = Values
+        SaveSetting()
     end)
     local AutoSpinToggle = Tabs.pageSpin:AddToggle("AutoSpinToggle", { Title = "Auto Style Spin", Default = getgenv().Settings.AutoSpinToggle or false })
     local FlowTitle = Tabs.pageSpin:AddSection("Flow Spin")
@@ -418,6 +480,7 @@ do
             table.insert(Values, Value)
         end
         getgenv().Settings.FlowLockDropdown = Values
+        SaveSetting()
     end)
     local AutoFlowToggle = Tabs.pageSpin:AddToggle("AutoFlowToggle", { Title = "Auto Flow Spin", Default = getgenv().Settings.AutoFlowToggle or false })
 
@@ -448,10 +511,12 @@ do
         Default = getgenv().Settings.EffectsDropdown or "",
         Callback = function(Value)
             getgenv().Settings.EffectsDropdown = Value
+            SaveSetting()
         end
     })
     EffectsDropdown:OnChanged(function(Value)
         getgenv().Settings.EffectsDropdown = Value
+        SaveSetting()
     end)
     local ApplyEffectButton = Tabs.pageItem:AddButton({
         Title = "Apply Effect",
@@ -480,10 +545,12 @@ do
         Default = getgenv().Settings.CosmeticsDropdown or "",
         Callback = function(Value)
             getgenv().Settings.CosmeticsDropdown = Value
+            SaveSetting()
         end
     })
     CosmeticsDropdown:OnChanged(function(Value)
         getgenv().Settings.CosmeticsDropdown = Value
+        SaveSetting()
     end)
     local ApplyCosmetic = Tabs.pageItem:AddButton({
         Title = "Apply Cosmetic",
@@ -512,10 +579,12 @@ do
         Default = getgenv().Settings.CardsDropdown or "",
         Callback = function(Value)
             getgenv().Settings.CardsDropdown = Value
+            SaveSetting()
         end
     })
     CardsDropdown:OnChanged(function(Value)
         getgenv().Settings.CardsDropdown = Value
+        SaveSetting()
     end)
     local ApplyCard = Tabs.pageItem:AddButton({
         Title = "Apply Card",
@@ -883,7 +952,6 @@ do
             return goalCFrames.Home[math.random(1, #goalCFrames.Home)]
         end
     end
-    
     Function_Storage.KaiserShoot = function(ball, startPos, targetCF, height, duration, curveIntensity)
         local startTime = tick()
         local connection
@@ -904,7 +972,6 @@ do
             ball.CFrame = CFrame.new(currentXZ.X + curve, startPos.Y + arcHeight, currentXZ.Z)
         end)
     end
-    
     Function_Storage.CurveShoot = function(ball, startPos, targetCF, height, duration, curveIntensity)
         local startTime = tick()
         local connection
@@ -944,8 +1011,6 @@ do
             ) * CFrame.Angles(0, spinEffect, 0) -- หมุนรอบตัวเอง
         end)
     end
-    
-
     Function_Storage.teleportBallToGoalKaiser = function()
         local ball = Function_Storage.GetBall()
         if ball and ball.Position then
@@ -962,7 +1027,6 @@ do
             warn("Failed to retrieve ball object")
         end
     end
-
     Function_Storage.teleportBallToGoalCurve = function()
         local ball = Function_Storage.GetBall()
         if ball and ball.Position then
@@ -979,7 +1043,6 @@ do
             warn("Failed to retrieve ball object")
         end
     end
-
     Function_Storage.CreateFeariseHubMobileToggle = function()
         local feariseHubMobile = Instance.new("ScreenGui")
         feariseHubMobile.Name = "FeariseHubMobile"
@@ -1292,6 +1355,8 @@ do
     
     WalkSpeedToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.WalkSpeedToggle = WalkSpeedToggle.Value
+            SaveSetting()
             if WalkSpeedToggle.Value then
                 Debris_Variables.WalkSpeedToggle.WalkSpeedConnect = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
                     if humanoid.WalkSpeed ~= getgenv().Settings.WalkSpeedInput then
@@ -1322,6 +1387,8 @@ do
     end)
     JumpPowerToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.JumpPowerToggle = JumpPowerToggle.Value
+            SaveSetting()
             while JumpPowerToggle.Value do
                 task.wait()
                 humanoid.UseJumpPower = true
@@ -1335,6 +1402,8 @@ do
     end)
     HitboxToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.HitboxToggle = HitboxToggle.Value
+            SaveSetting()
             while HitboxToggle.Value do
                 task.wait()
                 Debris_Variables.HitboxToggle.FootBall = Function_Storage.GetBall()
@@ -1377,6 +1446,7 @@ do
     AutoDribble:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.AutoDribble = AutoDribble.Value
+            SaveSetting()
         end)
     end)
     Services.RunServices.Heartbeat:Connect(function()
@@ -1433,6 +1503,9 @@ do
     end)
     vipToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.vipToggle = vipToggle.Value
+            SaveSetting()
+
             Debris_Variables.vipToggle.hasVIP = player:FindFirstChild("HasVIP")
 
             if Debris_Variables.vipToggle.hasVIP then
@@ -1469,6 +1542,8 @@ do
     -------------------------------------------------------[[ VISUAL SCRIPT ]]-------------------------------------------------------
     espToggle:OnChanged(function()
         Debris_Variables.ESP_Features.espEnabled = espToggle.Value
+        getgenv().Settings.espToggle = espToggle.Value
+        SaveSetting()
         task.spawn(function()
             for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
@@ -1480,6 +1555,8 @@ do
     espStyleToggle:OnChanged(function()
         task.spawn(function()
             Debris_Variables.ESP_Features.espFeatures["Style"] = espStyleToggle.Value
+            getgenv().Settings.espStyleToggle = espStyleToggle.Value
+            SaveSetting()
             for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
                     if obj.feature == "Style" then
@@ -1492,6 +1569,8 @@ do
     espAwakeningToggle:OnChanged(function()
         task.spawn(function()
             Debris_Variables.ESP_Features.espFeatures["Awakening"] = espAwakeningToggle.Value
+            getgenv().Settings.espAwakeningToggle = espAwakeningToggle.Value
+            SaveSetting()
             for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
                     if obj.feature == "Awakening" then
@@ -1504,6 +1583,8 @@ do
     espFlowToggle:OnChanged(function()
         task.spawn(function()
             Debris_Variables.ESP_Features.espFeatures["Flow"] = espFlowToggle.Value
+            getgenv().Settings.espFlowToggle = espFlowToggle.Value
+            SaveSetting()
             for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
                     if obj.feature == "Flow" then
@@ -1516,6 +1597,8 @@ do
     espStaminaToggle:OnChanged(function()
         task.spawn(function()
             Debris_Variables.ESP_Features.espFeatures["Stamina"] = espStaminaToggle.Value
+            getgenv().Settings.espStaminaToggle = espStaminaToggle.Value
+            SaveSetting()
             for _, data in pairs(Debris_Variables.ESP_Features.espObjects) do
                 for _, obj in ipairs(data) do
                     if obj.feature == "Stamina" then
@@ -1528,6 +1611,7 @@ do
     BallPredicToggle:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.BallPredicToggle = BallPredicToggle.Value
+            SaveSetting()
         end)
     end)
     getgenv().Settings = {
@@ -1646,6 +1730,8 @@ do
     -------------------------------------------------------[[ KAITAN SCRIPT ]]-------------------------------------------------------
     AutoFarmTweenToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.AutoFarmTweenToggle = AutoFarmTweenToggle.Value
+            SaveSetting()
             if AutoFarmTweenToggle.Value then
                 task.spawn(function()
                     while AutoFarmTweenToggle.Value do
@@ -1773,6 +1859,8 @@ do
     end)
     AutoFarmTeleportToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.AutoFarmTeleportToggle = AutoFarmTeleportToggle.Value
+            SaveSetting()
             if AutoFarmTeleportToggle.Value then
                 task.spawn(function()
                     while AutoFarmTeleportToggle.Value do
@@ -1861,6 +1949,7 @@ do
     AutoGoalKeeper:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.AutoGoalKeeper = AutoGoalKeeper.Value
+            SaveSetting()
         end)
     end)
     AutoGKKeybind:OnClick(function()
@@ -1883,6 +1972,8 @@ do
     end)
     AutoTeamToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.AutoTeamToggle = AutoTeamToggle.Value
+            SaveSetting()
             while AutoTeamToggle.Value do
                 -- ตรวจสอบว่าผู้เล่นอยู่ในทีม Visitor
                 if player.Team and player.Team.Name == "Visitor" then
@@ -1919,6 +2010,8 @@ do
     end)
     AutoTeamForAutoFarmToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.AutoTeamForAutoFarmToggle = AutoTeamForAutoFarmToggle.Value
+            SaveSetting()
             while AutoTeamToggle.Value do
                 -- ตรวจสอบว่าผู้เล่นอยู่ในทีม Visitor
                 if player.Team and player.Team.Name == "Visitor" then
@@ -1956,6 +2049,7 @@ do
     InstantGoalToggle:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.InstantGoalToggle = InstantGoalToggle.Value
+            SaveSetting()
         end)
     end)
     Remotes.Shoot.OnClientEvent:Connect(function()
@@ -1965,6 +2059,7 @@ do
     end)
     AutoHopToggle:OnChanged(function(v)
         getgenv().Settings.AutoHopToggle = v
+        SaveSetting()
         if v then
             task.spawn(Function_Storage.autoHop)
         end
@@ -1974,6 +2069,7 @@ do
     KaiserToggle:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.KaiserToggle = KaiserToggle.Value
+            SaveSetting()
         end)
     end)
     Remotes.Shoot.OnClientEvent:Connect(function()
@@ -1990,6 +2086,8 @@ do
     CurveShotProMaxToggle:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.CurveShotProMaxToggle = CurveShotProMaxToggle.Value
+            getgenv().Settings.CurveShotProMaxToggle = CurveShotProMaxToggle.Value
+            SaveSetting()
         end)
     end)
     Remotes.Shoot.OnClientEvent:Connect(function()
@@ -2005,6 +2103,8 @@ do
     end)
     NoCooldownStealToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.NoCooldownStealToggle = NoCooldownStealToggle.Value
+            SaveSetting()
             if NoCooldownStealToggle.Value then   
                 local originalSteal = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Bachira.Steal)
                 
@@ -2096,6 +2196,8 @@ do
     end)
     NoCooldownAirDribbleToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.NoCooldownAirDribbleToggle = NoCooldownAirDribbleToggle.Value
+            SaveSetting()
             if NoCooldownAirDribbleToggle.Value then
                 -- Hook the original AirDribble function
                 local airdribbleModule = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDribble)
@@ -2199,6 +2301,8 @@ do
     end)
     NoCooldownAirDashToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.NoCooldownAirDashToggle = NoCooldownAirDashToggle.Value
+            SaveSetting()
             if NoCooldownAirDashToggle.Value then
                 local originalAirDash = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDash)
                 
@@ -2232,6 +2336,8 @@ do
     -------------------------------------------------------[[ RAGE SCRIPT ]]-------------------------------------------------------
     LagSwitchToggle:OnChanged(function()
         task.spawn(function()
+            getgenv().Settings.LagSwitchToggle = LagSwitchToggle.Value
+            SaveSetting()
             while LagSwitchToggle.Value do
                 task.wait()
                 local args = {
@@ -2331,82 +2437,87 @@ do
             if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
                 local MobileUI = Function_Storage.CreateFeariseHubMobileToggle()
 
-                MobileUI.instantKickToggle.MouseButton1Click:Connect(function()
-                    Function_Storage.shootBall()
-                end)
-                MobileUI.kaiserImpackToggle.MouseButton1Click:Connect(function()
-                    Debris_Variables.KaiserKeybide.State = not KaiserToggle.Value
-                    KaiserToggle:SetValue(Debris_Variables.KaiserKeybide.State)
-                    if Debris_Variables.KaiserKeybide.State then
-                        Fluent:Notify({
-                            Title = "Fearise Hub",
-                            Content = "Kaiser Impack Actived.",
-                            Duration = 3
-                        })
-                    else
-                        Fluent:Notify({
-                            Title = "Fearise Hub",
-                            Content = "Kaiser Impack Not Actived.",
-                            Duration = 3
-                        })
-                    end
-                end)
-                MobileUI.curveShotProMaxToggle.MouseButton1Click:Connect(function()
-                    Debris_Variables.CurveShotProMaxKeybind.State = not CurveShotProMaxToggle.Value
-                    CurveShotProMaxToggle:SetValue(Debris_Variables.CurveShotProMaxKeybind.State)
-                    if Debris_Variables.CurveShotProMaxKeybind.State then
-                        Fluent:Notify({
-                            Title = "Fearise Hub",
-                            Content = "CurveShotProMax Actived.",
-                            Duration = 3
-                        })
-                    else
-                        Fluent:Notify({
-                            Title = "Fearise Hub",
-                            Content = "CurveShotProMax Not Actived.",
-                            Duration = 3
-                        })
-                    end
-                end)
-                MobileUI.autoGKToggle.MouseButton1Click:Connect(function()
-                    Debris_Variables.AutoGKKeybind.State = not AutoGoalKeeper.Value
-                    AutoGoalKeeper:SetValue(Debris_Variables.AutoGKKeybind.State)
-                    if Debris_Variables.AutoGKKeybind.State then
-                        Fluent:Notify({
-                            Title = "Fearise Hub",
-                            Content = "AutoGK Actived.",
-                            Duration = 3
-                        })
-                    else
-                        Fluent:Notify({
-                            Title = "Fearise Hub",
-                            Content = "AutoGK Not Actived.",
-                            Duration = 3
-                        })
-                    end
-                end)
-                MobileUI.hitBoxToggle.MouseButton1Click:Connect(function()
-                    Debris_Variables.HitboxKeybind.State = not HitboxToggle.Value
-                    HitboxToggle:SetValue(Debris_Variables.HitboxKeybind.State)
-                    if Debris_Variables.HitboxKeybind.State then
-                        Fluent:Notify({
-                            Title = "Fearise Hub",
-                            Content = "Hitbox Actived.",
-                            Duration = 3
-                        })
-                    else
-                        Fluent:Notify({
-                            Title = "Fearise Hub",
-                            Content = "Hitbox Not Actived.",
-                            Duration = 3
-                        })
-                    end
-                end)
-                game:GetService("CoreGui").ChildRemoved:Connect(function(Value)
-                    if Value.Name == "FeariseHub" then
-                        MobileUI.feariseHubMobileUI:Destroy()
-                    end
-                end)
+                    MobileUI.instantKickToggle.MouseButton1Click:Connect(function()
+                        Function_Storage.shootBall()
+                    end)
+                    MobileUI.kaiserImpackToggle.MouseButton1Click:Connect(function()
+                        Debris_Variables.KaiserKeybide.State = not KaiserToggle.Value
+                        KaiserToggle:SetValue(Debris_Variables.KaiserKeybide.State)
+                        if Debris_Variables.KaiserKeybide.State then
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "Kaiser Impack Actived.",
+                                Duration = 3
+                            })
+                        else
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "Kaiser Impack Not Actived.",
+                                Duration = 3
+                            })
+                        end
+                    end)
+                    MobileUI.curveShotProMaxToggle.MouseButton1Click:Connect(function()
+                        Debris_Variables.CurveShotProMaxKeybind.State = not CurveShotProMaxToggle.Value
+                        CurveShotProMaxToggle:SetValue(Debris_Variables.CurveShotProMaxKeybind.State)
+                        if Debris_Variables.CurveShotProMaxKeybind.State then
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "CurveShotProMax Actived.",
+                                Duration = 3
+                            })
+                        else
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "CurveShotProMax Not Actived.",
+                                Duration = 3
+                            })
+                        end
+                    end)
+                    MobileUI.autoGKToggle.MouseButton1Click:Connect(function()
+                        Debris_Variables.AutoGKKeybind.State = not AutoGoalKeeper.Value
+                        AutoGoalKeeper:SetValue(Debris_Variables.AutoGKKeybind.State)
+                        if Debris_Variables.AutoGKKeybind.State then
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "AutoGK Actived.",
+                                Duration = 3
+                            })
+                        else
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "AutoGK Not Actived.",
+                                Duration = 3
+                            })
+                        end
+                    end)
+                    MobileUI.hitBoxToggle.MouseButton1Click:Connect(function()
+                        Debris_Variables.HitboxKeybind.State = not HitboxToggle.Value
+                        HitboxToggle:SetValue(Debris_Variables.HitboxKeybind.State)
+                        if Debris_Variables.HitboxKeybind.State then
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "Hitbox Actived.",
+                                Duration = 3
+                            })
+                        else
+                            Fluent:Notify({
+                                Title = "Fearise Hub",
+                                Content = "Hitbox Not Actived.",
+                                Duration = 3
+                            })
+                        end
+                    end)
+                    game:GetService("CoreGui").ChildRemoved:Connect(function(Value)
+                        if Value.Name == "FeariseHub" then
+                            MobileUI.feariseHubMobileUI:Destroy()
+                        end
+                    end)
+                if getgenv().Configs["Mobile Mode"] then
+                    
+                else
+                    warn("Error: Your Forget Configs")    
+                end
             end
         end
     end
