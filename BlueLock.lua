@@ -1394,27 +1394,30 @@ do
                 Debris_Variables.HitboxToggle.FootBall = Function_Storage.GetBall()
                 Debris_Variables.HitboxToggle.HitBox = Debris_Variables.HitboxToggle.FootBall:FindFirstChild("Hitbox")
                 Debris_Variables.HitboxToggle.Char = Debris_Variables.HitboxToggle.FootBall:FindFirstChild("Char")
-                if Debris_Variables.HitboxToggle.FootBall and Debris_Variables.HitboxToggle.FootBall.Parent == Services.Workspace then
-                    if Debris_Variables.HitboxToggle.Char.Value ~= character then
-                        if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
-                            Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 0.5, getgenv().Settings.HitboxInput)
-                        end
-                    else
-                        if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
-                            Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 1, 2.5)
-                        end
-                    end
-                else
-                    if Debris_Variables.HitboxToggle.Char.Value ~= character then
-                        if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
-                            Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 0.5, getgenv().Settings.HitboxInput)
-                        end
-                    else
-                        if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
-                            Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 1, 2.5)
-                        end
-                    end
+                if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
+                    Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 0.5, getgenv().Settings.HitboxInput)
                 end
+                -- if Debris_Variables.HitboxToggle.FootBall and Debris_Variables.HitboxToggle.FootBall.Parent == Services.Workspace then
+                --     if Debris_Variables.HitboxToggle.Char.Value ~= character then
+                --         if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
+                --             Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 0.5, getgenv().Settings.HitboxInput)
+                --         end
+                --     else
+                --         if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
+                --             Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 1, 2.5)
+                --         end
+                --     end
+                -- else
+                --     if Debris_Variables.HitboxToggle.Char.Value ~= character then
+                --         if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
+                --             Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 0.5, getgenv().Settings.HitboxInput)
+                --         end
+                --     else
+                --         if Debris_Variables.HitboxToggle.HitBox:IsA("Part") and Debris_Variables.HitboxToggle.HitBox then
+                --             Function_Storage.UpdateHitboxSize(Debris_Variables.HitboxToggle.HitBox, 1, 2.5)
+                --         end
+                --     end
+                -- end
             end
             task.wait(.1)
             if not HitboxToggle.Value and Debris_Variables.HitboxToggle.HitBox then
