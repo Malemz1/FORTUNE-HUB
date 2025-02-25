@@ -1334,7 +1334,7 @@ do
             SaveSetting()
             if WalkSpeedToggle.Value then
                 Debris_Variables.WalkSpeedToggle.WalkSpeedConnect = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-                    if getgenv().Settings.WalkSpeedInput >= 90 then
+                    if tonumber(getgenv().Settings.WalkSpeedInput) >= 90 then
                         if humanoid.WalkSpeed ~= 90 then
                             humanoid.WalkSpeed = 90
                         end
@@ -1348,7 +1348,9 @@ do
                 task.spawn(function()
                     while WalkSpeedToggle.Value do
                         task.wait(0.1)
-                        if humanoid.WalkSpeed ~= getgenv().Settings.WalkSpeedInput then
+                        if tonumber(getgenv().Settings.WalkSpeedInput) >= 90 then
+                            humanoid.WalkSpeed = 90
+                        else
                             humanoid.WalkSpeed = getgenv().Settings.WalkSpeedInput
                         end
                     end
