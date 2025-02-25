@@ -340,17 +340,15 @@ do
         Default = getgenv().Settings.AutoGKKeybind or "",
         Callback = function(Value)
             getgenv().Settings.AutoGKKeybind = Value
-            SaveSetting()
         end,
         ChangedCallback = function(Value)
             getgenv().Settings.AutoGKKeybind = Value
-            SaveSetting()
         end
     })
-    AutoGKKeybind:OnChanged(function(Value)
-        getgenv().Settings.AutoGKKeybind = Value
-        SaveSetting()
-    end)
+    -- AutoGKKeybind:OnChanged(function(Value)
+    --     getgenv().Settings.AutoGKKeybind = Value
+    --     SaveSetting()
+    -- end)
     local Properties = Tabs.pageKaitan:AddSection("Properties")
     local TeamPositionDropdown = Tabs.pageKaitan:AddDropdown("TeamPositionDropdown", {
         Title = "Team and Position",
