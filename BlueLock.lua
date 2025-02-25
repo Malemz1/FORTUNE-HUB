@@ -1334,23 +1334,15 @@ do
             SaveSetting()
             if WalkSpeedToggle.Value then
                 Debris_Variables.WalkSpeedToggle.WalkSpeedConnect = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-                    if tonumber(getgenv().Settings.WalkSpeedInput) >= 90 then
-                        if humanoid.WalkSpeed ~= 90 then
-                            humanoid.WalkSpeed = 90
-                        end
-                    else
-                        if humanoid.WalkSpeed ~= getgenv().Settings.WalkSpeedInput then
-                            humanoid.WalkSpeed = getgenv().Settings.WalkSpeedInput
-                        end
+                    if humanoid.WalkSpeed ~= getgenv().Settings.WalkSpeedInput then
+                        humanoid.WalkSpeed = getgenv().Settings.WalkSpeedInput
                     end
                 end)
     
                 task.spawn(function()
                     while WalkSpeedToggle.Value do
                         task.wait(0.1)
-                        if tonumber(getgenv().Settings.WalkSpeedInput) >= 90 then
-                            humanoid.WalkSpeed = 90
-                        else
+                        if humanoid.WalkSpeed ~= getgenv().Settings.WalkSpeedInput then
                             humanoid.WalkSpeed = getgenv().Settings.WalkSpeedInput
                         end
                     end
@@ -1375,11 +1367,7 @@ do
             while JumpPowerToggle.Value do
                 task.wait()
                 humanoid.UseJumpPower = true
-                if getgenv().Settings.JumpPowerInput >= 110 then
-                    humanoid.JumpPower = 110
-                else
-                    humanoid.JumpPower = getgenv().Settings.JumpPowerInput
-                end
+                humanoid.JumpPower = getgenv().Settings.JumpPowerInput
             end
             task.wait(.1)
             if not JumpPowerToggle.Value then
