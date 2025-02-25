@@ -669,14 +669,13 @@ do
             State
         },
         NoCooldownStealToggle = {
-            originalSteal = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Bachira.Steal),
             newSteal
         },
         NoCooldownAirDribbleToggle = {
-            airdribbleModule = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDribble)
+            --airdribbleModule = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDribble)
         },
         NoCooldownAirDashToggle = {
-            originalAirDash = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDash)
+            --originalAirDash = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDash)
         }
     }
 
@@ -2006,7 +2005,9 @@ do
     end)
     NoCooldownStealToggle:OnChanged(function()
         task.spawn(function()
-            if NoCooldownStealToggle.Value then        
+            if NoCooldownStealToggle.Value then   
+                local originalSteal = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Bachira.Steal)
+                
                 Debris_Variables.NoCooldownStealToggle.newSteal = function(v11, v12, v13)
                     -- ข้ามเงื่อนไขคูลดาวน์และพลังงาน
                     if false then -- ข้ามการตรวจสอบทุกอย่าง
@@ -2086,7 +2087,7 @@ do
                 end
                 
                 -- แทนที่ฟังก์ชันใน ModuleScript
-                hookfunction(Debris_Variables.NoCooldownStealToggle.originalSteal, Debris_Variables.NoCooldownStealToggle.newSteal)
+                hookfunction(originalSteal, Debris_Variables.NoCooldownStealToggle.newSteal)
                 Fluent:Notify({ Title = "No Cooldown - Steal Enabled", Content = "Cooldown removed for Steal.", Duration = 3 })
             else
                 Fluent:Notify({ Title = "No Cooldown - Steal Disabled", Content = "Cooldown restored for Steal.", Duration = 3 })
@@ -2097,7 +2098,7 @@ do
         task.spawn(function()
             if NoCooldownAirDribbleToggle.Value then
                 -- Hook the original AirDribble function
-                local originalAirDribble = Debris_Variables.NoCooldownAirDribbleToggle.airdribbleModule
+                local airdribbleModule = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDribble)
                 
                 -- Define the new function
                 local function newAirDribble(v13, v14, v15)
@@ -2189,7 +2190,7 @@ do
                 end
                 
                 -- Hook the function using hookfunction
-                hookfunction(originalAirDribble, newAirDribble)
+                hookfunction(airdribbleModule, newAirDribble)
                 Fluent:Notify({ Title = "No Cooldown - AirDribble Enabled", Content = "Cooldown removed for AirDribble.", Duration = 3 })
             else
                 Fluent:Notify({ Title = "No Cooldown - AirDribble Disabled", Content = "Cooldown restored for AirDribble.", Duration = 3 })
@@ -2199,6 +2200,8 @@ do
     NoCooldownAirDashToggle:OnChanged(function()
         task.spawn(function()
             if NoCooldownAirDashToggle.Value then
+                local originalAirDash = require(game:GetService("ReplicatedStorage").Controllers.AbilityController.Abilities.Nagi.AirDash)
+                
                 local function newAirDash(v13, v14, v15)
                     if v13.ABC then
                         v13.ABC:Clean()
@@ -2218,7 +2221,7 @@ do
                     v13.Animations.Ball["AirDribble" .. dashDirection]:Play()
                 end
     
-                hookfunction(Debris_Variables.NoCooldownAirDashToggle.originalAirDash, newAirDash)
+                hookfunction(originalAirDash, newAirDash)
                 Fluent:Notify({ Title = "No Cooldown - AirDash Enabled", Content = "Cooldown removed for AirDash.", Duration = 3 })
             else
                 Fluent:Notify({ Title = "No Cooldown - AirDash Disabled", Content = "Cooldown restored for AirDash.", Duration = 3 })
