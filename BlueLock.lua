@@ -171,7 +171,7 @@ local Window = Fluent:CreateWindow({
     Size =  Device, --UDim2.fromOffset(480, 360), --default size (580, 460)
     Acrylic = false, -- การเบลออาจตรวจจับได้ การตั้งค่านี้เป็น false จะปิดการเบลอทั้งหมด
     Theme = "Rose", --Amethyst
-    MinimizeKey = Enum.KeyCode.RightControl
+    MinimizeKey = Enum.KeyCode.LeftControl --RightControl
 })
 
 local Tabs = {
@@ -183,6 +183,7 @@ local Tabs = {
     pageRage = Window:AddTab({ Title = "Rage", Icon = "bug" }),
     pageSpin = Window:AddTab({ Title = "Spin", Icon = "box" }),
     pageItem = Window:AddTab({ Title = "Item", Icon = "archive" }),
+    pageSettings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
 }
 
 do
@@ -241,17 +242,11 @@ do
         Default = getgenv().Settings.HitboxKeybind or "",
         Callback = function(Value)
             getgenv().Settings.HitboxKeybind = Value
-            SaveSetting()
         end,
         ChangedCallback = function(NewKey)
             getgenv().Settings.HitboxKeybind = NewKey
-            SaveSetting()
         end
     })
-    HitboxKeybind:OnChanged(function(Value)
-        getgenv().Settings.HitboxKeybind = Value
-        SaveSetting()
-    end)
     local MiscTitle = Tabs.pageLegit:AddSection("Misc")
     local AutoDribble = Tabs.pageLegit:AddToggle("AutoDribble", {Title = "AutoDribble", Description = "Testing.", Default = getgenv().Settings.AutoDribble or false })
     local vipToggle = Tabs.pageLegit:AddToggle("vipToggle", {Title = "vipToggle", Description = "Testing.", Default = getgenv().Settings.vipToggle or false })
@@ -303,17 +298,11 @@ do
         Default = getgenv().Settings.InstantKickKeybind or "",
         Callback = function(Value)
             getgenv().Settings.InstantKickKeybind = Value
-            SaveSetting()
         end,
         ChangedCallback = function(Value)
             getgenv().Settings.InstantKickKeybind = Value
-            SaveSetting()
         end
     })
-    InstantKickKeybind:OnChanged(function(Value)
-        getgenv().Settings.InstantKickKeybind = Value
-        SaveSetting()
-    end)
     local InputPower = Tabs.pageLegit:AddInput("InputPower", {
         Title = "Adjust Power (1-100000)",
         Default = getgenv().Settings.InputPower or 500,
@@ -411,17 +400,11 @@ do
         Default = getgenv().Settings.KaiserKeybide or "",
         Callback = function(Value)
             getgenv().Settings.KaiserKeybide = Value
-            SaveSetting()
         end,
         ChangedCallback = function(Value)
             getgenv().Settings.KaiserKeybide = Value
-            SaveSetting()
         end
     })
-    KaiserKeybide:OnChanged(function(Value)
-        getgenv().Settings.KaiserKeybide = Value
-        SaveSetting()
-    end)
     local CurveShotProMaxToggle = Tabs.pageOP:AddToggle("CurveShotProMaxToggle", { Title = "Gyro Shot Pro Max", Default = getgenv().Settings.CurveShotProMaxToggle or false })
     local CurveShotProMaxKeybind = Tabs.pageOP:AddKeybind("CurveShotProMaxKeybind", {
         Title = "Toggle Gyro Shot Keybind",
@@ -429,17 +412,11 @@ do
         Default = getgenv().Settings.CurveShotProMaxKeybind or "",
         Callback = function(Value)
             getgenv().Settings.CurveShotProMaxKeybind = Value
-            SaveSetting()
         end,
         ChangedCallback = function(Value)
             getgenv().Settings.CurveShotProMaxKeybind = Value
-            SaveSetting()
         end
     })
-    CurveShotProMaxKeybind:OnChanged(function(Value)
-        getgenv().Settings.CurveShotProMaxKeybind = Value
-        SaveSetting()
-    end)
     local SkillTitle = Tabs.pageOP:AddSection("No CD Skill (Wave Required)")
     local NoCooldownStealToggle = Tabs.pageOP:AddToggle("NoCooldownStealToggle", { Title = "No Cooldown - Steal", Default = getgenv().Settings.NoCooldownStealToggle or false })
     local NoCooldownAirDribbleToggle = Tabs.pageOP:AddToggle("NoCooldownAirDribbleToggle", { Title = "No Cooldown - AirDribble", Default = getgenv().Settings.NoCooldownAirDribbleToggle or false })
@@ -1359,8 +1336,14 @@ do
             SaveSetting()
             if WalkSpeedToggle.Value then
                 Debris_Variables.WalkSpeedToggle.WalkSpeedConnect = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-                    if humanoid.WalkSpeed ~= getgenv().Settings.WalkSpeedInput then
-                        humanoid.WalkSpeed = getgenv().Settings.WalkSpeedInput
+                    if getgenv().Settings.WalkSpeedInput >= 90 then
+                        if humanoid.WalkSpeed ~= 90 then
+                            humanoid.WalkSpeed = 90
+                        end
+                    else
+                        if humanoid.WalkSpeed ~= getgenv().Settings.WalkSpeedInput then
+                            humanoid.WalkSpeed = getgenv().Settings.WalkSpeedInput
+                        end
                     end
                 end)
     
@@ -1392,7 +1375,11 @@ do
             while JumpPowerToggle.Value do
                 task.wait()
                 humanoid.UseJumpPower = true
-                humanoid.JumpPower = getgenv().Settings.JumpPowerInput
+                if getgenv().Settings.JumpPowerInput >= 110 then
+                    humanoid.JumpPower = 110
+                else
+                    humanoid.JumpPower = getgenv().Settings.JumpPowerInput
+                end
             end
             task.wait(.1)
             if not JumpPowerToggle.Value then
@@ -2435,7 +2422,8 @@ do
             local UserInputService = game:GetService("UserInputService")
             
             if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-                local MobileUI = Function_Storage.CreateFeariseHubMobileToggle()
+                if getgenv().Configs["Mobile Mode"] then
+                    local MobileUI = Function_Storage.CreateFeariseHubMobileToggle()
 
                     MobileUI.instantKickToggle.MouseButton1Click:Connect(function()
                         Function_Storage.shootBall()
@@ -2513,8 +2501,6 @@ do
                             MobileUI.feariseHubMobileUI:Destroy()
                         end
                     end)
-                if getgenv().Configs["Mobile Mode"] then
-                    
                 else
                     warn("Error: Your Forget Configs")    
                 end
@@ -2523,6 +2509,12 @@ do
     end
     checkDeviceUi()
 end
+
+SaveManager:SetLibrary(Fluent)
+
+SaveManager:SetFolder("Fearise Hub")
+
+SaveManager:BuildConfigSection(Tabs.pageSettings)
 
 -- Anti AFK
 task.spawn(function()
