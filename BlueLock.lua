@@ -239,7 +239,7 @@ do
     local HitboxKeybind = Tabs.pageLegit:AddKeybind("HitboxKeybind", {
         Title = "Toggle Hitbox Keybind",
         Mode = "Toggle",
-        Default = getgenv().Settings.HitboxKeybind or "",
+        Default = "",
         Callback = function(Value)
             getgenv().Settings.HitboxKeybind = Value
         end,
@@ -295,7 +295,7 @@ do
     local InstantKickKeybind = Tabs.pageLegit:AddKeybind("InstantKickKeybind", {
         Title = "Shoot Keybind",
         Mode = "Toggle",
-        Default = getgenv().Settings.InstantKickKeybind or "",
+        Default = "",
         Callback = function(Value)
             getgenv().Settings.InstantKickKeybind = Value
         end,
@@ -337,7 +337,7 @@ do
     local AutoGKKeybind = Tabs.pageKaitan:AddKeybind("AutoGKKeybind", {
         Title = "Auto GK Keybind",
         Mode = "Toggle",
-        Default = getgenv().Settings.AutoGKKeybind or "",
+        Default = "",
         Callback = function(Value)
             getgenv().Settings.AutoGKKeybind = Value
         end,
@@ -395,7 +395,7 @@ do
     local KaiserKeybide = Tabs.pageOP:AddKeybind("KaiserKeybide", {
         Title = "Toggle Kaiser Impack Keybind",
         Mode = "Toggle",
-        Default = getgenv().Settings.KaiserKeybide or "",
+        Default = "",
         Callback = function(Value)
             getgenv().Settings.KaiserKeybide = Value
         end,
@@ -407,7 +407,7 @@ do
     local CurveShotProMaxKeybind = Tabs.pageOP:AddKeybind("CurveShotProMaxKeybind", {
         Title = "Toggle Gyro Shot Keybind",
         Mode = "Toggle",
-        Default = getgenv().Settings.CurveShotProMaxKeybind or "",
+        Default = "",
         Callback = function(Value)
             getgenv().Settings.CurveShotProMaxKeybind = Value
         end,
