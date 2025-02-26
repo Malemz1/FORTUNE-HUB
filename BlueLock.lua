@@ -127,7 +127,7 @@ function checkDevice()
 end
 checkDevice()
 
-local FileName = tostring(game.Players.LocalPlayer.UserId).."_Settings.FeariseHub"
+local FileName = tostring(game.Players.LocalPlayer.UserId).."_Settings.json"
 local BaseFolder = "FeariseHub"
 local SubFolder = "BlueLockRivals"
 
@@ -141,11 +141,11 @@ function SaveSetting()
         if not isfolder(BaseFolder) then
             makefolder(BaseFolder)
         end
-        if not isfolder(BaseFolder.."\\"..SubFolder) then
-            makefolder(BaseFolder.."\\"..SubFolder)
+        if not isfolder(BaseFolder.."/"..SubFolder) then
+            makefolder(BaseFolder.."/"..SubFolder)
         end
         
-        writefile(BaseFolder.."\\"..SubFolder.."\\"..FileName, json)
+        writefile(BaseFolder.."/"..SubFolder.."/"..FileName, json)
     else
         error("ERROR: Can't save your settings")
     end
