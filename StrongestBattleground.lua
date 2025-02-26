@@ -121,8 +121,8 @@ end
 
 function LoadSetting()
     local HttpService = game:GetService("HttpService")
-    if readfile and isfile and isfile(BaseFolder.."\\"..SubFolder.."\\"..FileName) then
-        getgenv().Settings = HttpService:JSONDecode(readfile(BaseFolder.."\\"..SubFolder.."\\"..FileName))
+    if readfile and isfile and isfile(BaseFolder.."/"..SubFolder.."/"..FileName) then
+        getgenv().Settings = HttpService:JSONDecode(readfile(BaseFolder.."/"..SubFolder.."/"..FileName))
     end
 end
 
