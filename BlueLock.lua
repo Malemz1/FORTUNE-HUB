@@ -2502,10 +2502,13 @@ do
 end
 
 SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
 
 SaveManager:SetFolder("Fearise Hub")
+InterfaceManager:SetFolder("Fearise Hub")
 
 SaveManager:BuildConfigSection(Tabs.pageSettings)
+InterfaceManager:BuildInterfaceSection(Tabs.pageSettings)
 
 -- Anti AFK
 task.spawn(function()
