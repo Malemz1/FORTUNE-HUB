@@ -6,10 +6,10 @@ getgenv().Settings = {
     JumpPowerInput = nil,
     HitboxToggle = nil,
     HitboxInput = nil,
-    HitboxKeybind = "",
+    HitboxKeybind = nil,
     AutoDribble = nil,
     vipToggle = nil,
-    InstantKickKeybind = "",
+    InstantKickKeybind = nil,
     InputPower = nil,
     espToggle = nil,
     espStyleToggle = nil,
@@ -32,7 +32,7 @@ getgenv().Settings = {
     KaiserToggle = nil,
     KaiserKeybide = nil,
     CurveShotProMaxToggle = nil,
-    CurveShotProMaxKeybind = "",
+    CurveShotProMaxKeybind = nil,
     NoCooldownStealToggle = nil,
     NoCooldownAirDribbleToggle = nil,
     NoCooldownAirDashToggle = nil,
@@ -295,7 +295,7 @@ do
     local InstantKickKeybind = Tabs.pageLegit:AddKeybind("InstantKickKeybind", {
         Title = "Shoot Keybind",
         Mode = "Toggle",
-        Default = getgenv().Settings.InstantKickKeybind or "",
+        Default = "",
         Callback = function(Value)
             getgenv().Settings.InstantKickKeybind = Value
         end,
@@ -1592,7 +1592,7 @@ do
             SaveSetting()
         end)
     end)
-    getgenv().Settings = {
+    getgenv().SettingsRay = {
         ["RayColor"] = Color3.new(1, 0, 0), -- สีของเส้น (แดง)
         ["RayThickness"] = 0.2, -- ความหนาของเส้น
         ["TweenSpeed"] = 0.0001 -- ความเร็วของ Tween
@@ -1623,8 +1623,8 @@ do
             Debris_Variables.Raycast.rayPart.Anchored = true
             Debris_Variables.Raycast.rayPart.CanCollide = false
             Debris_Variables.Raycast.rayPart.Material = Enum.Material.Neon
-            Debris_Variables.Raycast.rayPart.Color = getgenv().Settings["RayColor"]
-            Debris_Variables.Raycast.rayPart.Size = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], 1)
+            Debris_Variables.Raycast.rayPart.Color = getgenv().SettingsRay["RayColor"]
+            Debris_Variables.Raycast.rayPart.Size = Vector3.new(getgenv().SettingsRay["RayThickness"], getgenv().SettingsRay["RayThickness"], 1)
             Debris_Variables.Raycast.rayPart.Parent = workspace
         end
     end
@@ -1648,7 +1648,7 @@ do
             if Debris_Variables.Raycast.rayPart then
                 -- ถ้าบอลช้ามาก ปรับขนาดเส้นให้เล็กลง แทนที่จะซ่อน
                 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                local tweenGoal = {Size = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], 0.1)}
+                local tweenGoal = {Size = Vector3.new(getgenv().SettingsRay["RayThickness"], getgenv().SettingsRay["RayThickness"], 0.1)}
                 if Debris_Variables.Raycast.tween then Debris_Variables.Raycast.tween:Cancel() end
                 Debris_Variables.Raycast.tween = Services.TweenService:Create(Debris_Variables.Raycast.rayPart, tweenInfo, tweenGoal)
                 Debris_Variables.Raycast.tween:Play()
@@ -1955,31 +1955,7 @@ do
             while AutoTeamToggle.Value do
                 -- ตรวจสอบว่าผู้เล่นอยู่ในทีม Visitor
                 if player.Team and player.Team.Name == "Visitor" then
-                    Debris_Variables.AutoTeamToggle.selectedValue = getgenv().Settings.TeamPositionDropdown
-                    if Debris_Variables.AutoTeamToggle.selectedValue then
-                        Debris_Variables.AutoTeamToggle.team, Debris_Variables.AutoTeamToggle.position = unpack(string.split(Debris_Variables.AutoTeamToggle.selectedValue, "_"))
-                        if Debris_Variables.AutoTeamToggle.team and Debris_Variables.AutoTeamToggle.position then
-                            -- ส่งคำสั่งเลือกทีมและตำแหน่งไปยังเซิร์ฟเวอร์
-                            Remotes.TeamService.RE.Select:FireServer(Debris_Variables.AutoTeamToggle.team, Debris_Variables.AutoTeamToggle.position)
-                            Fluent:Notify({
-                                Title = "Team Selection",
-                                Content = "Attempted to select team: " .. Debris_Variables.AutoTeamToggle.team .. ", position: " .. Debris_Variables.AutoTeamToggle.position,
-                                Duration = 2
-                            })
-                        else
-                            Fluent:Notify({
-                                Title = "Error",
-                                Content = "Invalid team or position selected.",
-                                Duration = 2
-                            })
-                        end
-                    else
-                        Fluent:Notify({
-                            Title = "Error",
-                            Content = "No team or position selected.",
-                            Duration = 2
-                        })
-                    end
+                    Remotes.TeamService.RE.Select:FireServer(unpack(string.split(getgenv().Settings.TeamPositionDropdown, "_")))
                 end
         
                 task.wait(3) -- รอ 3 วินาทีก่อนตรวจสอบใหม่
@@ -1993,31 +1969,7 @@ do
             while AutoTeamToggle.Value do
                 -- ตรวจสอบว่าผู้เล่นอยู่ในทีม Visitor
                 if player.Team and player.Team.Name == "Visitor" then
-                    Debris_Variables.AutoTeamToggle.selectedValue = getgenv().Settings.TeamPositionDropdown
-                    if Debris_Variables.AutoTeamToggle.selectedValue then
-                        Debris_Variables.AutoTeamToggle.team, Debris_Variables.AutoTeamToggle.position = unpack(string.split(Debris_Variables.AutoTeamToggle.selectedValue, "_"))
-                        if Debris_Variables.AutoTeamToggle.team and Debris_Variables.AutoTeamToggle.position then
-                            -- ส่งคำสั่งเลือกทีมและตำแหน่งไปยังเซิร์ฟเวอร์
-                            Remotes.TeamService.RE.Select:FireServer(Debris_Variables.AutoTeamToggle.team, Debris_Variables.AutoTeamToggle.position)
-                            Fluent:Notify({
-                                Title = "Team Selection",
-                                Content = "Attempted to select team: " .. Debris_Variables.AutoTeamToggle.team .. ", position: " .. Debris_Variables.AutoTeamToggle.position,
-                                Duration = 2
-                            })
-                        else
-                            Fluent:Notify({
-                                Title = "Error",
-                                Content = "Invalid team or position selected.",
-                                Duration = 2
-                            })
-                        end
-                    else
-                        Fluent:Notify({
-                            Title = "Error",
-                            Content = "No team or position selected.",
-                            Duration = 2
-                        })
-                    end
+                    Remotes.TeamService.RE.Select:FireServer(unpack(string.split(getgenv().Settings.TeamPositionDropdown, "_")))
                 end
         
                 task.wait(3) -- รอ 3 วินาทีก่อนตรวจสอบใหม่
