@@ -295,7 +295,7 @@ do
     local InstantKickKeybind = Tabs.pageLegit:AddKeybind("InstantKickKeybind", {
         Title = "Shoot Keybind",
         Mode = "Toggle",
-        Default = "",
+        Default = getgenv().Settings.InstantKickKeybind or "",
         Callback = function(Value)
             getgenv().Settings.InstantKickKeybind = Value
         end,
@@ -305,7 +305,7 @@ do
     })
     local InputPower = Tabs.pageLegit:AddInput("InputPower", {
         Title = "Adjust Power (1-100000)",
-        Default = getgenv().Settings.InputPower or 500,
+        Default = getgenv().Settings.InputPower or "500",
         Placeholder = "Enter power...",
         Numeric = true,
         Finished = false,
@@ -784,7 +784,7 @@ do
     Function_Storage.shootBall = function()
         local args = {
             [1] = getgenv().Settings.InputPower,
-            [4] = mouse
+            [4] = mouse.Hit.Position
         }
         game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Shoot:FireServer(unpack(args))        
     end

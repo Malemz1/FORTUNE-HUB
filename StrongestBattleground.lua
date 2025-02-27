@@ -12,6 +12,7 @@ getgenv().Settings = {
     AutoKillMode = nil,
     NumberOfPlayersInput = nil,
     HopServer = nil,
+    AutoTrashCan = nil,
 }
 
 local function CreateToggle()
@@ -172,6 +173,7 @@ do
     local AutoBlock = Tabs.pageMain:AddToggle("AutoBlock", {Title = "Auto Block", Default = getgenv().Settings.AutoBlock or false })
     local LockOn = Tabs.pageMain:AddToggle("LockOn", {Title = "Lock On", Default = getgenv().Settings.Aimbot or false })
     local CollectFrozen = Tabs.pageMain:AddToggle("CollectFrozen", {Title = "Collect Frozen", Default = getgenv().Settings.CollectFrozen or false })
+    local AutoTrashCan = Tabs.pageMain:AddToggle("AutoTrashCan", {Title = "Auto TrashCan", Default = getgenv().Settings.AutoTrashCan or false })
     local SafeModeTitle = Tabs.pageMain:AddSection("SafeMode")
     Tabs.pageMain:AddParagraph({
         Title = "What Is Safe Mode?",
@@ -781,6 +783,47 @@ do
                 elseif not KilledCount then
                     KilledCount = Kills.Value
                     task.wait(0.5)
+                end
+            end
+        end)
+    end)
+
+    AutoTrashCan:OnChanged(function()
+        task.spawn(function()
+            while AutoTrashCan.Value do
+                task.wait()
+                if character:FindFirstChild("Trash Can") then
+                    for PlayerIndex, PlayerValue in pairs(workspace.Live:GetChildren()) do
+                        if PlayerValue:IsA("Model") and not PlayerValue:GetAttribute("NPC") and PlayerValue:FindFirstChild("HumanoidRootPart") then
+                            local PlayerHumanoidRootPart = PlayerValue:FindFirstChild("HumanoidRootPart")
+                            local PlayerHumanoid = PlayerValue:FindFirstChild("Humanoid")
+                            if PlayerHumanoid.Health <= (PlayerHumanoid.MaxHealth * 0.2) then
+                                humanoidrootpart.CFrame = PlayerHumanoidRootPart.CFrame * CFrame.new(0, 0, 7)
+                                task.spawn(function()
+                                    task.wait(.5)
+                                    remoteEvent:FireServer({["Goal"] = "LeftClick"})
+                                    task.wait()
+                                    remoteEvent:FireServer({["Goal"] = "LeftClickRelease"})
+                                end)
+                            else
+                                humanoidrootpart.CFrame = CFrame.new(291.61474609375, 684.2703857421875, 514.2841186523438)
+                            end
+                        end
+                    end
+                else
+                    for TrashcanIndex, TrashcanValue in ipairs(workspace.Map.Trash:GetChildren()) do
+                        if TrashcanValue:IsA("Model") and TrashcanValue:FindFirstChild("Trashcan") then
+                            local TrashcanPart = TrashcanValue:FindFirstChild("Trashcan")
+                            if TrashcanPart.Transparency == 0 then
+                                humanoidrootpart.CFrame = TrashcanPart.CFrame * CFrame.new(0, 0, 5)
+                                task.spawn(function()
+                                    remoteEvent:FireServer({["Goal"] = "LeftClick"})
+                                    task.wait()
+                                    remoteEvent:FireServer({["Goal"] = "LeftClickRelease"})
+                                end)
+                            end
+                        end
+                    end
                 end
             end
         end)
