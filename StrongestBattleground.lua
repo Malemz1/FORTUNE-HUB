@@ -147,6 +147,7 @@ local Tabs = {
     --[[ Tabs --]]
     pageMain = Window:AddTab({ Title = "Main", Icon = "home" }),
     pagePlayer = Window:AddTab({ Title = "Player", Icon = "user" }),
+    pageFunny = Window:AddTab({ Title = "Funny", Icon = "laugh" }),
     pageServer = Window:AddTab({ Title = "Server", Icon = "server" }),
 }
 
@@ -173,7 +174,6 @@ do
     local AutoBlock = Tabs.pageMain:AddToggle("AutoBlock", {Title = "Auto Block", Default = getgenv().Settings.AutoBlock or false })
     local LockOn = Tabs.pageMain:AddToggle("LockOn", {Title = "Lock On", Default = getgenv().Settings.Aimbot or false })
     local CollectFrozen = Tabs.pageMain:AddToggle("CollectFrozen", {Title = "Collect Frozen", Default = getgenv().Settings.CollectFrozen or false })
-    local AutoTrashCan = Tabs.pageMain:AddToggle("AutoTrashCan", {Title = "Auto TrashCan", Default = getgenv().Settings.AutoTrashCan or false })
     local SafeModeTitle = Tabs.pageMain:AddSection("SafeMode")
     Tabs.pageMain:AddParagraph({
         Title = "What Is Safe Mode?",
@@ -198,6 +198,9 @@ do
     end)
     local WalkSpeed = Tabs.pagePlayer:AddToggle("WalkSpeed", {Title = "Walk Speed", Default = getgenv().Settings.WalkSpeed or false })
     local Fly = Tabs.pagePlayer:AddToggle("Fly", {Title = "Fly", Default = getgenv().Settings.Fly or false })
+
+    --[[ FUNNY ]]--------------------------------------------------------
+    local AutoTrashCan = Tabs.pageFunny:AddToggle("AutoTrashCan", {Title = "Auto TrashCan", Default = getgenv().Settings.AutoTrashCan or false })
 
     --[[ SERVER ]]--------------------------------------------------------
     local NumberOfPlayersInput = Tabs.pageServer:AddInput("NumberOfPlayersInput", {
@@ -797,19 +800,34 @@ do
                         if PlayerValue:IsA("Model") and not PlayerValue:GetAttribute("NPC") and PlayerValue:FindFirstChild("HumanoidRootPart") then
                             local PlayerHumanoidRootPart = PlayerValue:FindFirstChild("HumanoidRootPart")
                             local PlayerHumanoid = PlayerValue:FindFirstChild("Humanoid")
-                            if PlayerHumanoid.Health <= (PlayerHumanoid.MaxHealth * 0.2) then
-                                humanoidrootpart.CFrame = PlayerHumanoidRootPart.CFrame * CFrame.new(0, 0, 7)
-                                task.spawn(function()
-                                    task.wait(.5)
-                                    remoteEvent:FireServer({["Goal"] = "LeftClick"})
-                                    task.wait()
-                                    remoteEvent:FireServer({["Goal"] = "LeftClickRelease"})
-                                end)
-                            else
-                                humanoidrootpart.CFrame = CFrame.new(291.61474609375, 684.2703857421875, 514.2841186523438)
+                    
+                            -- ตรวจสอบว่าพบ Humanoid และ RootPart หรือไม่
+                            if PlayerHumanoid and PlayerHumanoidRootPart then
+                                -- ตรวจสอบว่าเลือดต่ำกว่า 20% หรือไม่
+                                if PlayerHumanoid.Health > 0 and PlayerHumanoid.Health <= (PlayerHumanoid.MaxHealth * 0.2) then
+                                    -- ตรวจสอบว่า humanoidrootpart ถูกกำหนดค่าหรือไม่
+                                    if humanoidrootpart then
+                                        -- วาร์ปไปหาเป้าหมาย
+                                        humanoidrootpart.CFrame = PlayerHumanoidRootPart.CFrame * CFrame.new(0, 0, 7)
+                    
+                                        -- ตรวจสอบระยะทางก่อนกดโจมตี
+                                        task.spawn(function()
+                                            task.wait(0.1) -- รอให้วาร์ปก่อนเช็คระยะทาง
+                                            local DistanceTrashCan = (PlayerHumanoidRootPart.Position - humanoidrootpart.Position).Magnitude
+                                            if DistanceTrashCan <= 10 then
+                                                remoteEvent:FireServer({["Goal"] = "LeftClick"})
+                                                task.wait()
+                                                remoteEvent:FireServer({["Goal"] = "LeftClickRelease"})
+                                            end
+                                        end)
+                                    end
+                                else
+                                    -- ถ้าเลือดมากกว่า 20% ให้กลับไปที่จุดเริ่มต้น
+                                    humanoidrootpart.CFrame = CFrame.new(291.6147, 684.2704, 514.2841)
+                                end
                             end
                         end
-                    end
+                    end                    
                 else
                     for TrashcanIndex, TrashcanValue in ipairs(workspace.Map.Trash:GetChildren()) do
                         if TrashcanValue:IsA("Model") and TrashcanValue:FindFirstChild("Trashcan") then
