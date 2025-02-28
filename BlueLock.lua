@@ -106,11 +106,19 @@ function checkDevice()
         local UserInputService = game:GetService("UserInputService")
         
         if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+            
+            Device = UDim2.fromOffset(480, 360)
+        else
+            Device = UDim2.fromOffset(580, 460)
             local FeariseToggle = CreateToggle()
             FeariseToggle.MouseButton1Click:Connect(function()
                 for _, guiObject in ipairs(game:GetService("CoreGui"):GetChildren()) do
                     if guiObject.Name == "FeariseHub" and guiObject:IsA("ScreenGui") then
-                        guiObject.Enabled = not guiObject.Enabled
+                        for FrameIndex, FrameValue in pairs(guiObject:GetChildren()) do
+                            if FrameValue:IsA("Frame") and FrameValue:FindFirstChild("CanvasGroup") then
+                                FrameValue.Visible = not FrameValue.Visible
+                            end
+                        end
                     end
                 end
             end)
@@ -119,9 +127,6 @@ function checkDevice()
                     FeariseToggle.Parent.Parent:Destroy()
                 end
             end)
-            Device = UDim2.fromOffset(480, 360)
-        else
-            Device = UDim2.fromOffset(580, 460)
         end
     end
 end
