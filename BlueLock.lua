@@ -331,7 +331,7 @@ do
     local Striker = Tabs.pageKaitan:AddSection("Striker")
     local AutoFarmTweenToggle = Tabs.pageKaitan:AddToggle("AutoFarmTweenToggle", { Title = "Auto Farm(Tween)", Default = getgenv().Settings.AutoFarmTweenToggle or false })
     local AutoFarmTeleportToggle = Tabs.pageKaitan:AddToggle("AutoFarmTeleportToggle", { Title = "Auto Farm(TP)", Default = getgenv().Settings.AutoFarmTeleportToggle or false })
-    -- local WhiteScreen = Tabs.pageKaitan:AddToggle("WhiteScreen", { Title = "WhiteScreen [GPU 0%]", Default = getgenv().Settings.WhiteScreen or false })
+    local WhiteScreen = Tabs.pageKaitan:AddToggle("WhiteScreen", { Title = "WhiteScreen [GPU 0%]", Default = getgenv().Settings.WhiteScreen or false })
     local GoalTitle = Tabs.pageKaitan:AddSection("Goal (In Testing)")
     local AutoGoalKeeper = Tabs.pageKaitan:AddToggle("WhitAutoGoalKeepereScreen", { Title = "Auto GK", Default = getgenv().Settings.AutoGoalKeeper or false })
     local AutoGKKeybind = Tabs.pageKaitan:AddKeybind("AutoGKKeybind", {
@@ -1919,11 +1919,11 @@ do
             end
         end)
     end)
-    -- WhiteScreen:OnChanged(function()
-    --     task.spawn(function()
-    --         Services.RunServices:Set3dRenderingEnabled(WhiteScreen.Value)
-    --     end)
-    -- end)
+    WhiteScreen:OnChanged(function()
+        task.spawn(function()
+            Services.RunServices:Set3dRenderingEnabled(not WhiteScreen.Value)
+        end)
+    end)
     AutoGoalKeeper:OnChanged(function()
         task.spawn(function()
             getgenv().Settings.AutoGoalKeeper = AutoGoalKeeper.Value
