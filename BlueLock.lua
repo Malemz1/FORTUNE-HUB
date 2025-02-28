@@ -1682,11 +1682,11 @@ do
     
         -- อัปเดตตำแหน่งของเส้นด้วย Tween
         local distance = (endPos - Debris_Variables.Raycast.ball.Position).Magnitude
-        local newSize = Vector3.new(getgenv().Settings["RayThickness"], getgenv().Settings["RayThickness"], distance)
+        local newSize = Vector3.new(getgenv().SettingsRay["RayThickness"], getgenv().SettingsRay["RayThickness"], distance)
         local newPosition = Debris_Variables.Raycast.ball.Position + (endPos - Debris_Variables.Raycast.ball.Position) / 2
         local newCFrame = CFrame.lookAt(newPosition, endPos)
     
-        local tweenInfo = TweenInfo.new(getgenv().Settings["TweenSpeed"], Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tweenInfo = TweenInfo.new(getgenv().SettingsRay["TweenSpeed"], Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         local tweenGoal = {Size = newSize, Position = newPosition, CFrame = newCFrame}
     
         if Debris_Variables.Raycast.tween then Debris_Variables.Raycast.tween:Cancel() end
