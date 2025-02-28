@@ -106,10 +106,6 @@ function checkDevice()
         local UserInputService = game:GetService("UserInputService")
         
         if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-            
-            Device = UDim2.fromOffset(480, 360)
-        else
-            Device = UDim2.fromOffset(580, 460)
             local FeariseToggle = CreateToggle()
             FeariseToggle.MouseButton1Click:Connect(function()
                 for _, guiObject in ipairs(game:GetService("CoreGui"):GetChildren()) do
@@ -127,6 +123,9 @@ function checkDevice()
                     FeariseToggle.Parent.Parent:Destroy()
                 end
             end)
+            Device = UDim2.fromOffset(480, 360)
+        else
+            Device = UDim2.fromOffset(580, 460)
         end
     end
 end
