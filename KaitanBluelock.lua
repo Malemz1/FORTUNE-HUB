@@ -1,7 +1,3 @@
-getgenv().KAITAN_CONFIGS = {
-	["FARM MODE"] = "TP" -- TP, TWEEN
-}
-
 local function CreateKaitanGui()
     local KaitanGui = Instance.new("ScreenGui")
     local BackgroundFrame = Instance.new("Frame")
