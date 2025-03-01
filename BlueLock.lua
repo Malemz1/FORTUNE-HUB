@@ -20,7 +20,7 @@ getgenv().Settings = {
     AutoFarmTweenToggle = nil,
     AutoFarmTeleportToggle = nil,
     InfiniteStamina = false,
-    -- WhiteScreen = nil,
+    WhiteScreen = nil,
     AutoGoalKeeper = nil,
     AutoGKKeybind = "",
     TeamPositionDropdown = nil,
@@ -1970,10 +1970,24 @@ do
         task.spawn(function()
             getgenv().Settings.AutoTeamForAutoFarmToggle = AutoTeamForAutoFarmToggle.Value
             SaveSetting()
-            while AutoTeamToggle.Value do
-                -- ตรวจสอบว่าผู้เล่นอยู่ในทีม Visitor
+            while AutoTeamForAutoFarmToggle.Value do
+                local Teams = {
+                    "Home",
+                    "Away"
+                }
+                local Position = {
+                    "CF",
+                    "LE",
+                    "RW",
+                    "CM",
+                    "GK",
+                }
                 if player.Team and player.Team.Name == "Visitor" then
-                    Remotes.TeamService.RE.Select:FireServer(unpack(string.split(getgenv().Settings.TeamPositionDropdown, "_")))
+                    for _, team in ipairs(Teams) do
+                        for _, position in ipairs(Position) do
+                            Remotes.TeamService.RE.Select:FireServer(team, position)
+                        end
+                    end                    
                 end
         
                 task.wait(3) -- รอ 3 วินาทีก่อนตรวจสอบใหม่
