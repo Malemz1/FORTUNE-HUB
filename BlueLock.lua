@@ -432,7 +432,7 @@ do
     local StyleLockDropdown = Tabs.pageSpin:AddDropdown("StyleLockDropdown", {
         Title = "Style Lock",
         Description = "Select styles to stop spinning.",
-        Values = {"Isagi", "Chigiri", "Bachira", "Otoya", "Hiori", "Gagamaru", "King", "Nagi", "Reo",  "Karasu", "Shidou", "Kunigami", "Sae", "Aiku", "Rin", "Yukimiya"}, -- Replace with actual style names
+        Values = {"Isagi", "Chigiri", "Bachira", "Otoya", "Hiori", "Gagamaru", "King", "Nagi", "Reo",  "Karasu", "Shidou", "Kunigami", "Sae", "Aiku", "Rin", "Yukimiya", "Don Lorenzo"}, -- Replace with actual style names
         Multi = true,
         Default = {}
     })
