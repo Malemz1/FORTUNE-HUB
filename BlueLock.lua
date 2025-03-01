@@ -46,6 +46,11 @@ getgenv().Settings = {
     LagSwitchToggle = nil,
 }
 
+if getgenv().KAITAN_CONFIGS and getgenv().KAITAN_CONFIGS["FARM MODE"] then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Malemz1/FORTUNE-HUB/refs/heads/main/KaitanBluelock.lua"))()
+    return
+end
+
 local function CreateToggle()
     local toggleGui = Instance.new("ScreenGui")
     toggleGui.Name = "ToggleGui"
