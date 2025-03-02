@@ -1929,6 +1929,8 @@ do
         end)
     end)
     WhiteScreen:OnChanged(function()
+        getgenv().Settings.WhiteScreen = WhiteScreen.Value
+        SaveSetting()
         task.spawn(function()
             Services.RunServices:Set3dRenderingEnabled(not WhiteScreen.Value)
         end)
